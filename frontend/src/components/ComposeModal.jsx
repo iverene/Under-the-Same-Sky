@@ -44,7 +44,7 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
       
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+        className="absolute inset-0 bg-black/40" 
         onClick={onClose}
       />
 
@@ -63,7 +63,7 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
         
         {/* Header */}
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-serif text-white mb-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">
+          <h2 className="text-3xl font-serif  mb-2 tracking-wide text-transparent bg-clip-text bg-linear-to-r from-blue-200 to-white">
             Write an Entry
           </h2>
           <p className="text-slate-400 text-sm font-light tracking-wide">
@@ -81,7 +81,7 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               className="w-full bg-black/20 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-400/50 focus:ring-1 focus:ring-blue-400/50 transition-all"
-              placeholder="Someone, or no one..."
+              placeholder="Someone"
             />
           </div>
           
@@ -134,7 +134,7 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
           {/* Submit Button */}
           <button 
             type="submit" 
-            className="w-full py-4 mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-900/40 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full py-4 mt-4 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-900/40 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Send to Sky
           </button>
