@@ -1,9 +1,12 @@
+import React from 'react';
+import NightSky from './components/NightSky';
+
 function App() {
   return (
-    <>
-      <h1>Hello World</h1>
-    </>
-  )
+    <div className="w-full h-screen overflow-hidden">
+      <NightSky />
+    </div>
+  );
 }
 
-export default App
+export default App;

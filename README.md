@@ -107,7 +107,7 @@ To ensure the platform remains a place for release rather than validation:
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/iverene/under-the-same-sky.git
+git clone https://github.com/iverene/Under-the-Same-Sky.git
 
 ```
 
