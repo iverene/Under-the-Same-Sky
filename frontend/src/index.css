@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Quicksand:wght@300;400;600&display=swap');
+
 @import "tailwindcss";
 
 html, body, #root {
@@ -5,6 +7,22 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #000; /* Fallback color */
-  overflow: hidden; /* Prevent scrollbars */
+  background-color: #000;
+  overflow: hidden;
+  touch-action: none;
+  
+  font-family: 'Quicksand', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+.font-serif {
+  font-family: 'Cinzel', serif !important;
+}
+
+
+input::placeholder, textarea::placeholder {
+  opacity: 0.5;
+  font-family: 'Quicksand', sans-serif;
 }
