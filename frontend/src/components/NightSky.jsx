@@ -3,8 +3,10 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { mockMessages, getRandomPositionOnSphere } from '../data/mockMessages';
+import { mockWishes } from '../data/mockWishes';
 import ComposeModal from './ComposeModal';
-import WishingModal from './WishingModal'; 
+import WishingModal from './WishingModal';
+import LanternViewModal from './LanternViewModal';
 import HUD from './HUD';
 
 // --- Assets ---
@@ -43,6 +45,8 @@ const CameraZoomHandler = () => {
   return null;
 };
 
+
+
 // --- Component: Interactive Message Star ---
 const MessageStar = ({ position, message, color, baseSize, texture }) => {
   const [hovered, setHovered] = useState(false);
@@ -52,7 +56,7 @@ const MessageStar = ({ position, message, color, baseSize, texture }) => {
   useFrame(({ clock }) => {
     if (spriteRef.current) {
       const time = clock.getElapsedTime();
-      const offset = message.id * 100;
+      const offset = typeof message.id === 'number' ? message.id * 100 : 0;
       const twinkle = Math.sin(time * 2 + offset) * 0.2 + 0.8;
       spriteRef.current.material.opacity = hovered ? 1 : twinkle;
       const scale = hovered ? baseSize * 2.5 : baseSize;
@@ -96,9 +100,10 @@ const MessageStar = ({ position, message, color, baseSize, texture }) => {
 };
 
 // --- Component: Floating Lantern ---
-const FloatingLantern = ({ position, message }) => {
+const FloatingLantern = ({ position, message, onSelect }) => {
   const meshRef = useRef();
-  const [clicked, setClicked] = useState(false);
+  // Random offset for wobble so they don't all move in sync
+  const randomOffset = useMemo(() => Math.random() * 100, []);
 
   // Lanterns float upwards slowly
   useFrame(({ clock }) => {
@@ -106,8 +111,14 @@ const FloatingLantern = ({ position, message }) => {
       const time = clock.getElapsedTime();
       // Gentle float up
       meshRef.current.position.y += 0.005; 
+      
+      // Reset position if it goes too high (infinite loop effect for mock data)
+      if (meshRef.current.position.y > 50) {
+         meshRef.current.position.y = -20;
+      }
+
       // Gentle wobble
-      meshRef.current.position.x += Math.sin(time + message.id) * 0.002;
+      meshRef.current.position.x += Math.sin(time + randomOffset) * 0.002;
       meshRef.current.rotation.y += 0.002;
     }
   });
@@ -116,7 +127,7 @@ const FloatingLantern = ({ position, message }) => {
     <group position={position}>
       <mesh 
         ref={meshRef}
-        onClick={(e) => { e.stopPropagation(); setClicked(!clicked); }}
+        onClick={(e) => { e.stopPropagation(); onSelect(message); }}
         onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
         onPointerOut={() => { document.body.style.cursor = 'default'; }}
       >
@@ -126,20 +137,6 @@ const FloatingLantern = ({ position, message }) => {
       
       {/* Lantern Light Glow */}
       <pointLight distance={3} intensity={2} color="#ffaa00" />
-
-      {clicked && (
-        <Html position={[0, 0, 0]} distanceFactor={12} zIndexRange={[100, 0]}>
-          <div className="bg-slate-900/90 backdrop-blur-xl border border-amber-500/30 p-6 rounded-xl w-64 shadow-[0_0_30px_rgba(245,158,11,0.2)] animate-in zoom-in duration-300">
-             <div className="text-center">
-                <div className="text-amber-500 text-2xl mb-2">🏮</div>
-                <h3 className="text-[10px] font-bold text-amber-200 uppercase tracking-widest mb-1">A Wish For</h3>
-                <p className="font-serif text-white text-lg mb-4">{message.recipient}</p>
-                <p className="text-sm font-serif italic text-amber-100/80">"{message.content}"</p>
-                <button onClick={(e) => { e.stopPropagation(); setClicked(false); }} className="mt-4 text-xs text-amber-500/60 hover:text-amber-500">Close</button>
-             </div>
-          </div>
-        </Html>
-      )}
     </group>
   );
 };
@@ -217,32 +214,29 @@ const FallingStarSystem = ({ messages }) => {
 
 // --- Main Component ---
 const NightSky = () => {
-  const [messages, setMessages] = useState(mockMessages);
+  const [messages, setMessages] = useState([...mockMessages, ...mockWishes]);
   
-  // 2. States for both modals
+  // States for modals
   const [isWriting, setIsWriting] = useState(false);
   const [isWishing, setIsWishing] = useState(false);
+  const [selectedLantern, setSelectedLantern] = useState(null); // State for viewing a specific lantern
   
   const starTexture = useStarTexture();
 
-  // Filter messages by type
   const stars = useMemo(() => messages.filter(m => m.type === 'star'), [messages]);
   const fallingStars = useMemo(() => messages.filter(m => m.type === 'falling_star'), [messages]);
   const lanterns = useMemo(() => messages.filter(m => m.type === 'lantern'), [messages]);
 
-  // 3. Updated Handler to support both Modal data formats
   const handleSendMessage = (data) => {
     const newMessage = {
       id: Date.now(),
-      // Wishing Modal sends 'name'/'wish', Compose Modal sends 'recipient'/'message'
       recipient: data.recipient || data.name, 
       content: data.message || data.wish,
       type: data.type,
       size: Math.random() * 0.5 + 0.3,
       color: data.type === 'lantern' ? '#ffaa00' : (data.type === 'falling_star' ? '#aaddff' : 'white'),
-      // Lanterns need a start position lower down
       position: data.type === 'lantern' 
-        ? new THREE.Vector3((Math.random() - 0.5) * 20, -10, (Math.random() - 0.5) * 20) 
+        ? new THREE.Vector3((Math.random() - 0.5) * 40, -15, (Math.random() - 0.5) * 40) 
         : (data.type === 'star' ? getRandomPositionOnSphere(45) : null)
     };
 
@@ -255,7 +249,7 @@ const NightSky = () => {
         <CameraZoomHandler />
         <ambientLight intensity={0.5} />
         
-        {/* Render Stars */}
+        {/* Stars */}
         {stars.map((msg) => (
           <MessageStar 
             key={msg.id}
@@ -267,40 +261,29 @@ const NightSky = () => {
           />
         ))}
 
-        {/* Render Lanterns (New) */}
+        {/* Lanterns - Now passing setSelectedLantern */}
         {lanterns.map((msg) => (
           <FloatingLantern 
             key={msg.id}
-            position={msg.position || new THREE.Vector3(0, -10, -20)} // Fallback position
+            position={msg.position}
             message={msg}
+            onSelect={setSelectedLantern}
           />
         ))}
 
-        {/* Render Falling Stars */}
         <FallingStarSystem messages={fallingStars} />
 
         <OrbitControls enableZoom={false} enablePan={false} enableDamping={true} dampingFactor={0.05} rotateSpeed={0.4} reverseOrbit={true} />
       </Canvas>
 
-      {/* --- UI Components --- */}
-      <ComposeModal 
-        isOpen={isWriting} 
-        onClose={() => setIsWriting(false)} 
-        onSend={handleSendMessage} 
-      />
+      {/* --- Global Modals --- */}
+      <ComposeModal isOpen={isWriting} onClose={() => setIsWriting(false)} onSend={handleSendMessage} />
+      <WishingModal isOpen={isWishing} onClose={() => setIsWishing(false)} onSend={handleSendMessage} />
+      
+      {/* View Lantern Modal */}
+      <LanternViewModal message={selectedLantern} onClose={() => setSelectedLantern(null)} />
 
-      {/* 4. Render the Wishing Modal */}
-      <WishingModal
-        isOpen={isWishing}
-        onClose={() => setIsWishing(false)}
-        onSend={handleSendMessage}
-      />
-
-      {/* 5. Pass handlers to HUD */}
-      <HUD 
-        onOpenCompose={() => setIsWriting(true)} 
-        onOpenWish={() => setIsWishing(true)} 
-      />
+      <HUD onOpenCompose={() => setIsWriting(true)} onOpenWish={() => setIsWishing(true)} />
     </div>
   );
 };
