@@ -82,7 +82,7 @@ const MessageStar = ({ position, message, color, baseSize, texture }) => {
               {/* Header */}
               <div className="flex justify-between items-start mb-4 border-b border-white/5 pb-2">
                 <div>
-                  <h3 className="text-[10px] font-bold text-blue-200 uppercase tracking-[0.2em]">Addressed To</h3>
+                  <h3 className="text-[10px] font-bold text-blue-200 uppercase tracking-[0.2em]">To</h3>
                   <p className="text-white font-serif text-lg leading-none mt-1">{message.recipient}</p>
                 </div>
                 <button 
