@@ -43,7 +43,7 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
       <div className={`relative w-full max-w-lg overflow-hidden bg-slate-900/90 backdrop-blur-2xl border border-amber-500/20 rounded-3xl shadow-2xl shadow-amber-900/20 transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
         
         {/* Warm Ambient Light Effect */}
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-amber-500/10 to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 w-full h-32 bg-linear-to-b from-amber-500/10 to-transparent pointer-events-none" />
 
         {/* Close Button */}
         <button 
@@ -66,9 +66,16 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
             <h2 className="text-3xl font-serif text-amber-50 mb-2 tracking-wide drop-shadow-lg">
               Make a Wish
             </h2>
-            <p className="text-amber-200/60 text-xs font-medium tracking-[0.2em] uppercase">
+            <p className="text-amber-200/60 text-xs font-medium tracking-[0.2em] uppercase mb-4">
               Light a lantern for hope
             </p>
+
+            {/* Note about Full Moon availability */}
+            <div className="inline-block px-4 py-1.5 rounded-full bg-amber-950/40 border border-amber-500/20">
+              <p className="text-amber-400/90 text-[10px] font-serif italic tracking-wide flex items-center gap-2">
+                <span>✨</span> Wishing is only available during the Full Moon
+              </p>
+            </div>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -100,7 +107,7 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
             {/* Submit Button */}
             <button 
               type="submit" 
-              className="w-full py-4 mt-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold rounded-xl shadow-lg shadow-amber-900/30 border border-white/10 transition-all transform hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden group"
+              className="w-full py-4 mt-2 bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold rounded-xl shadow-lg shadow-amber-900/30 border border-white/10 transition-all transform hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 pointer-events-none" />
               <span className="relative tracking-widest uppercase text-xs">Release Lantern</span>

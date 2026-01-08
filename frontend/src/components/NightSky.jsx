@@ -8,6 +8,7 @@ import ComposeModal from './ComposeModal';
 import WishingModal from './WishingModal';
 import LanternViewModal from './LanternViewModal';
 import HUD from './HUD';
+import TopBar from './TopBar';
 
 // --- Assets ---
 const useStarTexture = () => {
@@ -275,6 +276,8 @@ const NightSky = () => {
 
         <OrbitControls enableZoom={false} enablePan={false} enableDamping={true} dampingFactor={0.05} rotateSpeed={0.4} reverseOrbit={true} />
       </Canvas>
+
+      <TopBar />
 
       {/* --- Global Modals --- */}
       <ComposeModal isOpen={isWriting} onClose={() => setIsWriting(false)} onSend={handleSendMessage} />
