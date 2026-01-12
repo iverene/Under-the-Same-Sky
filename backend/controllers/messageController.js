@@ -1,15 +1,24 @@
 const MessageModel = require('../models/messageModel');
 
-// Helper: Calculate fixed position on a sphere
-const calculatePosition = (radius = 45) => {
+// Helper: Calculate fixed position on a sphere (For Stars)
+const calculateStarPosition = (radius = 45) => {
   const theta = Math.random() * Math.PI * 2;
   const phi = Math.acos((Math.random() * 2) - 1);
   const r = radius * (0.8 + Math.random() * 0.4);
 
   return {
     x: r * Math.sin(phi) * Math.sin(theta),
-    y: r * Math.cos(phi),
+    y: Math.abs(r * Math.cos(phi)) + 10, // Ensure stars are always above horizon (y > 10)
     z: r * Math.sin(phi) * Math.cos(theta)
+  };
+};
+
+// Helper: Calculate position for Lanterns (Lower, floating)
+const calculateLanternPosition = () => {
+  return {
+    x: (Math.random() - 0.5) * 60, // Wide spread
+    y: -20 + (Math.random() * 10), // Start low, below the camera mostly
+    z: (Math.random() - 0.5) * 60
   };
 };
 
@@ -19,21 +28,16 @@ const MessageController = {
     try {
       const messages = await MessageModel.getAllMessages();
       
-      // Format data for frontend
       const formatted = messages.map(msg => ({
         id: msg.id,
         recipient: msg.recipient,
         content: msg.content,
         type: msg.type,
-        // Only attach position object if coordinates exist (stars)
         position: msg.position_x ? { 
           x: msg.position_x, 
           y: msg.position_y, 
           z: msg.position_z 
-        } : null,
-        // Add visual properties that don't need database storage
-        size: 0.5, 
-        color: msg.type === 'star' ? 'white' : '#aaddff'
+        } : null
       }));
 
       res.json(formatted);
@@ -45,23 +49,30 @@ const MessageController = {
 
   // 2. Create Message
   createMessage: async (req, res) => {
-    const { recipient, message } = req.body;
+    // Extract 'type' from body now (to support lanterns)
+    const { recipient, message, type: reqType } = req.body;
 
     if (!recipient || !message) {
       return res.status(400).json({ error: 'Missing fields' });
     }
 
-    // --- LOGIC START ---
-    // Determine type based on length
-    const isFalling = message.length > 100;
-    const type = isFalling ? 'falling_star' : 'star';
-
-    // Calculate position ONLY for normal stars
+    let type = 'star';
     let pos = { x: null, y: null, z: null };
-    if (!isFalling) {
-      pos = calculatePosition(45);
+
+    // --- LOGIC ---
+    if (reqType === 'lantern') {
+      type = 'lantern';
+      pos = calculateLanternPosition();
+    } else {
+      // Default Star Logic
+      const isFalling = message.length > 100;
+      type = isFalling ? 'falling_star' : 'star';
+      
+      // Only generate fixed position for normal stars
+      if (!isFalling) {
+        pos = calculateStarPosition(50);
+      }
     }
-    // --- LOGIC END ---
 
     try {
       const newMessage = await MessageModel.createMessage({
