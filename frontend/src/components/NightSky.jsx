@@ -76,14 +76,13 @@ const useTextures = () => {
     };
 
     return {
-      // UPDATED: Made star texture more opaque/solid for better visibility
       star: createTexture([[0, 'rgba(255,255,255,1)'], [0.4, 'rgba(220,240,255,0.9)'], [1, 'rgba(0,0,0,0)']]),
       lantern: createTexture([[0, 'rgba(255,200,50,1)'], [0.4, 'rgba(255,100,0,0.8)'], [1, 'rgba(0,0,0,0)']])
     };
   }, []);
 };
 
-// --- Component: Zoom Handler (Optional but helpful) ---
+// --- Component: Zoom Handler ---
 const CameraZoomHandler = () => {
   const { camera } = useThree();
   useEffect(() => {
@@ -115,7 +114,6 @@ const MessageBeacon = ({ position, message, texture }) => {
   useFrame(({ clock }) => {
     if (!spriteRef.current) return;
     const t = clock.getElapsedTime();
-    // UPDATED: Increased base scale so stars are visible at distance
     const scale = hovered ? 4.5 : 2.5 * (Math.sin(t * 1.5 + numericId) * 0.2 + 0.9); 
     spriteRef.current.scale.set(scale, scale, 1);
     spriteRef.current.material.color.setHSL((t * 0.02 + numericId * 0.1) % 1, 0.6, 0.9);
@@ -132,10 +130,9 @@ const MessageBeacon = ({ position, message, texture }) => {
         <spriteMaterial map={texture} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
       </sprite>
 
-      {/* UPDATED: Added Beacon Line for visibility */}
       <line>
-        <bufferGeometry attach="geometry" {...new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -position.y - 50, 0)])} />
-        <lineBasicMaterial attach="material" color="white" transparent opacity={0.15} />
+        <bufferGeometry attach="geometry" {...new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -100, 0)])} />
+        <lineBasicMaterial attach="material" color="white" transparent opacity={0.05} />
       </line>
 
       {clicked && (
@@ -263,10 +260,12 @@ const FallingStarSystem = ({ messages }) => {
   );
 };
 
+
+
 // --- Main Scene ---
 const NightSky = () => {
   const [messages, setMessages] = useState([]);
-  const [error, setError] = useState(null); // Debug Error State
+  const [error, setError] = useState(null);
 
   const [isWriting, setIsWriting] = useState(false);
   const [isWishing, setIsWishing] = useState(false);
@@ -279,21 +278,31 @@ const NightSky = () => {
       .then(data => {
         const processed = data.map(msg => {
           let pos = null;
-          // UPDATED: Check BOTH flat and nested props
           const x = msg.position?.x ?? msg.position_x;
           const y = msg.position?.y ?? msg.position_y;
           const z = msg.position?.z ?? msg.position_z;
 
           if (x != null && y != null && z != null) {
-            // Create Vector3. For Stars, we scale them out. Lanterns use raw DB pos.
             pos = new THREE.Vector3(Number(x), Number(y), Number(z));
-            if (msg.type === 'star') pos.multiplyScalar(0.8); 
+            // Stars should be above in the sky (positive Y)
+            if (msg.type === 'star') {
+              pos.y = Math.abs(pos.y) + 20; // Ensure stars are high in the sky
+            }
           } else {
-            // UPDATED: Generate random fallback if missing
-            const r = 40 + Math.random() * 20; 
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos((Math.random() * 2) - 1);
-            pos = new THREE.Vector3().setFromSphericalCoords(r, phi, theta);
+            // Generate random positions
+            if (msg.type === 'star') {
+              // Stars: distributed in upper hemisphere (sky above)
+              const r = 40 + Math.random() * 30; 
+              const theta = Math.random() * Math.PI * 2;
+              const phi = Math.random() * Math.PI / 2; // 0 to PI/2 = upper hemisphere
+              pos = new THREE.Vector3().setFromSphericalCoords(r, phi, theta);
+            } else {
+              // Other types: keep existing logic
+              const r = 40 + Math.random() * 20; 
+              const theta = Math.random() * Math.PI * 2;
+              const phi = Math.acos((Math.random() * 2) - 1);
+              pos = new THREE.Vector3().setFromSphericalCoords(r, phi, theta);
+            }
           }
           return { ...msg, position: pos };
         });
@@ -326,20 +335,18 @@ const NightSky = () => {
 
   return (
     <div className="relative w-full h-screen bg-black text-white overflow-hidden">
-      {/* ADDED: Debug Console */}
       <DebugConsole messages={messages} error={error} />
 
-      <Canvas camera={{ position: [0, 5, 30], fov: 50 }}>
+      {/* Camera floating in endless night sky */}
+      <Canvas camera={{ position: [0, 0, 5], fov: 60, up: [0, 1, 0] }}>
         <CameraZoomHandler />
-        {/* Environment */}
-        <color attach="background" args={['#020205']} />
-        <fog attach="fog" args={['#020205', 10, 80]} />
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={0.5} />
-        <Sparkles count={300} scale={60} size={2} speed={0.2} opacity={0.3} color="#aaddff" />
+        
+        <color attach="background" args={['#000000']} />
+        <Stars radius={150} depth={100} count={8000} factor={5} saturation={0} fade speed={0.3} />
+        <Sparkles count={500} scale={100} size={3} speed={0.15} opacity={0.4} color="#aaddff" />
 
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.3} />
 
-        {/* Render Stars */}
         <Float speed={0.5} rotationIntensity={0.2} floatIntensity={0.5}>
           {stars.map((msg) => (
             <MessageBeacon 
@@ -351,7 +358,6 @@ const NightSky = () => {
           ))}
         </Float>
 
-        {/* Render Lanterns */}
         {lanterns.map((msg) => (
           <FloatingLantern 
             key={msg.id}
@@ -361,17 +367,16 @@ const NightSky = () => {
           />
         ))}
 
-        {/* Render Falling Stars */}
         <FallingStarSystem messages={fallingStars} />
 
+        {/* Orbit Controls: floating freely in endless night */}
         <OrbitControls 
-          enablePan={false} 
+          enablePan={true} 
           enableZoom={true} 
           minDistance={5} 
-          maxDistance={60}
-          maxPolarAngle={Math.PI / 2 - 0.05} // Keep camera above ground
+          maxDistance={80}
           autoRotate={true}
-          autoRotateSpeed={0.3}
+          autoRotateSpeed={0.2}
         />
       </Canvas>
 
