@@ -27,7 +27,7 @@ import FloatingLantern from './sky/FloatingLantern';
 import FallingStarSystem from './sky/FallingStarSystem';
 import { NebulaField, Moon } from './sky/Backdrop';
 import { Ground, HillDetails, Fireflies, MountainRange } from './sky/Terrain';
-import { Bench, Signpost } from './sky/Foreground';
+import { Bench, Signpost, Stargazers } from './sky/Foreground';
 import { CameraRig, SkyRig, GroundCollision } from './sky/Rigs';
 import ReadingCard from './sky/ReadingCard';
 import SearchPanel from './sky/SearchPanel';
@@ -415,6 +415,7 @@ const NightSky = () => {
         <Ground texture={groundTexture} matRef={groundMatRef} />
         <Bench wood={woodTexture} glow={glowTexture} onSelect={handleSelectBench} />
         <Signpost wood={woodTexture} onSelect={handleSelectSign} />
+        <Stargazers wood={woodTexture} glow={glowTexture} />
         <HillDetails />
         <Fireflies texture={coronaTexture} />
         <MountainRange nearRef={mtnMatRef} farRef={mtnFarMatRef} />

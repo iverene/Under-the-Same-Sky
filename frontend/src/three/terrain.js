@@ -1,6 +1,16 @@
 import * as THREE from 'three';
 
 // Rolling terrain with a raised hilltop under the camera home (0, ~0, 31).
+// A flattened pad under the bench + signage + stargazers keeps every
+// footing level — the hill eases into the pad at the edges.
+export const FLAT_Y = -10.45;
+const PAD = { x0: -7.2, x1: 0.2, z0: 26.8, z1: 29.6, feather: 1.5 };
+
+const smooth01 = (x) => {
+  const t = Math.min(1, Math.max(0, x));
+  return t * t * (3 - 2 * t);
+};
+
 export const groundHeight = (x, z) => {
   const rolling =
     2.2 * Math.sin(x * 0.11) * Math.cos(z * 0.09) +
@@ -9,7 +19,11 @@ export const groundHeight = (x, z) => {
   const bump = 7 * Math.exp(-(x * x + (z - 28) * (z - 28)) / 180);
   const r = Math.hypot(x, z);
   const falloff = r > 60 ? -(r - 60) * 0.08 : 0;
-  return Math.min(-16 + rolling + bump + falloff, -5);
+  const natural = Math.min(-16 + rolling + bump + falloff, -5);
+  // Box-distance to the pad (<=0 inside) → 1 inside, feathered to 0 outside
+  const d = Math.max(PAD.x0 - x, x - PAD.x1, PAD.z0 - z, z - PAD.z1);
+  const mask = 1 - smooth01(d / PAD.feather);
+  return natural * (1 - mask) + FLAT_Y * mask;
 };
 
 // Jagged ridge walls that melt into the sky (real ridgelines, not cones).
