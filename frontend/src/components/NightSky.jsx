@@ -32,6 +32,7 @@ import { Ground, HillDetails, Fireflies, MountainRange } from './sky/Terrain';
 import { Bench, Signpost, Stargazers } from './sky/Foreground';
 import { CameraRig, SkyRig, GroundCollision } from './sky/Rigs';
 import ReadingCard from './sky/ReadingCard';
+import IntroDialogue from './sky/IntroDialogue';
 import SearchPanel from './sky/SearchPanel';
 import { useOutsideTapClose } from './sky/useOutsideTapClose';
 
@@ -121,6 +122,9 @@ const NightSky = () => {
   const woodTexture = useWoodTexture();
 
   const [splashVisible, setSplashVisible] = useState(true);
+  const [showIntro, setShowIntro] = useState(true);
+  const showIntroRef = useRef(true);
+  showIntroRef.current = showIntro;
 
   // Memoized starfield for splash so positions don't regenerate on re-render
   const splashStars = useMemo(() =>
@@ -423,6 +427,7 @@ const NightSky = () => {
         downPos.current = [e.clientX, e.clientY];
         flightRef.current.flying = false; // grabbing the scene cancels any flight
         flightRef.current.homingCam = false;
+        if (showIntroRef.current) setShowIntro(false);
       }}
     >
       <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} onPointerMissed={handlePointerMissed}>
@@ -578,6 +583,9 @@ const NightSky = () => {
         </div>
       )}
 
+      {ready && !splashVisible && showIntro && (
+        <IntroDialogue camera={controlsRef.current?.object ?? null} onDone={() => setShowIntro(false)} />
+      )}
       {!uiHidden && <TopBar />}
 
       <HUD
