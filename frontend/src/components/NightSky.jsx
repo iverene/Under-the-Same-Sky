@@ -30,6 +30,7 @@ import { Ground, HillDetails, Fireflies, MountainRange } from './sky/Terrain';
 import { Bench, Signpost } from './sky/Foreground';
 import { CameraRig, SkyRig, GroundCollision } from './sky/Rigs';
 import ReadingCard from './sky/ReadingCard';
+import SearchPanel from './sky/SearchPanel';
 import { useOutsideTapClose } from './sky/useOutsideTapClose';
 
 // Orchestrator: owns scene state (messages, selection, theme, modals),
@@ -42,6 +43,7 @@ const NightSky = () => {
   // States for modals
   const [isWriting, setIsWriting] = useState(false);
   const [isWishing, setIsWishing] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Last failed send — shown as a dismissible banner (auto-clears)
   const [sendError, setSendError] = useState(null);
@@ -189,6 +191,20 @@ const NightSky = () => {
   const handleSelectSign = () => {
     clearProps();
     setSelectedSign(true);
+  };
+
+  const handleSelectSearchResult = (msg) => {
+    if (msg.type === 'lantern') {
+      setSelectedId(msg.id);
+      setFocusOverride(msg.position);
+      setSelectedSign(false);
+      setSelectedBench(false);
+    } else {
+      setSelectedId(msg.id);
+      setFocusOverride(null);
+      setSelectedSign(false);
+      setSelectedBench(false);
+    }
   };
 
   const handleSelectBench = () => {
@@ -397,6 +413,17 @@ const NightSky = () => {
       <WishingModal isOpen={isWishing} onClose={() => setIsWishing(false)} onSend={handleSendMessage} />
       <SignModal open={selectedSign} onClose={() => setSelectedSign(false)} />
 
+      {/* Search panel — centered on mobile, top-right on desktop */}
+      {isSearching && (
+        <div className="fixed top-16 left-4 right-4 sm:top-20 sm:right-6 sm:left-auto sm:w-auto z-50 flex sm:block justify-center">
+          <SearchPanel
+            messages={messages}
+            onSelect={handleSelectSearchResult}
+            onClose={() => setIsSearching(false)}
+          />
+        </div>
+      )}
+
       {/* Send failure banner — top-center, dismissible, auto-clears */}
       {sendError && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md">
@@ -428,6 +455,8 @@ const NightSky = () => {
           clearProps();
           setHomeSignal((s) => s + 1);
         }}
+        isSearching={isSearching}
+        onToggleSearch={() => { setIsSearching((v) => !v); clearProps(); }}
       />
     </div>
   );
