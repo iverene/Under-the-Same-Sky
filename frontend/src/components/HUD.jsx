@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 const SKY_OPTIONS = [
   { key: 'dusk', label: 'Dusk', dot: 'linear-gradient(135deg, #2e1a45 50%, #ff8a4c 100%)' },
@@ -9,6 +9,8 @@ const SKY_OPTIONS = [
 
 const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
 
   useEffect(() => {
@@ -24,6 +26,21 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
   const barCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-6 scale-95 pointer-events-none'}`;
   const panelCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'}`;
 
+  const sendUrl = useMemo(() => {
+    const loc = window.location;
+    return `${loc.origin}/send`;
+  }, []);
+  const qrUrl = useMemo(() =>
+    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(sendUrl)}&bgcolor=020205&color=ffffff`,
+    [sendUrl]
+  );
+  const handleCopy = () => {
+    navigator.clipboard.writeText(sendUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   return (
     <>
       {/* 1. Instructional pill */}
@@ -37,30 +54,48 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         </div>
       </div>
 
-      {/* 2. UI hide toggle — top right, always visible */}
-      <button
-        onClick={() => onToggleUI && onToggleUI()}
-        aria-label={uiHidden ? 'Show interface' : 'Hide interface'}
-        title={uiHidden ? 'Show interface' : 'Hide interface'}
-        className={`pointer-events-auto fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105 active:scale-95 ${
-          uiHidden
-            ? 'opacity-20 hover:opacity-100 bg-slate-950/50 border-white/10 text-slate-300'
-            : 'opacity-100 bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
-        }`}
-      >
-        {uiHidden ? (
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
-            <circle cx="12" cy="12" r="3" />
+      {/* 2. Top-right buttons — hide toggle + search (desktop only) */}
+      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2">
+        {/* Search — desktop only */}
+        <button
+          onClick={() => onToggleSearch && onToggleSearch()}
+          aria-label="Search by name"
+          className={`hidden sm:flex pointer-events-auto items-center justify-center w-11 h-11 rounded-full backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105 active:scale-95 ${
+            isSearching
+              ? 'bg-blue-500/20 border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.3)] text-blue-300'
+              : 'bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
-        ) : (
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
-            <circle cx="12" cy="12" r="3" />
-            <line x1="4" y1="4" x2="20" y2="20" />
-          </svg>
-        )}
-      </button>
+        </button>
+
+        {/* Hide toggle */}
+        <button
+          onClick={() => onToggleUI && onToggleUI()}
+          aria-label={uiHidden ? 'Show interface' : 'Hide interface'}
+          title={uiHidden ? 'Show interface' : 'Hide interface'}
+          className={`pointer-events-auto flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105 active:scale-95 ${
+            uiHidden
+              ? 'opacity-20 hover:opacity-100 bg-slate-950/50 border-white/10 text-slate-300'
+              : 'opacity-100 bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
+          }`}
+        >
+          {uiHidden ? (
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+              <circle cx="12" cy="12" r="3" />
+              <line x1="4" y1="4" x2="20" y2="20" />
+            </svg>
+          )}
+        </button>
+      </div>
 
       {/* ============================================================
           MOBILE LAYOUT — old design, left & right columns
@@ -138,21 +173,6 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           <span className="text-xl">⟲</span>
         </button>
 
-        {/* Search */}
-        <button
-          onClick={() => onToggleSearch && onToggleSearch()}
-          aria-label="Search by name"
-          className={`pointer-events-auto flex items-center justify-center w-[60px] h-[60px] rounded-full backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
-            isSearching
-              ? 'bg-blue-500/20 border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
-              : 'bg-slate-900/40 border-white/10 hover:border-white/30'
-          }`}
-        >
-          <svg className="w-5 h-5 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-          </svg>
-        </button>
-
         {/* Moon toggle */}
         <button
           onClick={() => setSettingsOpen((v) => !v)}
@@ -217,6 +237,21 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           </svg>
         </button>
 
+        <button
+          onClick={() => setShareOpen((v) => !v)}
+          aria-label="Share send page"
+          className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
+            shareOpen
+              ? 'bg-emerald-500/20 border-emerald-400/50 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+              : 'bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
+          }`}
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
+          </svg>
+        </button>
+
         <div className="w-px h-8 bg-white/10" />
 
         <button
@@ -266,6 +301,63 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           <div className="h-2" />
         </div>
       </div>
+
+      {/* Share modal — QR code + link */}
+      {shareOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={() => setShareOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-sm bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 animate-in zoom-in-95 fade-in duration-200"
+          >
+            <div className="text-center mb-5">
+              <h3 className="text-lg font-serif text-white tracking-wide">Share Send Page</h3>
+              <p className="text-slate-400 text-xs mt-1">Scan or share the link</p>
+            </div>
+
+            {/* QR Code */}
+            <div className="flex justify-center mb-5">
+              <div className="bg-white p-3 rounded-2xl">
+                <img src={qrUrl} alt="QR Code" className="w-40 h-40" />
+              </div>
+            </div>
+
+            {/* URL + Copy */}
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-3">
+              <span className="flex-1 text-xs text-slate-300 truncate font-mono">{sendUrl}</span>
+              <button
+                onClick={handleCopy}
+                className="shrink-0 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+
+            {/* Download QR */}
+            <a
+              href={qrUrl}
+              download="under-the-same-sky-qr.png"
+              target="_blank"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-400/30 hover:border-emerald-400/50 text-emerald-300 text-xs font-bold uppercase tracking-wider transition-all duration-300"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              Download QR
+            </a>
+
+            {/* Close */}
+            <button
+              onClick={() => setShareOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
