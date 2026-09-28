@@ -126,6 +126,8 @@ const NightSky = () => {
 
   // Load messages from the backend on mount — real user data only.
   // Empty sky (background stars + terrain still render) when empty/offline.
+  // Polls every 30s and refetches when the tab regains focus so messages
+  // sent from /send (or another device) appear without manual refresh.
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -139,7 +141,19 @@ const NightSky = () => {
       }
     };
     load();
-    return () => { cancelled = true; };
+
+    // Poll every 10 seconds for cross-device updates
+    const pollId = setInterval(load, 10000);
+
+    // Refetch when tab becomes visible again
+    const onVisibility = () => { if (document.visibilityState === 'visible') load(); };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      cancelled = true;
+      clearInterval(pollId);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, []);
 
   const stars = useMemo(() => messages.filter(m => m.type === 'star' && m.position), [messages]);

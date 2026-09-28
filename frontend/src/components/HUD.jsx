@@ -54,16 +54,18 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         </div>
       </div>
 
-      {/* 2. Top-right buttons — hide toggle + search (desktop only) */}
+      {/* 2. Top-right buttons — search fades with UI, hide toggle always visible */}
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2">
-        {/* Search — desktop only */}
+        {/* Search — fades with UI */}
         <button
           onClick={() => onToggleSearch && onToggleSearch()}
           aria-label="Search by name"
-          className={`hidden sm:flex pointer-events-auto items-center justify-center w-11 h-11 rounded-full backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105 active:scale-95 ${
-            isSearching
-              ? 'bg-blue-500/20 border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.3)] text-blue-300'
-              : 'bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
+          className={`pointer-events-auto flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105 active:scale-95 ${
+            uiHidden
+              ? 'opacity-0 pointer-events-none scale-90'
+              : isSearching
+                ? 'opacity-100 bg-blue-500/20 border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.3)] text-blue-300'
+                : 'opacity-100 bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -71,7 +73,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           </svg>
         </button>
 
-        {/* Hide toggle */}
+        {/* Hide toggle — always visible, 20% when UI hidden */}
         <button
           onClick={() => onToggleUI && onToggleUI()}
           aria-label={uiHidden ? 'Show interface' : 'Hide interface'}
