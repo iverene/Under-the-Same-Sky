@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/messages'; // Make sure port matches your backend
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/messages'; // Make sure port matches your backend
 
 export const fetchMessages = async () => {
   try {

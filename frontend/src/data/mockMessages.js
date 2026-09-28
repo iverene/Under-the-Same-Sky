@@ -29,4 +29,4 @@ export const generateMockMessages = (count = 200) => {
   return messages;
 };
 
-export const mockMessages = generateMockMessages();
+export const mockMessages = generateMockMessages(280);

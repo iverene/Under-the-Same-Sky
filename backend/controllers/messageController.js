@@ -25,15 +25,15 @@ const MessageController = {
         recipient: msg.recipient,
         content: msg.content,
         type: msg.type,
-        // Only attach position object if coordinates exist (stars)
-        position: msg.position_x ? { 
-          x: msg.position_x, 
-          y: msg.position_y, 
-          z: msg.position_z 
+        // Only attach position object if coordinates exist (stars/lanterns)
+        position: (msg.position_x !== null && msg.position_x !== undefined) ? {
+          x: Number(msg.position_x),
+          y: Number(msg.position_y),
+          z: Number(msg.position_z)
         } : null,
         // Add visual properties that don't need database storage
-        size: 0.5, 
-        color: msg.type === 'star' ? 'white' : '#aaddff'
+        size: 0.5,
+        color: msg.type === 'lantern' ? '#ffaa00' : (msg.type === 'falling_star' ? '#aaddff' : 'white')
       }));
 
       res.json(formatted);
@@ -44,22 +44,38 @@ const MessageController = {
   },
 
   // 2. Create Message
+  // Accepts both backend shape { recipient, message } and
+  // frontend modal shapes { recipient, message, type } / { name, wish, type: 'lantern' }
   createMessage: async (req, res) => {
-    const { recipient, message } = req.body;
+    const recipient = req.body.recipient || req.body.name;
+    const message = req.body.message || req.body.wish || req.body.content;
+    const requestedType = req.body.type;
 
     if (!recipient || !message) {
       return res.status(400).json({ error: 'Missing fields' });
     }
 
     // --- LOGIC START ---
-    // Determine type based on length
-    const isFalling = message.length > 100;
-    const type = isFalling ? 'falling_star' : 'star';
-
-    // Calculate position ONLY for normal stars
+    let type;
     let pos = { x: null, y: null, z: null };
-    if (!isFalling) {
-      pos = calculatePosition(45);
+
+    if (requestedType === 'lantern') {
+      // Lanterns (wishes) keep their type and get a floating start position
+      type = 'lantern';
+      pos = {
+        x: (Math.random() - 0.5) * 40,
+        y: -15,
+        z: (Math.random() - 0.5) * 40
+      };
+    } else {
+      // Determine type based on length (explicit falling_star respected)
+      const isFalling = requestedType === 'falling_star' || message.length > 100;
+      type = isFalling ? 'falling_star' : 'star';
+
+      // Calculate fixed sphere position ONLY for normal stars
+      if (!isFalling) {
+        pos = calculatePosition(45);
+      }
     }
     // --- LOGIC END ---
 

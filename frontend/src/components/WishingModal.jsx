@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getMoonData, fetchMoonData } from '../moon';
 
 // Lantern Icon
 const LanternIcon = () => (
@@ -12,6 +13,26 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
   const [name, setName] = useState('');
   const [wish, setWish] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+  // Live lunar state for the availability badge (API first, local math fallback)
+  const [apiMoon, setApiMoon] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let live = true;
+    fetchMoonData().then(
+      (data) => {
+        if (live) setApiMoon(data);
+      },
+      () => {
+        if (live) setApiMoon(null);
+      }
+    );
+    return () => {
+      live = false;
+    };
+  }, [isOpen]);
+
+  const moon = apiMoon || getMoonData();
 
   useEffect(() => {
     if (isOpen) setIsVisible(true);
@@ -70,10 +91,13 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
               Light a lantern for hope
             </p>
 
-            {/* Note about Full Moon availability */}
+            {/* Live moon availability badge — actual phase + illumination */}
             <div className="inline-block px-4 py-1.5 rounded-full bg-amber-950/40 border border-amber-500/20">
               <p className="text-amber-400/90 text-[10px] font-serif italic tracking-wide flex items-center gap-2">
-                <span>✨</span> Wishing is only available during the Full Moon
+                <span>{moon.isFull ? '✨' : moon.icon}</span>
+                {moon.isFull
+                  ? 'The moon is full — wishing is open'
+                  : `${moon.name} • ${moon.illumination} illuminated — wishing opens at Full Moon`}
               </p>
             </div>
           </div>

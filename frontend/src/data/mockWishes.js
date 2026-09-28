@@ -23,4 +23,4 @@ export const generateMockWishes = (count = 50) => {
   return wishes;
 };
 
-export const mockWishes = generateMockWishes();
+export const mockWishes = generateMockWishes(70);
