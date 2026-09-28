@@ -23,13 +23,13 @@
 ### Task 1: Dialogue pool JSON + indexed IntroDialogue
 
 **Files:**
-- Create: `frontend/src/components/sky/introDialogues.json`
-- Modify: `frontend/src/components/sky/IntroDialogue.jsx`
+- Create: `frontend/src/components/sky/introDialogues.json`, `frontend/src/components/sky/introDialogues.js` (pool helper module — non-component exports live here per `react-refresh/only-export-components`)
+- Modify: `frontend/src/components/sky/IntroDialogue.jsx` (default component export only)
 - Test: manual (pool renders; verified live in Task 3)
 
 **Interfaces:**
 - Consumes: nothing from other tasks.
-- Produces: `introDialogues.json` (array of `{ "boy": string, "girl": string }`, 7 entries); `IntroDialogue({ onDone, camera, dialogueIndex })`; `export const randomDialogueIndex = (exclude = -1) => number` (module scope, `Math.random`-based, never returns `exclude` when pool length > 1, falls back to 0). `BOY_LINE`/`GIRL_LINE` exports are REMOVED — Task 3 imports `randomDialogueIndex` instead.
+- Produces: `introDialogues.json` (array of `{ "boy": string, "girl": string }`, 7 entries); `introDialogues.js` exporting `POOL`, `FALLBACK_PAIR`, `randomDialogueIndex(exclude = -1): number` (`Math.random`-based, never returns `exclude` when pool length > 1, falls back to 0); `IntroDialogue({ onDone, camera, dialogueIndex })` with no non-component exports. `BOY_LINE`/`GIRL_LINE` exports are REMOVED — Task 3 imports `randomDialogueIndex` from `./introDialogues` instead.
 
 - [ ] **Step 1: Create the JSON pool with exact copy**
 
@@ -53,15 +53,17 @@ Note: entry 1 uses straight apostrophes (existing code copy); entries 2-7 use th
 
 In `frontend/src/components/sky/IntroDialogue.jsx`, replace the `BOY_LINE`/`GIRL_LINE` constants with:
 
-```jsx
+Create `frontend/src/components/sky/introDialogues.js`:
+
+```js
 import DIALOGUES from './introDialogues.json';
 
-const FALLBACK_PAIR = {
+export const FALLBACK_PAIR = {
   boy: "Our stories may be different, but we're under the same sky.",
   girl: "And sometimes, knowing we're not alone is enough to keep going.",
 };
 
-const POOL = Array.isArray(DIALOGUES) && DIALOGUES.length > 0 ? DIALOGUES : [FALLBACK_PAIR];
+export const POOL = Array.isArray(DIALOGUES) && DIALOGUES.length > 0 ? DIALOGUES : [FALLBACK_PAIR];
 
 export const randomDialogueIndex = (exclude = -1) => {
   if (POOL.length <= 1) return 0;
@@ -74,6 +76,8 @@ export const randomDialogueIndex = (exclude = -1) => {
 Change the signature to `const IntroDialogue = ({ onDone, camera, dialogueIndex }) => {` and resolve the pair at the top of the component:
 
 ```jsx
+import { POOL, FALLBACK_PAIR } from './introDialogues';
+
 const pair = POOL[dialogueIndex] || FALLBACK_PAIR;
 ```
 
@@ -91,7 +95,7 @@ Expected: succeeds (the build will fail at the NightSky call site only if you br
 - [ ] **Step 5: Commit**
 
 ```bash
-git add frontend/src/components/sky/introDialogues.json frontend/src/components/sky/IntroDialogue.jsx
+git add frontend/src/components/sky/introDialogues.json frontend/src/components/sky/introDialogues.js frontend/src/components/sky/IntroDialogue.jsx
 git commit -m "feat: dialogue variation pool with indexed intro bubbles"
 ```
 
