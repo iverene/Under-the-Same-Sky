@@ -17,7 +17,7 @@ export const FRESH_GLOW_MS = 30000;
 export const FALL_DURATION = 2.2;
 
 // Camera focus flights stop this far from their target
-export const FOCUS_DISTANCE = 8;
+export const FOCUS_DISTANCE = 14;
 
 // Tap-vs-drag tolerance (squared px): 12px is forgiving for touch taps
 // while still ignoring orbit drags

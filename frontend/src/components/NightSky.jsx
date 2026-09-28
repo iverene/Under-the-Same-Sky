@@ -141,7 +141,6 @@ const NightSky = () => {
   }, []);
 
   const stars = useMemo(() => messages.filter(m => m.type === 'star' && m.position), [messages]);
-  const fallingStars = useMemo(() => messages.filter(m => m.type === 'falling_star'), [messages]);
   const lanterns = useMemo(() => messages.filter(m => m.type === 'lantern'), [messages]);
 
   // Selected object + its world position drive the reading panel and camera flight
@@ -322,7 +321,7 @@ const NightSky = () => {
             />
         ))}
 
-        <FallingStarSystem messages={fallingStars} headTexture={starTexture} trailTexture={trailTexture} />
+        <FallingStarSystem headTexture={starTexture} trailTexture={trailTexture} />
 
         {/* --- CONTROLS --- */}
         {/* Focus flight runs alongside the controls */}

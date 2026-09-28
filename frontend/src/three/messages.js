@@ -55,6 +55,6 @@ export const normalizeMessage = (raw) => {
     size: (raw.size ?? 0.5) * (type === 'star' ? 1.7 : 1),
     color:
       raw.color ||
-      (type === 'lantern' ? '#ffaa00' : type === 'falling_star' ? '#aaddff' : 'white'),
+      (type === 'lantern' ? '#ffaa00' : 'white'),
   };
 };

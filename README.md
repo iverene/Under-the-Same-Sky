@@ -12,9 +12,9 @@ The application simulates the experience of gazing up at the night sky. Every me
 
 ### Celestial Objects
 
-* :star: **Stars:** The standard visualization for submitted messages.
-* :comet: **Falling Stars:** A fleeting form the sender chooses at submission. They aren't pinned in the sky — one streaks across at random intervals, and clicking it mid-flight "catches" it to reveal the message.
+* :star: **Stars:** The standard visualization for submitted messages — permanently pinned across the sky.
 * :izakaya_lantern: **Lanterns:** Wishes that float gently upward across the sky. The wish modal shows the live moon phase (wishing is themed around the **Full Moon**), but submitting is always open.
+* :comet: **Shooting Stars:** A purely ambient effect — single bolts and occasional showers streak across the sky at random intervals. Not tied to any user submission.
 
 ---
 
@@ -42,7 +42,7 @@ The main interface is a **360° interactive night sky**.
 Input is intentionally minimal. There are **no accounts** and **no login** required.
 
 * **Fields:** Recipient Name (Free text) + Message Content.
-* **Form:** The sender chooses the form — a permanent **Star** or a fleeting **Falling Star**. Lanterns are sent from the separate wish form (themed around the Full Moon, always submittable).
+* **Form:** Stars are permanent; Lanterns are wishes. Shooting stars appear randomly in the background.
 
 ### 3. Anti-Social Metrics
 
@@ -75,8 +75,8 @@ To ensure the platform remains a place for release rather than validation:
 ### Included
 
 * Anonymous message submission.
-* Visual distinction between message types (Star, Falling Star, Lantern).
-* Randomized falling-star flybys to encourage presence.
+* Visual distinction between message types (Star, Lantern).
+* Ambient shooting-star animations for atmosphere.
 
 ### Excluded (By Design)
 
@@ -88,7 +88,7 @@ To ensure the platform remains a place for release rather than validation:
 ### Known Limitations
 
 * **Performance:** Rendering a high volume of objects in a 360° view may impact low-end devices.
-* **Visibility:** Falling-star messages have no fixed position — each one only appears if randomly picked for a flyby and clicked mid-flight, so a given one may rarely be seen.
+* **Visibility:** Messages are visible to all visitors who explore the sky.
 * **Moderation:** As an anonymous platform, moderation is limited to basic safeguards; messages are not traced to users.
 
 ---
