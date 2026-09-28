@@ -49,7 +49,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           <p className="text-blue-100/60 text-[9px] sm:text-[10px] font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-center leading-relaxed text-balance">
             {isTouch
               ? 'Pinch to Zoom \u2022 Drag \u2022 Tap Stars & Lanterns'
-              : 'Scroll to Zoom \u2022 Drag to Explore \u2022 Click Stars & Lanterns to Fly Closer'}
+              : 'Scroll to Zoom \u2022 Drag to Explore \u2022 Click Stars & Lanterns to discover a message.'}
           </p>
         </div>
       </div>
