@@ -69,7 +69,11 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
         tmpDir.copy(camera.position).sub(tmpFocus);
         if (tmpDir.lengthSq() < 1e-4) tmpDir.set(0, 0, 1);
         tmpDir.normalize();
-        tmpDesired.copy(tmpFocus).addScaledVector(tmpDir, FOCUS_DISTANCE);
+        // Scale focus distance proportionally to how far the target is:
+        // nearby lanterns stop close, distant stars stop further back
+        const targetDist = tmpFocus.length();
+        const scaledDist = Math.max(FOCUS_DISTANCE, targetDist * 0.25);
+        tmpDesired.copy(tmpFocus).addScaledVector(tmpDir, scaledDist);
         // Keep the camera out of the hill during focus flights
         tmpDesired.y = Math.max(tmpDesired.y, groundHeight(tmpDesired.x, tmpDesired.z) + 1.5);
       }

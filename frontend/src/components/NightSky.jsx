@@ -103,10 +103,10 @@ const NightSky = () => {
   const groundTexture = useGroundTexture();
   const woodTexture = useWoodTexture();
 
-  // Smooth fade-in on mount
+  // Smooth fade-in on mount — slight delay so the splash screen shows
   useEffect(() => {
-    const frame = requestAnimationFrame(() => setReady(true));
-    return () => cancelAnimationFrame(frame);
+    const timer = setTimeout(() => setReady(true), 800);
+    return () => clearTimeout(timer);
   }, []);
 
   // Ambient rotation: drift through every sky mood on a slow timer so the
@@ -254,6 +254,31 @@ const NightSky = () => {
         flightRef.current.homingCam = false;
       }}
     >
+      {/* Splash overlay — fades out once the scene is ready */}
+      <div
+        className={`absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[#020205] transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          ready ? 'opacity-0 pointer-events-none scale-105' : 'opacity-100 scale-100'
+        }`}
+      >
+        {/* Star icon */}
+        <div className={`transition-all duration-1000 delay-300 ${ready ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
+          <svg className="w-10 h-10 text-blue-300/80 mb-6 filter drop-shadow-[0_0_12px_rgba(147,197,253,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+          </svg>
+        </div>
+        {/* Title */}
+        <h1 className={`font-serif text-2xl sm:text-4xl tracking-[0.15em] text-white/90 transition-all duration-1000 delay-500 ${ready ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
+          Under the Same Sky
+        </h1>
+        {/* Subtle tagline */}
+        <p className={`mt-3 text-[10px] sm:text-xs text-blue-200/40 uppercase tracking-[0.3em] font-bold transition-all duration-1000 delay-700 ${ready ? 'opacity-0 translate-y-3' : 'opacity-100 translate-y-0'}`}>
+          Cast your thought into the void
+        </p>
+        {/* Loading bar */}
+        <div className={`mt-8 w-32 h-[2px] bg-white/5 rounded-full overflow-hidden transition-all duration-700 delay-200 ${ready ? 'opacity-0' : 'opacity-100'}`}>
+          <div className={`h-full bg-gradient-to-r from-blue-400/60 to-indigo-400/60 rounded-full transition-all duration-[3000ms] ease-linear ${ready ? 'w-full' : 'w-0'}`} />
+        </div>
+      </div>
       <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} onPointerMissed={handlePointerMissed}>
 
         {/* --- ATMOSPHERE --- */}
