@@ -20,7 +20,7 @@ const LANTERN_PROFILE = [
 
 // Floating sky-lantern: ribbed paper shell, flickering flame, warm halo.
 // Rises forever (resets at the ceiling), sways, and glows after release.
-const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt }) => {
+const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, selected, onLivePosition }) => {
   const groupRef = useRef();
   const lightRef = useRef();
   const flameRef = useRef();
@@ -80,6 +80,11 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt }) =
     // Smooth hover grow (base 1.15 so lanterns hold presence at distance)
     const s = THREE.MathUtils.damp(g.scale.x, (hovered ? 1.45 : 1.15) * (1 + glowAmt * 0.35), 8, delta);
     g.scale.set(s, s, s);
+
+    // Report live position when selected so camera tracks the rising lantern
+    if (selected && onLivePosition) {
+      onLivePosition(g.position.clone());
+    }
   });
 
   return (

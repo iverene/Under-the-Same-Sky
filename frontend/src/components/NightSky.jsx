@@ -244,16 +244,12 @@ const NightSky = () => {
   };
 
   const handleSelectSearchResult = (msg) => {
+    clearProps();
     if (msg.type === 'lantern') {
       setSelectedId(msg.id);
       setFocusOverride(msg.position);
-      setSelectedSign(false);
-      setSelectedBench(false);
     } else {
       setSelectedId(msg.id);
-      setFocusOverride(null);
-      setSelectedSign(false);
-      setSelectedBench(false);
     }
   };
 
@@ -267,7 +263,7 @@ const NightSky = () => {
   // opt out of raycasting via raycast={() => null} so taps there count as
   // a miss instead of a dead hit.
   const handlePointerMissed = (e) => {
-    if (!downPos.current) return;
+    if (!downPos.current || isSearching) return;
     const dx = e.clientX - downPos.current[0];
     const dy = e.clientY - downPos.current[1];
     // Forgiving for touch taps, still ignores orbit drags
@@ -469,6 +465,8 @@ const NightSky = () => {
               glow={glowTexture}
               paper={paperTexture}
               bornAt={freshMap[msg.id]}
+              selected={msg.id === selectedId && selectedIsLantern}
+              onLivePosition={msg.id === selectedId && selectedIsLantern ? (pos) => setFocusOverride(pos) : undefined}
             />
         ))}
 
