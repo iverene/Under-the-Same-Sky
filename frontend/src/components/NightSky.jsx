@@ -123,6 +123,7 @@ const NightSky = () => {
 
   const [splashVisible, setSplashVisible] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
+  const handleIntroDone = useCallback(() => setShowIntro(false), []);
   const showIntroRef = useRef(true);
   showIntroRef.current = showIntro;
 
@@ -584,7 +585,7 @@ const NightSky = () => {
       )}
 
       {ready && !splashVisible && showIntro && (
-        <IntroDialogue camera={controlsRef.current?.object ?? null} onDone={() => setShowIntro(false)} />
+        <IntroDialogue camera={controlsRef.current?.object ?? null} onDone={handleIntroDone} />
       )}
       {!uiHidden && <TopBar />}
 
