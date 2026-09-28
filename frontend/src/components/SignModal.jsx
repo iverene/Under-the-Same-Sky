@@ -94,7 +94,7 @@ const SignModal = ({ open, onClose }) => {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Sign assembly — generous padding so drop shadows never clip */}
-      <div className="modal-pop relative w-full max-w-md max-h-[92vh] overflow-y-auto px-6 sm:px-8 pt-5 pb-12">
+      <div className="modal-pop relative w-full max-w-md sm:max-w-2xl max-h-[92vh] overflow-y-auto px-6 sm:px-8 pt-5 pb-12">
         <div className="relative px-5 sm:px-8">
           {/* Mounting posts peeking out below the board */}
           <Post className="left-8 sm:left-11" />
@@ -122,39 +122,39 @@ const SignModal = ({ open, onClose }) => {
             <Nail className="bottom-2.5 left-2.5" />
             <Nail className="bottom-2.5 right-2.5" />
 
-            <div className="px-6 sm:px-8 py-8 sm:py-10">
+            <div className="px-6 sm:px-12 py-8 sm:py-12">
               <p
-                className="font-serif text-amber-100/85 text-[11px] sm:text-xs font-bold uppercase mb-3"
+                className="font-serif text-amber-100/85 text-[11px] sm:text-sm font-bold uppercase mb-3 sm:mb-4"
                 style={{ letterSpacing: '0.35em', ...carved }}
               >
                 Trail Marker
               </p>
               <h2
-                className="font-serif text-[#f2e7cd] text-2xl sm:text-3xl mb-1"
+                className="font-serif text-[#f2e7cd] text-2xl sm:text-5xl mb-1 sm:mb-2"
                 style={{ letterSpacing: '0.1em', ...carved }}
               >
                 UNDER THE SAME SKY
               </h2>
               <p
-                className="font-serif italic text-[#e8d5a8] text-lg mb-5"
+                className="font-serif italic text-[#e8d5a8] text-lg sm:text-2xl mb-5 sm:mb-6"
                 style={carved}
               >
                 ★ look up ★
               </p>
 
-              <div className="mx-auto h-px w-2/3 bg-amber-100/25 mb-5" />
+              <div className="mx-auto h-px w-2/3 bg-amber-100/25 mb-5 sm:mb-6" />
 
-              <p className="font-serif italic text-amber-50/90 text-sm leading-relaxed">
+              <p className="font-serif italic text-amber-50/90 text-sm sm:text-lg leading-relaxed max-w-xl mx-auto">
                 You are sitting on a quiet hill beneath a sky full of unsaid things.
-                Scroll to zoom, drag to wander. Click a star to read its message,
-                catch a falling one if you can — and leave one of your own.
+                Scroll to zoom, drag to wander. Click a star to read its message
+                — and leave one of your own.
               </p>
 
               {/* Plank button */}
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onClose(); }}
-                className="mt-7 px-8 py-2.5 rounded-[3px] border-2 font-serif text-xs uppercase transition-all hover:scale-105 active:scale-95"
+                className="mt-7 sm:mt-8 px-8 sm:px-10 py-2.5 sm:py-3 rounded-[3px] border-2 font-serif text-xs sm:text-sm uppercase transition-all hover:scale-105 active:scale-95"
                 style={{
                   backgroundImage: `url(${woodBg.plank})`,
                   backgroundSize: 'cover',
