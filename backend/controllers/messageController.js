@@ -51,19 +51,29 @@ const MessageController = {
   // Accepts both backend shape { recipient, message } and
   // frontend modal shapes { recipient, message, type } / { name, wish, type: 'lantern' }
   createMessage: async (req, res) => {
-    const recipient = req.body.recipient || req.body.name;
-    const message = req.body.message || req.body.wish || req.body.content;
+    const recipient = (req.body.recipient || req.body.name || '').toString().trim();
+    const message = (req.body.message || req.body.wish || req.body.content || '').toString().trim();
     const requestedType = req.body.type;
 
+    // Mirrors the frontend modal caps (60 / 500) so overlong posts
+    // can't bloat the DB or blow out the reading card layout
+    const MAX_RECIPIENT = 60;
+    const MAX_MESSAGE = 500;
     if (!recipient || !message) {
       return res.status(400).json({ error: 'Missing fields' });
     }
+    if (recipient.length > MAX_RECIPIENT || message.length > MAX_MESSAGE) {
+      return res.status(400).json({ error: `Fields too long (max ${MAX_RECIPIENT} / ${MAX_MESSAGE} chars)` });
+    }
+    // Only known types accepted — anything else becomes a plain star
+    const ALLOWED_TYPES = new Set(['star', 'lantern', 'falling_star']);
+    const requested = ALLOWED_TYPES.has(requestedType) ? requestedType : 'star';
 
     // --- LOGIC START ---
     let type;
     let pos = { x: null, y: null, z: null };
 
-    if (requestedType === 'lantern') {
+    if (requested === 'lantern') {
       // Lanterns (wishes) keep their type and get a floating start position.
       // Terrain never rises above y=-5, so y=-2 starts just above the grass
       // instead of buried in the hill.
@@ -76,7 +86,7 @@ const MessageController = {
     } else {
       // Honor the sender's explicit choice: only 'falling_star' falls —
       // long messages stay permanent stars instead of being retyped by length
-      const isFalling = requestedType === 'falling_star';
+      const isFalling = requested === 'falling_star';
       type = isFalling ? 'falling_star' : 'star';
 
       // Calculate fixed sphere position ONLY for normal stars
