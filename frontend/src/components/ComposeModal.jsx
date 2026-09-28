@@ -19,12 +19,19 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const [type, setType] = useState('star');
   const [isVisible, setIsVisible] = useState(false);
   const hideTimer = useRef(null);
+  const rootRef = useRef(null);
+
+  const RECIPIENT_LIMIT = 60;
+  const MESSAGE_LIMIT = 500;
 
   useEffect(() => {
     if (isOpen) {
       if (hideTimer.current) clearTimeout(hideTimer.current);
       setIsVisible(true);
     } else {
+      // Drop focus before the modal hides so focus never sits inside an
+      // aria-hidden tree (avoids the assistive-tech warning on submit)
+      if (rootRef.current?.contains(document.activeElement)) document.activeElement.blur();
       hideTimer.current = setTimeout(() => setIsVisible(false), 300);
     }
     return () => {
@@ -55,7 +62,7 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
   };
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 backdrop-blur-none pointer-events-none'}`} aria-hidden={!isOpen}>
+    <div ref={rootRef} className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 backdrop-blur-none pointer-events-none'}`} aria-hidden={!isOpen}>
       
       {/* Darkened Overlay */}
       <div 
@@ -84,10 +91,14 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
             
             {/* Recipient Input */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</label>
+                <span className="text-[10px] text-slate-500 tabular-nums mr-1">{recipient.length}/{RECIPIENT_LIMIT}</span>
+              </div>
               <input 
                 type="text" 
                 value={recipient}
+                maxLength={RECIPIENT_LIMIT}
                 onChange={(e) => setRecipient(e.target.value)}
                 className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border border-white/5 focus:border-blue-400/50 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-400/30 transition-all duration-200"
                 placeholder="Someone..."
@@ -96,10 +107,14 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
             
             {/* Message Input */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
+                <span className="text-[10px] text-slate-500 tabular-nums mr-1">{message.length}/{MESSAGE_LIMIT}</span>
+              </div>
               <textarea 
                 rows={4}
                 value={message}
+                maxLength={MESSAGE_LIMIT}
                 onChange={(e) => setMessage(e.target.value)}
                 className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border border-white/5 focus:border-blue-400/50 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-400/30 transition-all duration-200 resize-none leading-relaxed"
                 placeholder="What's on your mind?"

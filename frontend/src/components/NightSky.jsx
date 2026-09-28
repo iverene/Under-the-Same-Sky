@@ -23,7 +23,9 @@ const toVector3 = (pos) => {
 };
 
 const randomLanternPosition = () =>
-  new THREE.Vector3((Math.random() - 0.5) * 40, -15, (Math.random() - 0.5) * 40);
+  // Terrain never rises above y=-5, so start just above the grass (-2)
+  // instead of buried in the hill
+  new THREE.Vector3((Math.random() - 0.5) * 40, -2, (Math.random() - 0.5) * 40);
 
 // The sky sits far beyond the hill: stars pushed deep, lanterns mid-distance.
 // (Stored DB positions stay on the ~45-unit sphere; scaled at render time.)
@@ -342,8 +344,12 @@ const useMoonTexture = () => {
 // Star color temperatures so the sky doesn't look monochrome
 const STAR_TINTS = ['#ffffff', '#cfe4ff', '#ffe9c9', '#e8d8ff'];
 
+// New arrivals glow brightly so you can spot where yours landed,
+// then settle back to normal over this long (ms)
+const FRESH_GLOW_MS = 30000;
+
 // --- 2. Interactive Message Star (core + corona, smooth shimmer) ---
-const MessageStar = ({ position, message, baseSize, texture, corona, selected, onSelect }) => {
+const MessageStar = ({ position, message, baseSize, texture, corona, selected, onSelect, bornAt }) => {
   const [hovered, setHovered] = useState(false);
   const coreRef = useRef();
   const coronaRef = useRef();
@@ -366,16 +372,18 @@ const MessageStar = ({ position, message, baseSize, texture, corona, selected, o
     const shimmer =
       0.72 + 0.28 * (0.6 * Math.sin(time * 2.1 + offset) + 0.4 * Math.sin(time * 3.9 + offset * 1.7));
     const active = hovered || selected;
+    // Birth glow: 1 at release → 0 after FRESH_GLOW_MS
+    const glow = bornAt ? Math.max(0, 1 - (Date.now() - bornAt) / FRESH_GLOW_MS) : 0;
 
     if (coreRef.current) {
-      coreRef.current.material.opacity = active ? 1 : shimmer;
-      const target = active ? baseSize * 2.4 : baseSize;
+      coreRef.current.material.opacity = Math.min(1, (active ? 1 : shimmer) + glow);
+      const target = (active ? baseSize * 2.4 : baseSize) * (1 + glow * 1.5);
       const s = THREE.MathUtils.damp(coreRef.current.scale.x, target, 8, delta);
       coreRef.current.scale.set(s, s, 1);
     }
     if (coronaRef.current) {
-      coronaRef.current.material.opacity = (active ? 0.85 : 0.38) * shimmer;
-      const target = baseSize * 3.4 * (active ? 1.2 : 1 + 0.06 * Math.sin(time * 1.7 + offset));
+      coronaRef.current.material.opacity = Math.min(1, (active ? 0.85 : 0.38) * shimmer + glow * 0.6);
+      const target = baseSize * 3.4 * (active ? 1.2 : 1 + 0.06 * Math.sin(time * 1.7 + offset)) * (1 + glow);
       const s = THREE.MathUtils.damp(coronaRef.current.scale.x, target, 6, delta);
       coronaRef.current.scale.set(s, s, 1);
     }
@@ -434,11 +442,13 @@ const LANTERN_PROFILE = [
   [0.02, 0.47],
 ].map(([x, y]) => new THREE.Vector2(x, y));
 
-const FloatingLantern = ({ position, message, onSelect, glow, paper }) => {
+const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt }) => {
   const groupRef = useRef();
   const lightRef = useRef();
   const flameRef = useRef();
   const haloRef = useRef();
+  const shellRef = useRef();
+  const farRef = useRef();
   const [hovered, setHovered] = useState(false);
   // Random offsets so lanterns don't move/flicker in sync
   const randomOffset = useMemo(() => Math.random() * 100, []);
@@ -474,17 +484,23 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper }) => {
     const flicker =
       Math.sin(time * flickerSpeed + randomOffset) * 0.3 +
       Math.sin(time * 13 + randomOffset * 2) * 0.12;
-    if (lightRef.current) lightRef.current.intensity = 1.8 + flicker;
+    // Birth glow: 1 at release → 0 after FRESH_GLOW_MS
+    const glowAmt = bornAt ? Math.max(0, 1 - (Date.now() - bornAt) / FRESH_GLOW_MS) : 0;
+    if (lightRef.current) lightRef.current.intensity = 1.8 + flicker + glowAmt * 8;
+    if (shellRef.current) shellRef.current.emissiveIntensity = 1.6 + glowAmt * 2.5;
     if (flameRef.current) {
       const s = 1 + flicker * 0.15;
       flameRef.current.scale.set(s, s, s);
     }
     if (haloRef.current) {
-      haloRef.current.material.opacity = (hovered ? 0.75 : 0.5) + flicker * 0.08;
+      haloRef.current.material.opacity = Math.min(1, (hovered ? 0.75 : 0.5) + flicker * 0.08 + glowAmt * 0.5);
+    }
+    if (farRef.current) {
+      farRef.current.material.opacity = 0.16 + glowAmt * 0.5;
     }
 
     // Smooth hover grow (base 1.15 so lanterns hold presence at distance)
-    const s = THREE.MathUtils.damp(g.scale.x, hovered ? 1.45 : 1.15, 8, delta);
+    const s = THREE.MathUtils.damp(g.scale.x, (hovered ? 1.45 : 1.15) * (1 + glowAmt * 0.35), 8, delta);
     g.scale.set(s, s, s);
   });
 
@@ -498,6 +514,7 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper }) => {
       >
         <latheGeometry args={[LANTERN_PROFILE, 16]} />
         <meshStandardMaterial
+          ref={shellRef}
           map={paper}
           color={tint}
           emissive="#ff5a00"
@@ -544,7 +561,7 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper }) => {
 
       {/* Far-distance glow so lanterns read as warm lights across the sky */}
       {glow && (
-        <sprite scale={[7, 7, 1]}>
+        <sprite ref={farRef} scale={[7, 7, 1]}>
           <spriteMaterial
             map={glow}
             color="#ff8a2a"
@@ -752,6 +769,10 @@ const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal })
   const homeTarget = useMemo(() => new THREE.Vector3(0, 4, 0), []);
   const tmpDir = useMemo(() => new THREE.Vector3(), []);
   const tmpDesired = useMemo(() => new THREE.Vector3(), []);
+  const tmpFocus = useMemo(() => new THREE.Vector3(), []);
+  // Failsafe bookkeeping: a flight that can't arrive must release the camera
+  const flySince = useRef(0);
+  const wasFlying = useRef(false);
 
   // Reset button arms a glide back to the bench POV
   useEffect(() => {
@@ -761,9 +782,18 @@ const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal })
     }
   }, [homeSignal, flightRef]);
 
-  useFrame(({ camera }, delta) => {
+  useFrame(({ camera, clock }, delta) => {
     const controls = controlsRef.current;
     if (!controls) return;
+
+    // Failsafe: a flight that can't arrive (bad data, lost race) releases
+    // after 8s instead of trapping the camera with autoRotate off
+    const time = clock.getElapsedTime();
+    if (flightRef.current.flying && !wasFlying.current) flySince.current = time;
+    wasFlying.current = flightRef.current.flying;
+    if (flightRef.current.flying && time - flySince.current > 8) {
+      flightRef.current.flying = false;
+    }
 
     if (flightRef.current.homingCam) {
       // Glide home to the bench: position + target together, then release
@@ -780,18 +810,22 @@ const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal })
 
     if (focusPoint && flightRef.current.flying) {
       controls.autoRotate = false;
+      // Never dive the gaze under the hill — below-horizon data (old rows)
+      // can't bury the view or stall the flight
+      tmpFocus.copy(focusPoint);
+      tmpFocus.setY(Math.max(tmpFocus.y, groundHeight(tmpFocus.x, tmpFocus.z) + 2.0));
       if (focusCam) {
         // Directed shot (sign overlook): explicit camera perch, gaze to the point
         tmpDesired.copy(focusCam);
       } else {
-        tmpDir.copy(camera.position).sub(focusPoint);
+        tmpDir.copy(camera.position).sub(tmpFocus);
         if (tmpDir.lengthSq() < 1e-4) tmpDir.set(0, 0, 1);
         tmpDir.normalize();
-        tmpDesired.copy(focusPoint).addScaledVector(tmpDir, FOCUS_DISTANCE);
+        tmpDesired.copy(tmpFocus).addScaledVector(tmpDir, FOCUS_DISTANCE);
         // Keep the camera out of the hill during focus flights
         tmpDesired.y = Math.max(tmpDesired.y, groundHeight(tmpDesired.x, tmpDesired.z) + 1.5);
       }
-      controls.target.lerp(focusPoint, t);
+      controls.target.lerp(tmpFocus, t);
       camera.position.lerp(tmpDesired, t);
       if (camera.position.distanceTo(tmpDesired) < 0.25) {
         flightRef.current.flying = false; // arrived — user is free to move
@@ -1472,6 +1506,22 @@ const NightSky = () => {
   const [isWriting, setIsWriting] = useState(false);
   const [isWishing, setIsWishing] = useState(false);
 
+  // Fresh arrivals (id -> release timestamp): they glow brightly for
+  // FRESH_GLOW_MS so you can spot where yours landed, then settle
+  const [freshMap, setFreshMap] = useState({});
+  const markFresh = (id) => {
+    if (id === null || id === undefined) return;
+    setFreshMap((prev) => ({ ...prev, [id]: Date.now() }));
+    setTimeout(() => {
+      setFreshMap((prev) => {
+        if (!(id in prev)) return prev;
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }, FRESH_GLOW_MS + 1000);
+  };
+
   // Sky atmosphere setting (dusk / nightfall / deep night / dawn — smoothed by SkyRig)
   const [skyTheme, setSkyTheme] = useState('deepnight');
   // Immersion toggle: hides every button (panels + modals stay readable)
@@ -1617,6 +1667,11 @@ const NightSky = () => {
           normalized.type === 'lantern' ? randomLanternPosition() : getRandomPositionOnSphere(45);
       }
       setMessages(prev => [...prev, normalized]);
+      markFresh(normalized.id);
+      // Showcase the new arrival: fly the camera out to it (stops at focus
+      // distance — close enough to see, never on top of it)
+      if (normalized.type === 'lantern') handleSelectLantern(normalized, normalized.position);
+      else handleSelectStar(normalized);
     } catch {
       // Backend down — fall back to local-only message so UX still works
       const fallback = normalizeMessage({
@@ -1631,6 +1686,9 @@ const NightSky = () => {
           : (data.type === 'star' ? getRandomPositionOnSphere(45) : null)
       });
       setMessages(prev => [...prev, fallback]);
+      markFresh(fallback.id);
+      if (fallback.type === 'lantern') handleSelectLantern(fallback, fallback.position);
+      else handleSelectStar(fallback);
     }
   };
 
@@ -1692,20 +1750,22 @@ const NightSky = () => {
               corona={coronaTexture}
               selected={msg.id === selectedId}
               onSelect={handleSelectStar}
+              bornAt={freshMap[msg.id]}
             />
           ))}
         </Float>
 
         {/* Lanterns */}
         {lanterns.map((msg) => (
-          <FloatingLantern
-            key={msg.id}
-            position={msg.position}
-            message={msg}
-            onSelect={handleSelectLantern}
-            glow={glowTexture}
-            paper={paperTexture}
-          />
+            <FloatingLantern
+              key={msg.id}
+              position={msg.position}
+              message={msg}
+              onSelect={handleSelectLantern}
+              glow={glowTexture}
+              paper={paperTexture}
+              bornAt={freshMap[msg.id]}
+            />
         ))}
 
         <FallingStarSystem messages={fallingStars} headTexture={starTexture} trailTexture={trailTexture} />

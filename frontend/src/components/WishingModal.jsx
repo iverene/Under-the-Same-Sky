@@ -14,6 +14,10 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
   const [wish, setWish] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const hideTimer = useRef(null);
+  const rootRef = useRef(null);
+
+  const NAME_LIMIT = 60;
+  const WISH_LIMIT = 500;
   // Live lunar state for the availability badge (API first, local math fallback)
   const [apiMoon, setApiMoon] = useState(null);
 
@@ -40,6 +44,9 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
       if (hideTimer.current) clearTimeout(hideTimer.current);
       setIsVisible(true);
     } else {
+      // Drop focus before the modal hides so focus never sits inside an
+      // aria-hidden tree (avoids the assistive-tech warning on submit)
+      if (rootRef.current?.contains(document.activeElement)) document.activeElement.blur();
       hideTimer.current = setTimeout(() => setIsVisible(false), 300);
     }
     return () => {
@@ -70,7 +77,7 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
   };
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 backdrop-blur-none pointer-events-none'}`} aria-hidden={!isOpen}>
+    <div ref={rootRef} className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 backdrop-blur-none pointer-events-none'}`} aria-hidden={!isOpen}>
       
       {/* Darkened Overlay */}
       <div 
@@ -118,10 +125,14 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
             
             {/* Name Input */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest ml-1">For Whom?</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest ml-1">For Whom?</label>
+                <span className="text-[10px] text-amber-500/50 tabular-nums mr-1">{name.length}/{NAME_LIMIT}</span>
+              </div>
               <input 
                 type="text" 
                 value={name}
+                maxLength={NAME_LIMIT}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full bg-amber-900/5 hover:bg-amber-900/10 focus:bg-amber-900/10 border border-amber-500/10 focus:border-amber-400/50 rounded-xl p-4 text-amber-50 placeholder-amber-500/30 focus:outline-none focus:ring-1 focus:ring-amber-400/30 transition-all duration-200"
                 placeholder="Yourself, a friend, or the world..."
@@ -130,10 +141,14 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
             
             {/* Wish Input */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest ml-1">Your Wish</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest ml-1">Your Wish</label>
+                <span className="text-[10px] text-amber-500/50 tabular-nums mr-1">{wish.length}/{WISH_LIMIT}</span>
+              </div>
               <textarea 
                 rows={4}
                 value={wish}
+                maxLength={WISH_LIMIT}
                 onChange={(e) => setWish(e.target.value)}
                 className="w-full bg-amber-900/5 hover:bg-amber-900/10 focus:bg-amber-900/10 border border-amber-500/10 focus:border-amber-400/50 rounded-xl p-4 text-amber-50 placeholder-amber-500/30 focus:outline-none focus:ring-1 focus:ring-amber-400/30 transition-all duration-200 resize-none leading-relaxed"
                 placeholder="What do you hope for?"

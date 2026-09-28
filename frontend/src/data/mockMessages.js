@@ -1,11 +1,20 @@
 import * as THREE from 'three';
 
-// Exporting this helper so we can use it when adding new stars
+// Exporting this helper so we can use it when adding new stars.
+// New stars must hang above the hill — below-horizon draws are resampled
+// so flights can always arrive and arrivals stay visible.
 export const getRandomPositionOnSphere = (radius) => {
-  const theta = Math.random() * Math.PI * 2;
-  const phi = Math.acos((Math.random() * 2) - 1);
-  const r = radius * (0.8 + Math.random() * 0.4);
-  return new THREE.Vector3().setFromSphericalCoords(r, phi, theta);
+  const SKY_FLOOR = 10;
+  let pos = new THREE.Vector3();
+  for (let i = 0; i < 12; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos((Math.random() * 2) - 1);
+    const r = radius * (0.8 + Math.random() * 0.4);
+    pos = new THREE.Vector3().setFromSphericalCoords(r, phi, theta);
+    if (pos.y >= SKY_FLOOR) return pos;
+  }
+  pos.y = Math.max(pos.y, SKY_FLOOR);
+  return pos;
 };
 
 export const generateMockMessages = (count = 200) => {
