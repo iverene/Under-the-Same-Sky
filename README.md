@@ -13,7 +13,7 @@ The application simulates the experience of gazing up at the night sky. Every me
 ### Celestial Objects
 
 * :star: **Stars:** The standard visualization for submitted messages — permanently pinned across the sky.
-* :izakaya_lantern: **Lanterns:** Wishes that float gently upward across the sky. The wish modal shows the live moon phase (wishing is themed around the **Full Moon**), but submitting is always open.
+* :izakaya_lantern: **Lanterns:** Wishes that float gently upward across the sky. The wish modal also shows the live moon phase.
 * :comet: **Shooting Stars:** A purely ambient effect — single bolts and occasional showers streak across the sky at random intervals. Not tied to any user submission.
 
 ---
@@ -65,7 +65,7 @@ To ensure the platform remains a place for release rather than validation:
 ### Backend (Node.js)
 
 * **Logic:** Stores the sender's chosen form (Star / Falling Star / Lantern) and assigns sky positions.
-* **Moon phase:** Relays live lunar data (upstream API with local-astronomy fallback) for the wish modal's Full Moon display — informational only, it never gates submission.
+* **Moon phase:** Relays live lunar data (upstream API with local-astronomy fallback) for the wish modal's phase badge.
 * **API:** RESTful endpoints for submission and retrieval.
 
 ---
