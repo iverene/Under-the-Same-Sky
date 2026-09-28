@@ -393,8 +393,14 @@ const MessageStar = ({ position, message, baseSize, texture, corona, selected, o
 
   return (
     <group position={vecPosition}>
-      {/* Outer corona */}
-      <sprite ref={coronaRef} scale={[baseSize * 3.4, baseSize * 3.4, 1]}>
+      {/* Outer corona — shares the click target so far (tiny) stars stay tappable */}
+      <sprite
+        ref={coronaRef}
+        scale={[baseSize * 3.4, baseSize * 3.4, 1]}
+        onClick={(e) => { e.stopPropagation(); onSelect(message); }}
+        onPointerOver={() => { document.body.style.cursor = 'pointer'; setHovered(true); }}
+        onPointerOut={() => { document.body.style.cursor = 'default'; setHovered(false); }}
+      >
         <spriteMaterial
           map={corona}
           color={tint}
@@ -544,9 +550,15 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt }) =
         <meshBasicMaterial color="#ffe3ae" fog={false} />
       </mesh>
 
-      {/* Warm halo (bloom-like glow) */}
+      {/* Warm halo (bloom-like glow) — part of the click target for far lanterns */}
       {glow && (
-        <sprite ref={haloRef} scale={[3.0, 3.0, 1]}>
+        <sprite
+          ref={haloRef}
+          scale={[3.0, 3.0, 1]}
+          onClick={(e) => { e.stopPropagation(); onSelect(message, groupRef.current?.position.clone()); }}
+          onPointerOver={() => { document.body.style.cursor = 'pointer'; setHovered(true); }}
+          onPointerOut={() => { document.body.style.cursor = 'default'; setHovered(false); }}
+        >
           <spriteMaterial
             map={glow}
             color="#ff9a3c"
@@ -559,9 +571,15 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt }) =
         </sprite>
       )}
 
-      {/* Far-distance glow so lanterns read as warm lights across the sky */}
+      {/* Far-distance glow so lanterns read as warm lights across the sky.
+          Not clickable — it's nearly invisible, so taps here should count
+          as empty sky (deselect) instead of a surprise selection. */}
       {glow && (
-        <sprite ref={farRef} scale={[7, 7, 1]}>
+        <sprite
+          ref={farRef}
+          scale={[7, 7, 1]}
+          raycast={() => null}
+        >
           <spriteMaterial
             map={glow}
             color="#ff8a2a"
@@ -711,7 +729,7 @@ const NebulaField = ({ texture }) => {
   return (
     <group ref={groupRef}>
       {clouds.map((cloud, i) => (
-        <sprite key={i} position={cloud.pos} scale={[cloud.scale, cloud.scale, 1]}>
+        <sprite key={i} position={cloud.pos} scale={[cloud.scale, cloud.scale, 1]} raycast={() => null}>
           <spriteMaterial
             map={texture}
             color={cloud.color}
@@ -729,7 +747,7 @@ const NebulaField = ({ texture }) => {
 
 const Moon = ({ texture, glow }) => (
   <group position={[-345, 237, -496]}>
-    <mesh>
+    <mesh raycast={() => null}>
       <sphereGeometry args={[16, 32, 32]} />
       <meshStandardMaterial
         map={texture}
@@ -741,7 +759,7 @@ const Moon = ({ texture, glow }) => (
         fog={false}
       />
     </mesh>
-    <sprite scale={[62, 62, 1]}>
+    <sprite scale={[62, 62, 1]} raycast={() => null}>
       <spriteMaterial
         map={glow}
         color="#cdd8ff"
@@ -927,7 +945,7 @@ const Ground = ({ texture, matRef }) => {
   useEffect(() => () => geometry.dispose(), [geometry]);
 
   return (
-    <mesh geometry={geometry}>
+    <mesh geometry={geometry} raycast={() => null}>
       <meshStandardMaterial ref={matRef} map={texture} color="#b9c9c2" roughness={1} metalness={0} />
     </mesh>
   );
@@ -957,15 +975,15 @@ const HillDetails = () => {
     <group>
       {TREES.map(([x, z, s], i) => (
         <group key={`tree-${i}`} position={[x, groundHeight(x, z) - 0.1, z]} scale={s}>
-          <mesh position={[0, 1.2, 0]}>
+          <mesh position={[0, 1.2, 0]} raycast={() => null}>
             <cylinderGeometry args={[0.18, 0.3, 2.4, 7]} />
             <meshStandardMaterial color="#0d1410" roughness={1} />
           </mesh>
-          <mesh position={[0, 3.0, 0]}>
+          <mesh position={[0, 3.0, 0]} raycast={() => null}>
             <coneGeometry args={[1.6, 3.2, 8]} />
             <meshStandardMaterial color="#0a1a10" roughness={1} />
           </mesh>
-          <mesh position={[0, 4.6, 0]}>
+          <mesh position={[0, 4.6, 0]} raycast={() => null}>
             <coneGeometry args={[1.1, 2.4, 8]} />
             <meshStandardMaterial color="#0c2013" roughness={1} />
           </mesh>
@@ -977,6 +995,7 @@ const HillDetails = () => {
           position={[rock.x, groundHeight(rock.x, rock.z) + rock.s * 0.2, rock.z]}
           rotation={[0, rock.rot, 0]}
           scale={rock.s}
+          raycast={() => null}
         >
           <dodecahedronGeometry args={[1, 0]} />
           <meshStandardMaterial color="#1b2331" roughness={0.95} flatShading />
@@ -1025,7 +1044,7 @@ const Fireflies = ({ count = 70, texture }) => {
   });
 
   return (
-    <points ref={pointsRef}>
+    <points ref={pointsRef} raycast={() => null}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
@@ -1238,8 +1257,8 @@ const MountainRange = ({ nearRef, farRef }) => {
 
   return (
     <group>
-      <mesh geometry={farGeo} material={farMat} />
-      <mesh geometry={nearGeo} material={nearMat} />
+      <mesh geometry={farGeo} material={farMat} raycast={() => null} />
+      <mesh geometry={nearGeo} material={nearMat} raycast={() => null} />
     </group>
   );
 };
@@ -1471,11 +1490,11 @@ const Signpost = ({ wood, onSelect }) => {
   return (
     <group position={[SIGN_X, base, SIGN_Z]} rotation={[0, -0.35, 0]}>
       {/* Post sits behind the board so it never covers the lettering */}
-      <mesh position={[0, 1.2, -0.15]} material={woodMat}>
+      <mesh position={[0, 1.2, -0.15]} material={woodMat} raycast={() => null}>
         <boxGeometry args={[0.18, 2.4, 0.18]} />
       </mesh>
       {/* Post cap */}
-      <mesh position={[0, 2.45, -0.15]} material={woodMat}>
+      <mesh position={[0, 2.45, -0.15]} material={woodMat} raycast={() => null}>
         <boxGeometry args={[0.26, 0.1, 0.26]} />
       </mesh>
       {/* Board (front face kept clear) */}
@@ -1635,7 +1654,10 @@ const NightSky = () => {
     setSelectedBench(true);
   };
 
-  // Clicking empty space deselects (ignored when it was actually an orbit drag)
+  // Clicking empty space deselects (ignored when it was actually an orbit drag).
+  // Note: background objects (stars field, nebulae, ground, mountains, moon)
+  // opt out of raycasting via raycast={() => null} so taps there count as
+  // a miss instead of a dead hit.
   const handlePointerMissed = (e) => {
     if (!downPos.current) return;
     const dx = e.clientX - downPos.current[0];
@@ -1722,12 +1744,12 @@ const NightSky = () => {
         <Moon texture={moonTexture} glow={coronaTexture} />
 
         {/* Thousands of distant background stars (shell sits beyond the moon) */}
-        <Stars radius={800} depth={100} count={7000} factor={4} saturation={0} fade speed={0.5} />
+        <Stars radius={800} depth={100} count={7000} factor={4} saturation={0} fade speed={0.5} raycast={() => null} />
         {/* Brighter near veil: extra depth at deep night, breathed by SkyRig */}
-        <Stars ref={veilRef} radius={500} depth={80} count={6000} factor={5} saturation={0} fade speed={0.6} />
+        <Stars ref={veilRef} radius={500} depth={80} count={6000} factor={5} saturation={0} fade speed={0.6} raycast={() => null} />
 
         {/* Subtle floating dust/fireflies */}
-        <Sparkles count={300} scale={60} size={2} speed={0.2} opacity={0.3} color="#aaddff" />
+        <Sparkles count={300} scale={60} size={2} speed={0.2} opacity={0.3} color="#aaddff" raycast={() => null} />
 
         {/* --- LIGHTING --- */}
         <ambientLight ref={ambientRef} intensity={0.5} />
@@ -1807,21 +1829,35 @@ const NightSky = () => {
         />
       </Canvas>
 
-      {/* Selected star / lantern message — fixed bottom-center reading panel */}
+      {/* Selected star / lantern message — responsive bottom-center reading card */}
       {selectedStar && (
-        <div className="fixed bottom-52 sm:bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4 pointer-events-none">
-          <div className={`pointer-events-auto relative bg-slate-950/80 backdrop-blur-xl border rounded-2xl px-6 py-5 animate-in fade-in slide-in-from-bottom-4 duration-300 ${selectedIsLantern ? 'border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 'border-white/10 shadow-[0_0_50px_rgba(150,180,255,0.15)]'}`}>
+        <div className="fixed bottom-52 sm:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] sm:w-full max-w-md pointer-events-none">
+          <div className={`pointer-events-auto relative max-h-[55vh] overflow-y-auto bg-slate-950/80 backdrop-blur-xl border rounded-2xl px-5 py-5 sm:px-8 sm:py-6 animate-in fade-in slide-in-from-bottom-4 duration-300 ${selectedIsLantern ? 'border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 'border-white/10 shadow-[0_0_50px_rgba(150,180,255,0.15)]'}`}>
             <div className="text-center">
-              <h3 className={`text-[10px] font-bold uppercase tracking-[0.25em] ${selectedIsLantern ? 'text-amber-200' : 'text-blue-200'}`}>
+              <h3 className={`text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] ${selectedIsLantern ? 'text-amber-200' : 'text-blue-200'}`}>
                 {selectedIsLantern ? 'A Wish Floating By' : 'Addressed To'}
               </h3>
-              <p className="text-white font-serif text-xl leading-tight mt-1">{selectedStar.recipient}</p>
+              <p className="text-white font-serif text-xl sm:text-2xl leading-tight mt-1 break-words">{selectedStar.recipient}</p>
             </div>
-            <div className="relative mt-3 max-h-40 overflow-y-auto">
-              <span className="absolute -top-2 left-0 text-4xl text-white/10 font-serif leading-none">“</span>
-              <p className="text-sm font-serif text-slate-300 leading-relaxed italic text-center px-6">
+            {/* Full message flows naturally — no inner scrollbar */}
+            <div className="relative mt-3">
+              <span aria-hidden className="absolute -top-2 left-0 text-4xl text-white/10 font-serif leading-none">“</span>
+              <p className="text-[15px] sm:text-base font-serif text-slate-300 leading-relaxed italic text-center px-6 break-words">
                 {selectedStar.content}
               </p>
+            </div>
+            <div className="mt-5 text-center">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); clearProps(); }}
+                className={`px-6 py-2 rounded-full border text-[11px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 ${
+                  selectedIsLantern
+                    ? 'bg-amber-600/20 hover:bg-amber-600/30 border-amber-500/30 text-amber-200'
+                    : 'bg-white/5 hover:bg-white/10 border-white/15 text-slate-300'
+                }`}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
