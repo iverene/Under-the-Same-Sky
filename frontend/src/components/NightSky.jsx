@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stars, Sparkles, Float } from '@react-three/drei';
+import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
 import { fetchMessages, sendMessage } from '../api';
 import ComposeModal from './ComposeModal';
 import WishingModal from './WishingModal';
@@ -105,10 +105,35 @@ const NightSky = () => {
   const groundTexture = useGroundTexture();
   const woodTexture = useWoodTexture();
 
-  // Smooth fade-in on mount — slight delay so the splash screen shows
+  const [splashVisible, setSplashVisible] = useState(true);
+
+  // Memoized starfield for splash so positions don't regenerate on re-render
+  const splashStars = useMemo(() =>
+    Array.from({ length: 60 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 2.5 + 0.5,
+      delay: Math.random() * 4,
+      dur: 1.5 + Math.random() * 3,
+    })), []
+  );
+
+  // Memoized floating lanterns for splash
+  const splashLanterns = useMemo(() =>
+    Array.from({ length: 6 }, () => ({
+      x: 10 + Math.random() * 80,
+      size: 14 + Math.random() * 10,
+      delay: Math.random() * 5,
+      dur: 6 + Math.random() * 4,
+      drift: (Math.random() - 0.5) * 30,
+    })), []
+  );
+
+  // Splash shows briefly then fades out gracefully
   useEffect(() => {
-    const timer = setTimeout(() => setReady(true), 800);
-    return () => clearTimeout(timer);
+    const fadeTimer = setTimeout(() => setReady(true), 1200);
+    const unmountTimer = setTimeout(() => setSplashVisible(false), 2500);
+    return () => { clearTimeout(fadeTimer); clearTimeout(unmountTimer); };
   }, []);
 
   // Ambient rotation: drift through every sky mood on a slow timer so the
@@ -126,18 +151,29 @@ const NightSky = () => {
 
   // Load messages from the backend on mount — real user data only.
   // Empty sky (background stars + terrain still render) when empty/offline.
-  // Polls every 30s and refetches when the tab regains focus so messages
-  // sent from /send (or another device) appear without manual refresh.
+  // Polls every 10s and merges new arrivals by ID so existing stars
+  // never remount or jump. Also refetches when the tab regains focus.
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
         const data = await fetchMessages();
         if (cancelled) return;
-        setMessages(Array.isArray(data) ? data.map(normalizeMessage) : []);
+        const incoming = Array.isArray(data) ? data.map(normalizeMessage) : [];
+        setMessages((prev) => {
+          if (prev.length === 0) return incoming;
+          const byId = new Map(prev.map((m) => [m.id, m]));
+          let changed = false;
+          for (const msg of incoming) {
+            if (!byId.has(msg.id)) {
+              byId.set(msg.id, msg);
+              changed = true;
+            }
+          }
+          return changed ? Array.from(byId.values()) : prev;
+        });
       } catch (err) {
         console.error('Failed to load messages:', err);
-        if (!cancelled) setMessages([]);
       }
     };
     load();
@@ -276,6 +312,93 @@ const NightSky = () => {
   };
 
   return (
+    <>
+    {/* Splash overlay — fades out gracefully */}
+    {splashVisible && (
+    <div className={`fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#020205] overflow-hidden transition-opacity duration-[1300ms] ease-out ${ready ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+
+      {/* Animated starfield background */}
+      <div className="absolute inset-0">
+        {splashStars.map((s, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-white"
+            style={{
+              left: `${s.x}%`,
+              top: `${s.y}%`,
+              width: s.size,
+              height: s.size,
+              animation: `splashStar ${s.dur}s ease-in-out ${s.delay}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Gradient orbs — ambient glow */}
+      <div className="absolute w-[500px] h-[500px] bg-blue-500/8 rounded-full blur-[150px] top-1/4 left-1/2 -translate-x-1/2" />
+      <div className="absolute w-[300px] h-[300px] bg-indigo-500/6 rounded-full blur-[120px] bottom-1/4 left-1/3" />
+
+      {/* Floating lanterns */}
+      {splashLanterns.map((l, i) => (
+        <div
+          key={`lantern-${i}`}
+          className="absolute pointer-events-none"
+          style={{
+            left: `${l.x}%`,
+            bottom: '-5%',
+            width: l.size,
+            height: l.size * 1.3,
+            '--drift': `${l.drift}px`,
+            animation: `splashLantern ${l.dur}s ease-in ${l.delay}s infinite`,
+          }}
+        >
+          {/* Lantern body */}
+          <div className="w-full h-full rounded-[40%_40%_50%_50%] bg-gradient-to-b from-amber-200/80 to-amber-400/60 shadow-[0_0_20px_rgba(255,200,100,0.4),0_0_40px_rgba(255,180,60,0.15)]" />
+          {/* Inner glow */}
+          <div className="absolute inset-[20%] rounded-[40%_40%_50%_50%] bg-gradient-to-b from-yellow-100/90 to-amber-300/70 blur-[1px]" />
+        </div>
+      ))}
+
+      {/* Moon */}
+      <div className="absolute top-[12%] left-1/2 -translate-x-1/2">
+        <div className="relative">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-amber-50 to-yellow-100 shadow-[0_0_80px_rgba(255,250,205,0.25),0_0_160px_rgba(255,250,205,0.1)]" />
+          <div className="absolute top-2 right-3 w-6 h-6 rounded-full bg-amber-200/30 blur-[2px]" />
+          <div className="absolute bottom-4 left-4 w-4 h-4 rounded-full bg-amber-200/20 blur-[1px]" />
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center px-6 text-center">
+        {/* App name */}
+        <h1 className="font-serif text-3xl sm:text-6xl tracking-[0.08em] text-white mb-3 drop-shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+          Under the Same Sky
+        </h1>
+
+        {/* Divider line */}
+        <div className="w-20 sm:w-24 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mb-3" />
+
+        {/* Tagline */}
+        <p className="text-[10px] sm:text-xs text-blue-200/50 uppercase tracking-[0.3em] sm:tracking-[0.35em] font-bold mb-8 sm:mb-10">
+          Cast your thought into the void
+        </p>
+
+        {/* Loading bar */}
+        <div className="w-40 sm:w-56 relative">
+          <div className="h-[2px] bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-400 rounded-full animate-[splashLoad_1.2s_ease-in-out_forwards]" />
+          </div>
+          <div className="absolute -bottom-2 left-0 right-0 h-4 bg-blue-400/10 blur-lg rounded-full animate-[splashLoad_1.2s_ease-in-out_forwards]" />
+        </div>
+
+        {/* Loading text */}
+        <p className="mt-5 text-[9px] text-slate-500 uppercase tracking-[0.4em] font-bold animate-pulse" style={{ animationDuration: '1.5s' }}>
+          Entering the sky
+        </p>
+      </div>
+    </div>
+    )}
+
     <div
       className={`relative w-full h-screen bg-black text-white overflow-hidden transition-opacity duration-[1500ms] ${ready ? 'opacity-100' : 'opacity-0'}`}
       onPointerDown={(e) => {
@@ -284,31 +407,6 @@ const NightSky = () => {
         flightRef.current.homingCam = false;
       }}
     >
-      {/* Splash overlay — fades out once the scene is ready */}
-      <div
-        className={`absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[#020205] transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          ready ? 'opacity-0 pointer-events-none scale-105' : 'opacity-100 scale-100'
-        }`}
-      >
-        {/* Star icon */}
-        <div className={`transition-all duration-1000 delay-300 ${ready ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
-          <svg className="w-10 h-10 text-blue-300/80 mb-6 filter drop-shadow-[0_0_12px_rgba(147,197,253,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-          </svg>
-        </div>
-        {/* Title */}
-        <h1 className={`font-serif text-2xl sm:text-4xl tracking-[0.15em] text-white/90 transition-all duration-1000 delay-500 ${ready ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
-          Under the Same Sky
-        </h1>
-        {/* Subtle tagline */}
-        <p className={`mt-3 text-[10px] sm:text-xs text-blue-200/40 uppercase tracking-[0.3em] font-bold transition-all duration-1000 delay-700 ${ready ? 'opacity-0 translate-y-3' : 'opacity-100 translate-y-0'}`}>
-          Cast your thought into the void
-        </p>
-        {/* Loading bar */}
-        <div className={`mt-8 w-32 h-[2px] bg-white/5 rounded-full overflow-hidden transition-all duration-700 delay-200 ${ready ? 'opacity-0' : 'opacity-100'}`}>
-          <div className={`h-full bg-gradient-to-r from-blue-400/60 to-indigo-400/60 rounded-full transition-all duration-[3000ms] ease-linear ${ready ? 'w-full' : 'w-0'}`} />
-        </div>
-      </div>
       <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} onPointerMissed={handlePointerMissed}>
 
         {/* --- ATMOSPHERE --- */}
@@ -346,22 +444,20 @@ const NightSky = () => {
         <SkyRig theme={skyTheme} ambientRef={ambientRef} sunRef={sunRef} groundRef={groundMatRef} mtnRef={mtnMatRef} mtnFarRef={mtnFarMatRef} veilRef={veilRef} />
 
         {/* --- CONTENT --- */}
-        <Float speed={0.5} rotationIntensity={0.2} floatIntensity={0.5}>
-          {/* Stars */}
-          {stars.map((msg) => (
-            <MessageStar
-              key={msg.id}
-              position={msg.position}
-              message={msg}
-              baseSize={(msg.size || 0.5) * 2}
-              texture={starTexture}
-              corona={coronaTexture}
-              selected={msg.id === selectedId}
-              onSelect={handleSelectStar}
-              bornAt={freshMap[msg.id]}
-            />
-          ))}
-        </Float>
+        {/* Stars */}
+        {stars.map((msg) => (
+          <MessageStar
+            key={msg.id}
+            position={msg.position}
+            message={msg}
+            baseSize={(msg.size || 0.5) * 2}
+            texture={starTexture}
+            corona={coronaTexture}
+            selected={msg.id === selectedId}
+            onSelect={handleSelectStar}
+            bornAt={freshMap[msg.id]}
+          />
+        ))}
 
         {/* Lanterns */}
         {lanterns.map((msg) => (
@@ -473,6 +569,7 @@ const NightSky = () => {
         onToggleSearch={() => { setIsSearching((v) => !v); clearProps(); }}
       />
     </div>
+    </>
   );
 };
 
