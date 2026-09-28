@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
 import { DECK_X, DECK_Z, FLAT_Y } from '../../three/terrain';
 
-export const BOY_LINE = "Our stories may be different, but we're under the same sky.";
-export const GIRL_LINE = "And sometimes, knowing we're not alone is enough to keep going.";
+import { POOL, FALLBACK_PAIR } from './introDialogues';
 
 const headAnchors = () => ({
   // Must match Foreground.jsx Stargazers offsets: girl x -0.5 head y ~1.52, boy x +0.5 head y ~1.58, deck top ~ FLAT_Y + 0.35
@@ -11,7 +10,8 @@ const headAnchors = () => ({
   boy: new THREE.Vector3(DECK_X + 0.5, FLAT_Y + 0.35 + 1.58, DECK_Z + 0.05),
 });
 
-const IntroDialogue = ({ onDone, camera }) => {
+const IntroDialogue = ({ onDone, camera, dialogueIndex }) => {
+  const pair = POOL[dialogueIndex] || FALLBACK_PAIR;
   const [phase, setPhase] = useState('boy');
   const [pos, setPos] = useState({ bx: 0, by: 0, gx: 0, gy: 0, visible: false });
 
@@ -55,20 +55,20 @@ const IntroDialogue = ({ onDone, camera }) => {
     : { left: '30%', top: '30%' };
 
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-0 z-40">
+    <div aria-live="polite" className="pointer-events-auto fixed inset-0 z-40">
       <div
         style={boyStyle}
         className={`absolute max-w-[220px] rounded-2xl border border-white/10 bg-slate-950/80 backdrop-blur-xl px-4 py-3 text-xs font-serif italic text-slate-200 shadow-[0_0_30px_rgba(150,180,255,0.2)] transition-opacity duration-1000 ${phase === 'boy' ? 'opacity-100' : 'opacity-0'}`}
       >
         <p className="text-[9px] not-italic font-sans font-bold uppercase tracking-[0.25em] text-blue-200">Boy</p>
-        <p className="mt-1">{BOY_LINE}</p>
+        <p className="mt-1">{pair.boy}</p>
       </div>
       <div
         style={girlStyle}
         className={`absolute max-w-[220px] rounded-2xl border border-pink-200/20 bg-slate-950/80 backdrop-blur-xl px-4 py-3 text-xs font-serif italic text-slate-200 shadow-[0_0_30px_rgba(255,180,220,0.2)] transition-opacity duration-1000 ${phase === 'girl' ? 'opacity-100' : 'opacity-0'}`}
       >
         <p className="text-[9px] not-italic font-sans font-bold uppercase tracking-[0.25em] text-pink-200">Girl</p>
-        <p className="mt-1">{GIRL_LINE}</p>
+        <p className="mt-1">{pair.girl}</p>
       </div>
       <button
         type="button"
