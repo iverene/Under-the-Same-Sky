@@ -425,10 +425,10 @@ const NightSky = () => {
     <div
       className={`relative w-full h-screen bg-black text-white overflow-hidden transition-opacity duration-[1500ms] ${ready ? 'opacity-100' : 'opacity-0'}`}
       onPointerDown={(e) => {
+        if (showIntroRef.current) return; // intro is fully locked: only Skip/timers exit
         downPos.current = [e.clientX, e.clientY];
         flightRef.current.flying = false; // grabbing the scene cancels any flight
         flightRef.current.homingCam = false;
-        if (showIntroRef.current) setShowIntro(false);
       }}
     >
       <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} onPointerMissed={handlePointerMissed}>
@@ -503,12 +503,13 @@ const NightSky = () => {
 
         {/* --- CONTROLS --- */}
         {/* Focus flight runs alongside the controls */}
-        <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} />
+        <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} introHold={showIntro} />
         <OrbitControls
           ref={controlsRef}
           // Rest gaze aims at the signage so it sits centered on reset
           target={[0, 1, 0]}
           enablePan={false}
+          enabled={!showIntro}
           enableZoom={true}
           // Deep dynamic zoom: dive right up to a star, pull back for the wide
           // hilltop vista — capped so scrolling out can't leave the scene
