@@ -1749,14 +1749,8 @@ const NightSky = () => {
 
       {/* Selected star / lantern message — fixed bottom-center reading panel */}
       {selectedStar && (
-        <div className="fixed bottom-44 sm:bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4 pointer-events-none">
+        <div className="fixed bottom-52 sm:bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4 pointer-events-none">
           <div className={`pointer-events-auto relative bg-slate-950/80 backdrop-blur-xl border rounded-2xl px-6 py-5 animate-in fade-in slide-in-from-bottom-4 duration-300 ${selectedIsLantern ? 'border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 'border-white/10 shadow-[0_0_50px_rgba(150,180,255,0.15)]'}`}>
-            <button
-              onClick={() => setSelectedId(null)}
-              className="absolute top-3 right-3 text-slate-500 hover:text-white transition-colors p-1"
-            >
-              ✕
-            </button>
             <div className="text-center">
               <h3 className={`text-[10px] font-bold uppercase tracking-[0.25em] ${selectedIsLantern ? 'text-amber-200' : 'text-blue-200'}`}>
                 {selectedIsLantern ? 'A Wish Floating By' : 'Addressed To'}
@@ -1774,8 +1768,6 @@ const NightSky = () => {
       )}
 
       {/* Trail sign uses the centered wooden SignModal (see Global Modals) */}
-
-      <TopBar />
 
       {/* --- Global Modals --- */}
       <ComposeModal isOpen={isWriting} onClose={() => setIsWriting(false)} onSend={handleSendMessage} />

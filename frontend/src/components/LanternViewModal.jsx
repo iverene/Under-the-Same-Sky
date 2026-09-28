@@ -1,5 +1,17 @@
+import React, { useEffect } from 'react';
+
 // --- Component: Lantern View Modal (STATIC & CENTERED) ---
 const LanternViewModal = ({ message, onClose }) => {
+  // Escape closes the modal
+  useEffect(() => {
+    if (!message) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [message, onClose]);
+
   if (!message) return null;
 
   return (
@@ -12,13 +24,6 @@ const LanternViewModal = ({ message, onClose }) => {
       
       {/* Card */}
       <div className="relative bg-slate-900/95 border border-amber-500/30 p-8 rounded-2xl w-full max-w-md shadow-[0_0_50px_rgba(245,158,11,0.2)] transform transition-all scale-100">
-         <button 
-           onClick={onClose} 
-           className="absolute top-4 right-4 text-slate-500 hover:text-amber-500 transition-colors"
-         >
-           ✕
-         </button>
-         
          <div className="text-center">
             {/* Icon */}
             <div className="inline-block p-4 bg-amber-500/10 rounded-full mb-6 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
@@ -42,7 +47,8 @@ const LanternViewModal = ({ message, onClose }) => {
             </div>
 
             <button 
-                onClick={onClose}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onClose(); }}
                 className="mt-8 px-8 py-3 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 rounded-full text-amber-200 text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
             >
                 Release Lantern

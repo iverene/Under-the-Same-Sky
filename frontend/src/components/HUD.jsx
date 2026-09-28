@@ -24,7 +24,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
     <>
       {/* 1. Instructional pill — hidden in immersion mode */}
       {!uiHidden && (
-      <div className="fixed top-28 sm:top-auto left-0 w-full z-40 pointer-events-none flex justify-center px-4 sm:bottom-8 sm:px-4">
+      <div className="fixed bottom-4 sm:bottom-8 left-0 w-full z-40 pointer-events-none flex justify-center px-4 sm:px-4">
         <div className="bg-slate-950/40 backdrop-blur-md border border-white/5 px-4 sm:px-6 py-2 rounded-full shadow-lg max-w-full">
           <p className="text-blue-100/60 text-[9px] sm:text-[10px] font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-center leading-relaxed text-balance">
             {isTouch
@@ -37,12 +37,12 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
 
       {/* 2. Action buttons — hidden in immersion mode */}
       {!uiHidden && (
-      <div className="fixed z-40 left-4 bottom-4 sm:left-auto sm:right-6 sm:top-6 sm:bottom-auto flex flex-col gap-2 sm:gap-3 items-start sm:items-end">
+      <div className="fixed z-40 left-4 bottom-16 sm:left-auto sm:right-6 sm:top-6 sm:bottom-auto flex flex-col gap-2 sm:gap-3 items-start sm:items-end">
 
         {/* Write Entry Button (Star Theme) */}
         <button
           onClick={onOpenCompose}
-          className="group relative pointer-events-auto flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-3 py-2 sm:px-5 sm:py-3 sm:pr-6
+          className="group relative pointer-events-auto flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-3 py-2 sm:px-5 sm:py-3 sm:pr-6 w-[60px] h-[60px] sm:w-auto sm:h-auto
                      bg-slate-900/40 hover:bg-slate-800/60 backdrop-blur-xl
                      border border-blue-400/20 hover:border-blue-400/50
                      rounded-2xl sm:rounded-full text-white transition-all duration-300
@@ -65,7 +65,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         {/* Lantern Button (Warm/Wish Theme) */}
         <button
           onClick={onOpenWish}
-          className="group relative pointer-events-auto flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-3 py-2 sm:px-5 sm:py-3 sm:pr-6
+          className="group relative pointer-events-auto flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-3 py-2 sm:px-5 sm:py-3 sm:pr-6 w-[60px] h-[60px] sm:w-auto sm:h-auto
                      bg-amber-950/30 hover:bg-amber-900/50 backdrop-blur-xl
                      border border-amber-500/20 hover:border-amber-500/50
                      rounded-2xl sm:rounded-full text-amber-50 transition-all duration-300
@@ -89,7 +89,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
       )}
 
       {/* 3. Sky Settings - Bottom Right (always available) */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end gap-2 sm:gap-3">
+      <div className="fixed bottom-16 right-4 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end gap-2 sm:gap-3">
         {/* UI hide/show — top-right on mobile, above reset on desktop. Always visible. */}
         <button
           onClick={() => onToggleUI && onToggleUI()}
@@ -157,7 +157,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           onClick={() => onReset && onReset()}
           aria-label="Reset view to bench"
           title="Back to the bench"
-          className="pointer-events-auto sm:order-3 flex items-center justify-center w-12 h-12 rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 hover:border-white/30 text-slate-200 transition-all duration-300 hover:scale-105 active:scale-95"
+          className="pointer-events-auto sm:order-3 flex items-center justify-center w-[60px] h-[60px] sm:w-12 sm:h-12 rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 hover:border-white/30 text-slate-200 transition-all duration-300 hover:scale-105 active:scale-95"
         >
           <span className="text-xl">⟲</span>
         </button>
@@ -166,19 +166,34 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         <button
           onClick={() => setSettingsOpen((v) => !v)}
           aria-label="Sky settings"
-          className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-full backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 sm:order-4 ${
+          aria-expanded={settingsOpen}
+          className={`pointer-events-auto flex items-center justify-center w-[60px] h-[60px] sm:w-12 sm:h-12 rounded-full backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 sm:order-4 ${
             settingsOpen
               ? 'bg-sky-500/20 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
               : 'bg-slate-900/40 border-white/10 hover:border-white/30'
           }`}
         >
-          <span
-            className={`text-xl text-slate-200 transition-transform duration-500 ${
+          <svg
+            aria-hidden="true"
+            className={`w-6 h-6 text-slate-200 transition-transform duration-500 ${
               settingsOpen ? 'rotate-90' : ''
             }`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
           >
-            ⚙
-          </span>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
         </button>
         </>)}
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Icons
 const StarIcon = () => (
@@ -18,11 +18,29 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const [message, setMessage] = useState('');
   const [type, setType] = useState('star');
   const [isVisible, setIsVisible] = useState(false);
+  const hideTimer = useRef(null);
 
   useEffect(() => {
-    if (isOpen) setIsVisible(true);
-    else setTimeout(() => setIsVisible(false), 300);
+    if (isOpen) {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+      setIsVisible(true);
+    } else {
+      hideTimer.current = setTimeout(() => setIsVisible(false), 300);
+    }
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
   }, [isOpen]);
+
+  // Escape closes the modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
 
   if (!isVisible && !isOpen) return null;
 
@@ -37,7 +55,7 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
   };
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 backdrop-blur-none'}`}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 backdrop-blur-none pointer-events-none'}`} aria-hidden={!isOpen}>
       
       {/* Darkened Overlay */}
       <div 
@@ -50,16 +68,6 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
         
         {/* Subtle Ambient Light Effect at Top */}
         <div className="absolute top-0 left-0 w-full h-32 bg-linear-to-b from-blue-500/10 to-transparent pointer-events-none" />
-
-        {/* Close Button */}
-        <button 
-          onClick={onClose} 
-          className="absolute top-5 right-5 z-10 p-2 text-slate-500 hover:text-white bg-transparent hover:bg-white/5 rounded-full transition-all duration-200"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
         
         <div className="p-8 relative z-0">
           {/* Header */}
