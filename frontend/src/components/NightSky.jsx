@@ -1622,12 +1622,16 @@ const NightSky = () => {
   // Directed camera perch (sign overlook) — null means "hold current side"
   const focusCam = useMemo(() => (selectedSign ? SIGN_CAM : null), [selectedSign]);
 
-  const clearProps = () => {
+  const clearProps = React.useCallback(() => {
     setSelectedId(null);
     setFocusOverride(null);
     setSelectedSign(false);
     setSelectedBench(false);
-  };
+  }, []);
+
+  // Ref to the reading card: taps inside it never close it
+  const cardRef = useRef(null);
+  const tapDown = useRef(null);
 
   const handleSelectStar = (msg) => {
     clearProps();
@@ -1662,8 +1666,41 @@ const NightSky = () => {
     if (!downPos.current) return;
     const dx = e.clientX - downPos.current[0];
     const dy = e.clientY - downPos.current[1];
-    if (dx * dx + dy * dy < 36) clearProps();
+    // 12px tolerance — forgiving for touch taps, still ignores orbit drags
+    if (dx * dx + dy * dy < 144) clearProps();
   };
+
+  // Fast outside-tap close: fires on pointerup instantly at the HTML level,
+  // without waiting for the R3F raycast/click cycle (which feels laggy on
+  // mobile). Any short tap that lands on the canvas and outside the card
+  // closes it. Taps on another star also pass through here (cleared first,
+  // then the star's onClick selects it). Drags are ignored.
+  useEffect(() => {
+    if (!selectedStar) return;
+    const onDown = (e) => {
+      tapDown.current = [e.clientX, e.clientY];
+    };
+    const onUp = (e) => {
+      if (!tapDown.current) return;
+      const dx = e.clientX - tapDown.current[0];
+      const dy = e.clientY - tapDown.current[1];
+      tapDown.current = null;
+      if (dx * dx + dy * dy > 144) return;
+      if (cardRef.current?.contains(e.target)) return;
+      if (e.target?.closest?.('canvas')) clearProps();
+    };
+    window.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointerup', onUp);
+    const onKey = (e) => {
+      if (e.key === 'Escape') clearProps();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('pointerdown', onDown);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [selectedStar, clearProps]);
 
   // Arm a fresh focus flight whenever a (new) star is selected
   useEffect(() => {
@@ -1829,10 +1866,11 @@ const NightSky = () => {
         />
       </Canvas>
 
-      {/* Selected star / lantern message — responsive bottom-center reading card */}
+      {/* Selected star / lantern message — responsive bottom-center reading card.
+          Closes via fast outside-tap (see effect above) or Escape; no button. */}
       {selectedStar && (
         <div className="fixed bottom-52 sm:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] sm:w-full max-w-md pointer-events-none">
-          <div className={`pointer-events-auto relative max-h-[55vh] overflow-y-auto bg-slate-950/80 backdrop-blur-xl border rounded-2xl px-5 py-5 sm:px-8 sm:py-6 animate-in fade-in slide-in-from-bottom-4 duration-300 ${selectedIsLantern ? 'border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 'border-white/10 shadow-[0_0_50px_rgba(150,180,255,0.15)]'}`}>
+          <div ref={cardRef} className={`pointer-events-auto relative max-h-[55vh] overflow-y-auto bg-slate-950/80 backdrop-blur-xl border rounded-2xl px-5 py-5 sm:px-8 sm:py-6 animate-in fade-in slide-in-from-bottom-4 duration-300 ${selectedIsLantern ? 'border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 'border-white/10 shadow-[0_0_50px_rgba(150,180,255,0.15)]'}`}>
             <div className="text-center">
               <h3 className={`text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] ${selectedIsLantern ? 'text-amber-200' : 'text-blue-200'}`}>
                 {selectedIsLantern ? 'A Wish Floating By' : 'Addressed To'}
@@ -1845,19 +1883,6 @@ const NightSky = () => {
               <p className="text-[15px] sm:text-base font-serif text-slate-300 leading-relaxed italic text-center px-6 break-words">
                 {selectedStar.content}
               </p>
-            </div>
-            <div className="mt-5 text-center">
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); clearProps(); }}
-                className={`px-6 py-2 rounded-full border text-[11px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 ${
-                  selectedIsLantern
-                    ? 'bg-amber-600/20 hover:bg-amber-600/30 border-amber-500/30 text-amber-200'
-                    : 'bg-white/5 hover:bg-white/10 border-white/15 text-slate-300'
-                }`}
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
