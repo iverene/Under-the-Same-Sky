@@ -13,8 +13,8 @@ import { SKY_THEMES } from '../../three/themes';
 // overrides the perch (used by the sign overlook shot).
 export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal }) => {
   const wasFocused = useRef(false);
-  // Rest gaze looks slightly upward so the sky dominates and the hill sits low
-  const homeTarget = useMemo(() => new THREE.Vector3(0, 4, 0), []);
+  // Rest gaze aims at the signage area so it sits centered on reset
+  const homeTarget = useMemo(() => new THREE.Vector3(0, 1, 0), []);
   const tmpDir = useMemo(() => new THREE.Vector3(), []);
   const tmpDesired = useMemo(() => new THREE.Vector3(), []);
   const tmpFocus = useMemo(() => new THREE.Vector3(), []);

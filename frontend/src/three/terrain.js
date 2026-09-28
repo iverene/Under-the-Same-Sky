@@ -48,7 +48,7 @@ export const SIGN_Z = 27.6;
 export const SIGN_CAM = new THREE.Vector3(BENCH_X, groundHeight(BENCH_X, BENCH_Z + 11) + 5.5, BENCH_Z + 11);
 export const OVERLOOK = new THREE.Vector3(BENCH_X, 26, -80);
 
-// Seated eye position: on the (human-scale) bench seat, ~1.4 above the grass
-export const HOME_POS = new THREE.Vector3(BENCH_X, groundHeight(BENCH_X, BENCH_Z + 0.7) + 1.45, BENCH_Z + 0.7);
+// Seated eye position: behind the (human-scale) bench seat
+export const HOME_POS = new THREE.Vector3(BENCH_X, groundHeight(BENCH_X, BENCH_Z + 4.5) + 1.45, BENCH_Z + 4.5);
 // Bench close-up focus point for click-to-zoom
 export const BENCH_FOCUS = new THREE.Vector3(BENCH_X, groundHeight(BENCH_X, BENCH_Z) + 1.2, BENCH_Z);

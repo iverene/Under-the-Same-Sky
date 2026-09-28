@@ -415,11 +415,11 @@ export const useSignTexture = () => {
     ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
     ctx.shadowBlur = 4;
     ctx.shadowOffsetY = 2;
-    ctx.font = 'bold 40px Georgia, serif';
-    ctx.fillText('UNDER THE SAME SKY', 256, 72);
-    ctx.font = 'italic 28px Georgia, serif';
+    ctx.font = 'bold 26px Georgia, serif';
+    ctx.fillText('UNDER THE SAME SKY', 256, 65);
+    ctx.font = 'italic 16px Georgia, serif';
     ctx.fillStyle = '#e8d5a8';
-    ctx.fillText('★ look up ★', 256, 116);
+    ctx.fillText('★ look up ★', 256, 105);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;

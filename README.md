@@ -13,8 +13,8 @@ The application simulates the experience of gazing up at the night sky. Every me
 ### Celestial Objects
 
 * :star: **Stars:** The standard visualization for submitted messages.
-* :comet: **Falling Stars:** Messages that exceed a specific character length. These are rare, appearing randomly or only when "caught" by a user.
-* :izakaya_lantern: **Lanterns:** Special wishes submitted during **Full Moon** events that float gently across the sky.
+* :comet: **Falling Stars:** A fleeting form the sender chooses at submission. They aren't pinned in the sky — one streaks across at random intervals, and clicking it mid-flight "catches" it to reveal the message.
+* :izakaya_lantern: **Lanterns:** Wishes that float gently upward across the sky. The wish modal shows the live moon phase (wishing is themed around the **Full Moon**), but submitting is always open.
 
 ---
 
@@ -42,7 +42,7 @@ The main interface is a **360° interactive night sky**.
 Input is intentionally minimal. There are **no accounts** and **no login** required.
 
 * **Fields:** Recipient Name (Free text) + Message Content.
-* **Classification:** The system automatically determines if a message is a Star or a Falling Star based on length. Lanterns are only available during specific dates (Full Moon).
+* **Form:** The sender chooses the form — a permanent **Star** or a fleeting **Falling Star**. Lanterns are sent from the separate wish form (themed around the Full Moon, always submittable).
 
 ### 3. Anti-Social Metrics
 
@@ -64,8 +64,8 @@ To ensure the platform remains a place for release rather than validation:
 
 ### Backend (Node.js)
 
-* **Logic:** Classifies incoming text (Star vs. Falling Star).
-* **Cron/Timing:** Manages the "Full Moon" state for Lantern activation.
+* **Logic:** Stores the sender's chosen form (Star / Falling Star / Lantern) and assigns sky positions.
+* **Moon phase:** Relays live lunar data (upstream API with local-astronomy fallback) for the wish modal's Full Moon display — informational only, it never gates submission.
 * **API:** RESTful endpoints for submission and retrieval.
 
 ---
@@ -76,7 +76,7 @@ To ensure the platform remains a place for release rather than validation:
 
 * Anonymous message submission.
 * Visual distinction between message types (Star, Falling Star, Lantern).
-* Randomized visibility for falling stars to encourage presence.
+* Randomized falling-star flybys to encourage presence.
 
 ### Excluded (By Design)
 
@@ -88,7 +88,7 @@ To ensure the platform remains a place for release rather than validation:
 ### Known Limitations
 
 * **Performance:** Rendering a high volume of objects in a 360° view may impact low-end devices.
-* **Visibility:** Due to the "Falling Star" mechanic, some long messages may rarely be seen.
+* **Visibility:** Falling-star messages have no fixed position — each one only appears if randomly picked for a flyby and clicked mid-flight, so a given one may rarely be seen.
 * **Moderation:** As an anonymous platform, moderation is limited to basic safeguards; messages are not traced to users.
 
 ---

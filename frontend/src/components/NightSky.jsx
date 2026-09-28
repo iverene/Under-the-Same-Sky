@@ -329,8 +329,8 @@ const NightSky = () => {
         <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} />
         <OrbitControls
           ref={controlsRef}
-          // Rest gaze aims slightly above the horizon so the sky dominates
-          target={[0, 4, 0]}
+          // Rest gaze aims at the signage so it sits centered on reset
+          target={[0, 1, 0]}
           enablePan={false}
           enableZoom={true}
           // Deep dynamic zoom: dive right up to a star, pull back for the wide
