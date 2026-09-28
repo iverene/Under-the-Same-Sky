@@ -2,8 +2,6 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars, Sparkles, Float } from '@react-three/drei';
 import { fetchMessages, sendMessage } from '../api';
-import { mockMessages, getRandomPositionOnSphere } from '../data/mockMessages';
-import { mockWishes } from '../data/mockWishes';
 import ComposeModal from './ComposeModal';
 import WishingModal from './WishingModal';
 import SignModal from './SignModal';
@@ -12,7 +10,7 @@ import TopBar from './TopBar';
 import { FRESH_GLOW_MS, TAP_TOLERANCE_SQ } from '../three/config';
 import { BENCH_FOCUS, HOME_POS, OVERLOOK, SIGN_CAM } from '../three/terrain';
 import { THEME_CYCLE, THEME_CYCLE_MS } from '../three/themes';
-import { normalizeMessage, randomLanternPosition, toVector3 } from '../three/messages';
+import { normalizeMessage, randomLanternPosition, getRandomPositionOnSphere, toVector3 } from '../three/messages';
 import {
   useStarTexture,
   useCoronaTexture,
@@ -44,6 +42,14 @@ const NightSky = () => {
   // States for modals
   const [isWriting, setIsWriting] = useState(false);
   const [isWishing, setIsWishing] = useState(false);
+
+  // Last failed send — shown as a dismissible banner (auto-clears)
+  const [sendError, setSendError] = useState(null);
+  useEffect(() => {
+    if (!sendError) return;
+    const t = setTimeout(() => setSendError(null), 6000);
+    return () => clearTimeout(t);
+  }, [sendError]);
 
   // Fresh arrivals (id -> release timestamp): they glow brightly for
   // FRESH_GLOW_MS so you can spot where yours landed, then settle
@@ -116,20 +122,18 @@ const NightSky = () => {
     return () => clearInterval(id);
   }, []);
 
-  // Load from backend on mount, fall back to mock data when backend is down/empty
+  // Load messages from the backend on mount — real user data only.
+  // Empty sky (background stars + terrain still render) when empty/offline.
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
         const data = await fetchMessages();
         if (cancelled) return;
-        if (Array.isArray(data) && data.length > 0) {
-          setMessages(data.map(normalizeMessage));
-        } else {
-          setMessages([...mockMessages, ...mockWishes]);
-        }
-      } catch {
-        if (!cancelled) setMessages([...mockMessages, ...mockWishes]);
+        setMessages(Array.isArray(data) ? data.map(normalizeMessage) : []);
+      } catch (err) {
+        console.error('Failed to load messages:', err);
+        if (!cancelled) setMessages([]);
       }
     };
     load();
@@ -211,7 +215,8 @@ const NightSky = () => {
   }, [selectedId, selectedSign, selectedBench]);
 
   const handleSendMessage = async (data) => {
-    // Try backend first so the message persists in Supabase
+    // Persist to the backend (Supabase) — no local fallback: unsaved
+    // messages must never appear as phantom stars/lanterns.
     try {
       const saved = await sendMessage(data);
       const normalized = normalizeMessage({
@@ -234,23 +239,10 @@ const NightSky = () => {
       // distance — close enough to see, never on top of it)
       if (normalized.type === 'lantern') handleSelectLantern(normalized, normalized.position);
       else handleSelectStar(normalized);
-    } catch {
-      // Backend down — fall back to local-only message so UX still works
-      const fallback = normalizeMessage({
-        id: Date.now(),
-        recipient: data.recipient || data.name,
-        content: data.message || data.wish,
-        type: data.type,
-        size: Math.random() * 0.5 + 0.3,
-        color: data.type === 'lantern' ? '#ffaa00' : (data.type === 'falling_star' ? '#aaddff' : 'white'),
-        position: data.type === 'lantern'
-          ? randomLanternPosition()
-          : (data.type === 'star' ? getRandomPositionOnSphere(45) : null)
-      });
-      setMessages(prev => [...prev, fallback]);
-      markFresh(fallback.id);
-      if (fallback.type === 'lantern') handleSelectLantern(fallback, fallback.position);
-      else handleSelectStar(fallback);
+    } catch (err) {
+      // Surface the failure so the user knows their wish wasn't saved
+      // (rate-limit, validation, or backend down) instead of faking it.
+      setSendError(err.message || 'Could not save — please try again');
     }
   };
 
@@ -380,6 +372,24 @@ const NightSky = () => {
       <ComposeModal isOpen={isWriting} onClose={() => setIsWriting(false)} onSend={handleSendMessage} />
       <WishingModal isOpen={isWishing} onClose={() => setIsWishing(false)} onSend={handleSendMessage} />
       <SignModal open={selectedSign} onClose={() => setSelectedSign(false)} />
+
+      {/* Send failure banner — top-center, dismissible, auto-clears */}
+      {sendError && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md">
+          <div className="flex items-center gap-3 bg-red-950/90 backdrop-blur-xl border border-red-500/30 rounded-xl px-4 py-3 shadow-[0_0_30px_rgba(239,68,68,0.25)] animate-in fade-in slide-in-from-top-4 duration-300">
+            <span aria-hidden className="text-red-400 text-lg shrink-0">⚠</span>
+            <p className="flex-1 text-sm text-red-200 font-medium leading-snug">{sendError}</p>
+            <button
+              type="button"
+              onClick={() => setSendError(null)}
+              aria-label="Dismiss error"
+              className="shrink-0 text-red-400/70 hover:text-red-300 text-lg leading-none transition-colors"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       {!uiHidden && <TopBar />}
 
