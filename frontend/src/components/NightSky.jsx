@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
 import { fetchMessages, sendMessage } from '../api';
@@ -74,6 +75,17 @@ const NightSky = () => {
   const [skyTheme, setSkyTheme] = useState('dusk');
   // Immersion toggle: hides every button (panels + modals stay readable)
   const [uiHidden, setUiHidden] = useState(false);
+  // Touch device signal (coarse pointer): drives touch-tuned controls.
+  // Matches HUD's detection so hint copy and behavior stay in sync.
+  const [isTouchDevice, setIsTouchDevice] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(pointer: coarse)');
+    const onChange = (e) => setIsTouchDevice(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
   const ambientRef = useRef(null);
   const sunRef = useRef(null);
   const groundMatRef = useRef(null);
@@ -496,8 +508,12 @@ const NightSky = () => {
           // hilltop vista — capped so scrolling out can't leave the scene
           minDistance={2.5}
           maxDistance={80}
-          zoomSpeed={1.2}
-          zoomToCursor={true}
+          // Touch tuning: pinch moves less per gesture than a wheel, so it
+          // gets a higher speed; zoomToCursor is off on touch so the target
+          // doesn't drift under the fingers mid-pinch.
+          zoomSpeed={isTouchDevice ? 1.8 : 1.2}
+          zoomToCursor={!isTouchDevice}
+          touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
           // Full vertical freedom: dragging down swoops the camera to the grass
           // so you can lie back and gaze straight up (GroundCollision below
           // keeps you from tunneling through the hill). Dragging up stops

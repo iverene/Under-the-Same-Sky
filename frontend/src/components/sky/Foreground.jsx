@@ -108,6 +108,11 @@ export const Bench = ({ wood, glow, onSelect }) => {
           <boxGeometry args={[2.0, 0.18, 0.07]} />
         </mesh>
       ))}
+      {/* Generous invisible tap volume (touch-friendly; taps bubble to the group) */}
+      <mesh position={[0, 1.3, 0]}>
+        <boxGeometry args={[3.2, 3.0, 2.0]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
       {/* A vintage hurricane lantern left waiting on the seat */}
       <group position={[-0.6, 1.19, 0]}>
         {/* Flat iron base + brass trim ring */}
@@ -261,14 +266,14 @@ export const Stargazers = ({ wood, glow, onSelect }) => {
       </mesh>
       {/* Warm spill so the pair reads in the dark */}
       <pointLight position={[0, deck.top + 1.8, 0.2]} distance={7} intensity={2} decay={2} color="#ff9a4e" />
-      {/* Invisible click box over the couple — tappable without blocking taps on them */}
+      {/* Invisible click box over the couple — roomy for touch taps */}
       <mesh
         position={[0, deck.top + 1, 0]}
         onClick={(e) => { e.stopPropagation(); onSelect && onSelect(); }}
         onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
         onPointerOut={() => { document.body.style.cursor = 'default'; }}
       >
-        <boxGeometry args={[2.2, 2, 1.4]} />
+        <boxGeometry args={[3.0, 2.6, 2.2]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
@@ -473,6 +478,16 @@ export const Signpost = ({ wood, onSelect }) => {
       >
         <boxGeometry args={[2.0, 0.62, 0.06]} />
       </mesh>
+      {/* Board — readable text on front (+z) AND back (-z, un-mirrored) */}
+      <mesh
+        position={[0, 1.9, 0.17]}
+        material={boardMats.mats}
+        onClick={handleClick}
+        onPointerOver={handleOver}
+        onPointerOut={handleOut}
+      >
+        <boxGeometry args={[2.0, 0.62, 0.06]} />
+      </mesh>
       {/* Back board (-z): rotated so its sign face points backwards */}
       <mesh
         position={[0, 1.9, -0.17]}
@@ -483,6 +498,16 @@ export const Signpost = ({ wood, onSelect }) => {
         onPointerOut={handleOut}
       >
         <boxGeometry args={[2.0, 0.62, 0.06]} />
+      </mesh>
+      {/* Generous invisible tap volume around the whole sign (touch-friendly) */}
+      <mesh
+        position={[0, 1.9, 0]}
+        onClick={handleClick}
+        onPointerOver={handleOver}
+        onPointerOut={handleOut}
+      >
+        <boxGeometry args={[3.0, 1.4, 1.2]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
     </group>
   );
