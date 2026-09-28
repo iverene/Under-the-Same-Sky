@@ -11,6 +11,7 @@ import HUD from './HUD';
 import TopBar from './TopBar';
 import { FRESH_GLOW_MS, TAP_TOLERANCE_SQ } from '../three/config';
 import { BENCH_FOCUS, HOME_POS, OVERLOOK, SIGN_CAM } from '../three/terrain';
+import { THEME_CYCLE, THEME_CYCLE_MS } from '../three/themes';
 import { normalizeMessage, randomLanternPosition, toVector3 } from '../three/messages';
 import {
   useStarTexture,
@@ -100,6 +101,19 @@ const NightSky = () => {
   useEffect(() => {
     const frame = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(frame);
+  }, []);
+
+  // Ambient rotation: drift through every sky mood on a slow timer so the
+  // scene stays alive. Manual picks just move the starting point — the
+  // cycle continues from there. SkyRig blends each shift over ~2s.
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSkyTheme((prev) => {
+        const i = THEME_CYCLE.indexOf(prev);
+        return THEME_CYCLE[(i + 1) % THEME_CYCLE.length];
+      });
+    }, THEME_CYCLE_MS);
+    return () => clearInterval(id);
   }, []);
 
   // Load from backend on mount, fall back to mock data when backend is down/empty

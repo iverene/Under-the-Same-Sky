@@ -1,3 +1,6 @@
+// Ambient rotation order (matches the HUD list) + interval between shifts.
+export const THEME_CYCLE = ['dusk', 'nightfall', 'deepnight', 'dawn'];
+export const THEME_CYCLE_MS = 5 * 60 * 1000;
 // Sky theme targets: SkyRig damps the live scene toward these (~2s silky blend).
 export const SKY_THEMES = {
   dusk: {
