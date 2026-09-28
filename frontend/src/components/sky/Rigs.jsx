@@ -98,16 +98,16 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
 // active theme (~2s silky blend).
 export const SkyRig = ({ theme, ambientRef, sunRef, groundRef, mtnRef, mtnFarRef, veilRef }) => {
   const cur = useMemo(() => ({
-    bg: new THREE.Color(SKY_THEMES.deepnight.bg),
-    ambient: SKY_THEMES.deepnight.ambient,
-    sun: SKY_THEMES.deepnight.sun,
-    sunColor: new THREE.Color(SKY_THEMES.deepnight.sunColor),
-    sunPos: new THREE.Vector3(...SKY_THEMES.deepnight.sunPos),
-    exposure: SKY_THEMES.deepnight.exposure,
-    ground: new THREE.Color(SKY_THEMES.deepnight.ground),
-    mtn: new THREE.Color(SKY_THEMES.deepnight.mtn),
-    mtnFar: new THREE.Color(SKY_THEMES.deepnight.mtnFar),
-    veil: SKY_THEMES.deepnight.veil,
+    bg: new THREE.Color(SKY_THEMES.dusk.bg),
+    ambient: SKY_THEMES.dusk.ambient,
+    sun: SKY_THEMES.dusk.sun,
+    sunColor: new THREE.Color(SKY_THEMES.dusk.sunColor),
+    sunPos: new THREE.Vector3(...SKY_THEMES.dusk.sunPos),
+    exposure: SKY_THEMES.dusk.exposure,
+    ground: new THREE.Color(SKY_THEMES.dusk.ground),
+    mtn: new THREE.Color(SKY_THEMES.dusk.mtn),
+    mtnFar: new THREE.Color(SKY_THEMES.dusk.mtnFar),
+    veil: SKY_THEMES.dusk.veil,
   }), []);
   const tmpColor = useMemo(() => new THREE.Color(), []);
   const tmpPos = useMemo(() => new THREE.Vector3(), []);
@@ -160,20 +160,26 @@ export const SkyRig = ({ theme, ambientRef, sunRef, groundRef, mtnRef, mtnFarRef
 // While anything is selected the target fence lifts — focus flights and
 // overlook shots manage their own target.
 export const GroundCollision = ({ controlsRef, lockTarget }) => {
-  useFrame(({ camera }) => {
+  const tmp = useMemo(() => new THREE.Vector3(), []);
+  useFrame(({ camera }, delta) => {
     const minY = groundHeight(camera.position.x, camera.position.z) + 0.6;
     if (camera.position.y < minY) camera.position.y = minY;
     const controls = controlsRef.current;
     if (controls && !lockTarget) {
       const t = controls.target;
+      // Nearest allowed target (fence). Damped instead of snapped: the bench
+      // close-up gazes below the fence, so a hard clamp used to jolt the view
+      // the moment a selection released. This glides out smoothly instead.
+      tmp.copy(t);
       // Wide enough to contain every focus target (stars sit near r=80),
       // so releasing a selection never snaps the view
-      const r = Math.hypot(t.x, t.z);
+      const r = Math.hypot(tmp.x, tmp.z);
       if (r > 95) {
-        t.x *= 95 / r;
-        t.z *= 95 / r;
+        tmp.x *= 95 / r;
+        tmp.z *= 95 / r;
       }
-      t.y = THREE.MathUtils.clamp(t.y, -5, 95);
+      tmp.y = THREE.MathUtils.clamp(tmp.y, -5, 95);
+      t.lerp(tmp, 1 - Math.exp(-4 * delta));
     }
   });
   return null;

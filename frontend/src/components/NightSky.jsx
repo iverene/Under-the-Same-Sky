@@ -5,10 +5,11 @@ import { fetchMessages, sendMessage } from '../api';
 import ComposeModal from './ComposeModal';
 import WishingModal from './WishingModal';
 import SignModal from './SignModal';
+import TeamModal from './TeamModal';
 import HUD from './HUD';
 import TopBar from './TopBar';
 import { FRESH_GLOW_MS, TAP_TOLERANCE_SQ } from '../three/config';
-import { BENCH_FOCUS, HOME_POS, OVERLOOK, SIGN_CAM } from '../three/terrain';
+import { BENCH_FOCUS, HOME_POS, OVERLOOK, SIGN_CAM, DECK_FOCUS } from '../three/terrain';
 import { THEME_CYCLE, THEME_CYCLE_MS } from '../three/themes';
 import { normalizeMessage, randomLanternPosition, getRandomPositionOnSphere, toVector3 } from '../three/messages';
 import {
@@ -70,7 +71,7 @@ const NightSky = () => {
   };
 
   // Sky atmosphere setting (dusk / nightfall / deep night / dawn — smoothed by SkyRig)
-  const [skyTheme, setSkyTheme] = useState('deepnight');
+  const [skyTheme, setSkyTheme] = useState('dusk');
   // Immersion toggle: hides every button (panels + modals stay readable)
   const [uiHidden, setUiHidden] = useState(false);
   const ambientRef = useRef(null);
@@ -86,6 +87,8 @@ const NightSky = () => {
   const [selectedSign, setSelectedSign] = useState(false);
   // Bench close-up selection (also not a message row, no reading panel)
   const [selectedBench, setSelectedBench] = useState(false);
+  // Stargazer couple selection (opens the team modal)
+  const [selectedTeam, setSelectedTeam] = useState(false);
   // Lanterns drift as they rise, so we snapshot the lantern's live position on click
   const [focusOverride, setFocusOverride] = useState(null);
   const controlsRef = useRef(null);
@@ -204,9 +207,10 @@ const NightSky = () => {
   const focusPoint = useMemo(() => {
     if (selectedSign) return OVERLOOK;
     if (selectedBench) return BENCH_FOCUS;
+    if (selectedTeam) return DECK_FOCUS;
     if (!selectedId) return null;
     return toVector3(focusOverride) || toVector3(selectedStar?.position);
-  }, [selectedId, selectedSign, selectedBench, focusOverride, selectedStar]);
+  }, [selectedId, selectedSign, selectedBench, selectedTeam, focusOverride, selectedStar]);
   // Directed camera perch (sign overlook) — null means "hold current side"
   const focusCam = useMemo(() => (selectedSign ? SIGN_CAM : null), [selectedSign]);
 
@@ -215,6 +219,7 @@ const NightSky = () => {
     setFocusOverride(null);
     setSelectedSign(false);
     setSelectedBench(false);
+    setSelectedTeam(false);
   }, []);
 
   // Ref to the reading card: taps inside it never close it
@@ -258,6 +263,11 @@ const NightSky = () => {
     setSelectedBench(true);
   };
 
+  const handleSelectTeam = () => {
+    clearProps();
+    setSelectedTeam(true);
+  };
+
   // Clicking empty space deselects (ignored when it was actually an orbit drag).
   // Note: background objects (stars field, nebulae, ground, mountains, moon)
   // opt out of raycasting via raycast={() => null} so taps there count as
@@ -272,9 +282,9 @@ const NightSky = () => {
 
   // Arm a fresh focus flight whenever a (new) star is selected
   useEffect(() => {
-    flightRef.current.flying = selectedId !== null || selectedSign || selectedBench;
-  }, [selectedId, selectedSign, selectedBench]);
+    flightRef.current.flying = selectedId !== null || selectedSign || selectedBench || selectedTeam;
 
+  }, [selectedId, selectedSign, selectedBench, selectedTeam]);
   const handleSendMessage = async (data) => {
     // Persist to the backend (Supabase) — no local fallback: unsaved
     // messages must never appear as phantom stars/lanterns.
@@ -415,7 +425,7 @@ const NightSky = () => {
         <Ground texture={groundTexture} matRef={groundMatRef} />
         <Bench wood={woodTexture} glow={glowTexture} onSelect={handleSelectBench} />
         <Signpost wood={woodTexture} onSelect={handleSelectSign} />
-        <Stargazers wood={woodTexture} glow={glowTexture} />
+        <Stargazers wood={woodTexture} glow={glowTexture} onSelect={handleSelectTeam} />
         <HillDetails />
         <Fireflies texture={coronaTexture} />
         <MountainRange nearRef={mtnMatRef} farRef={mtnFarMatRef} />
@@ -506,7 +516,7 @@ const NightSky = () => {
             along the hill instead of letting it sink through */}
         <GroundCollision
           controlsRef={controlsRef}
-          lockTarget={selectedId !== null || selectedSign || selectedBench}
+          lockTarget={selectedId !== null || selectedSign || selectedBench || selectedTeam}
         />
       </Canvas>
 
@@ -521,6 +531,7 @@ const NightSky = () => {
       <ComposeModal isOpen={isWriting} onClose={() => setIsWriting(false)} onSend={handleSendMessage} />
       <WishingModal isOpen={isWishing} onClose={() => setIsWishing(false)} onSend={handleSendMessage} />
       <SignModal open={selectedSign} onClose={() => setSelectedSign(false)} />
+      <TeamModal open={selectedTeam} onClose={() => setSelectedTeam(false)} />
 
       {/* Search panel — centered on mobile, top-right on desktop */}
       {isSearching && (

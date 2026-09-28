@@ -1,7 +1,7 @@
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { BENCH_X, BENCH_Z, SIGN_X, SIGN_Z, groundHeight } from '../../three/terrain';
+import { BENCH_X, BENCH_Z, SIGN_X, SIGN_Z, DECK_X, DECK_Z, groundHeight } from '../../three/terrain';
 import { useSignTexture } from '../../three/textures';
 
 // A wooden seat on the hilltop where your POV rests.
@@ -172,12 +172,10 @@ export const Bench = ({ wood, glow, onSelect }) => {
 
 // A girl and a boy standing on a wooden platform beside the sign,
 // gazing up at the night sky together (she points at a star).
-const DECK_X = -1.25;
-const DECK_Z = 28.1;
 const DECK_W = 2.2;
 const DECK_D = 1.4;
 
-export const Stargazers = ({ wood, glow }) => {
+export const Stargazers = ({ wood, glow, onSelect }) => {
   const bobRef = useRef();
   const girlHeadRef = useRef();
   const boyHeadRef = useRef();
@@ -263,6 +261,16 @@ export const Stargazers = ({ wood, glow }) => {
       </mesh>
       {/* Warm spill so the pair reads in the dark */}
       <pointLight position={[0, deck.top + 1.8, 0.2]} distance={7} intensity={2} decay={2} color="#ff9a4e" />
+      {/* Invisible click box over the couple — tappable without blocking taps on them */}
+      <mesh
+        position={[0, deck.top + 1, 0]}
+        onClick={(e) => { e.stopPropagation(); onSelect && onSelect(); }}
+        onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { document.body.style.cursor = 'default'; }}
+      >
+        <boxGeometry args={[2.2, 2, 1.4]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
 
       <group ref={bobRef} position={[0, deck.top, 0.05]}>
         {/* ---------- GIRL (left, dress + long hair, pointing at the sky) ---------- */}

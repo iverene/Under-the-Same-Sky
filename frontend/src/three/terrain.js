@@ -57,6 +57,11 @@ export const BENCH_Z = 28.5;
 export const SIGN_X = -3.6;
 export const SIGN_Z = 27.6;
 
+// Stargazer deck anchor + click-to-focus point (~chest height)
+export const DECK_X = -1.25;
+export const DECK_Z = 28.1;
+export const DECK_FOCUS = new THREE.Vector3(DECK_X, FLAT_Y + 1.1, DECK_Z);
+
 // Overlook shot for sign clicks: camera rises behind bench + sign,
 // gaze lands deep in the sky ahead so both sit silhouetted below.
 export const SIGN_CAM = new THREE.Vector3(BENCH_X, groundHeight(BENCH_X, BENCH_Z + 11) + 5.5, BENCH_Z + 11);
