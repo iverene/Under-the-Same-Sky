@@ -319,6 +319,8 @@ const NightSky = () => {
         ...saved,
         // Backend returns a raw row (position_x/y/z); normalizeMessage handles it.
         // Keep the requested lantern type for display even if backend stored otherwise.
+        // Prefer the saved sender row, fall back to what was just typed.
+        sender: saved.sender ?? data.sender ?? null,
         type: data.type || saved.type,
         position: saved.position || saved.position_x !== undefined
           ? (saved.position || { x: saved.position_x, y: saved.position_y, z: saved.position_z })

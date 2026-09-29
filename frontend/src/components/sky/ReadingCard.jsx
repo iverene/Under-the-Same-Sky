@@ -19,6 +19,11 @@ const ReadingCard = ({ message, isLantern, cardRef }) => {
           <p className="text-[15px] sm:text-base font-serif text-slate-300 leading-relaxed italic text-center px-6 break-words">
             {message.content}
           </p>
+          {message.sender && (
+            <p className="mt-2 text-xs font-sans text-slate-400 text-center tracking-wide">
+              — from {message.sender}
+            </p>
+          )}
         </div>
       </div>
     </div>

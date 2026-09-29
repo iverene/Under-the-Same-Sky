@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const [recipient, setRecipient] = useState('');
+  const [sender, setSender] = useState('');
   const [message, setMessage] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const hideTimer = useRef(null);
   const rootRef = useRef(null);
 
   const RECIPIENT_LIMIT = 60;
+  const SENDER_LIMIT = 60;
   const MESSAGE_LIMIT = 500;
 
   useEffect(() => {
@@ -40,8 +42,9 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!recipient || !message) return;
-    onSend({ recipient, message, type: 'star' });
+    onSend({ recipient, message, sender: sender.trim(), type: 'star' });
     setRecipient('');
+    setSender('');
     setMessage('');
     onClose();
   };
@@ -98,6 +101,22 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
               />
             </div>
             
+            {/* Sender Input (optional) */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">From <span className="text-slate-600 normal-case font-medium tracking-normal">(optional)</span></label>
+                <span className="text-[10px] text-slate-500 tabular-nums mr-1">{sender.length}/{SENDER_LIMIT}</span>
+              </div>
+              <input
+                type="text"
+                value={sender}
+                maxLength={SENDER_LIMIT}
+                onChange={(e) => setSender(e.target.value)}
+                className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border border-white/5 focus:border-blue-400/50 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-400/30 transition-all duration-200"
+                placeholder="Anonymous"
+              />
+            </div>
+
             {/* Message Input */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">

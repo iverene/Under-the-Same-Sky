@@ -53,17 +53,23 @@ const MessageController = {
   createMessage: async (req, res) => {
     const recipient = (req.body.recipient || req.body.name || '').toString().trim();
     const message = (req.body.message || req.body.wish || req.body.content || '').toString().trim();
+    // Optional sender signature — empty stays null so old rows render unchanged
+    const sender = (req.body.sender || '').toString().trim() || null;
     const requestedType = req.body.type;
 
-    // Mirrors the frontend modal caps (60 / 500) so overlong posts
+    // Mirrors the frontend modal caps (60 / 60 / 500) so overlong posts
     // can't bloat the DB or blow out the reading card layout
     const MAX_RECIPIENT = 60;
+    const MAX_SENDER = 60;
     const MAX_MESSAGE = 500;
     if (!recipient || !message) {
       return res.status(400).json({ error: 'Missing fields' });
     }
     if (recipient.length > MAX_RECIPIENT || message.length > MAX_MESSAGE) {
       return res.status(400).json({ error: `Fields too long (max ${MAX_RECIPIENT} / ${MAX_MESSAGE} chars)` });
+    }
+    if (sender && sender.length > MAX_SENDER) {
+      return res.status(400).json({ error: `Sender too long (max ${MAX_SENDER} chars)` });
     }
     // Only known types accepted — anything else becomes a plain star
     const ALLOWED_TYPES = new Set(['star', 'lantern', 'falling_star']);
@@ -99,6 +105,7 @@ const MessageController = {
     try {
       const newMessage = await MessageModel.createMessage({
         recipient,
+        sender,
         content: message,
         type,
         position_x: pos.x,
