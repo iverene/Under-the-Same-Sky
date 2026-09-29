@@ -261,10 +261,10 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         </button>
       </div>
 
-      {/* Desktop: Settings panel only — bottom right */}
-      <div className={`hidden sm:flex fixed z-40 bottom-20 right-6 flex-col items-end ${panelCls}`}>
+      {/* Desktop: Settings panel — centered just above the bottom bar */}
+      <div className={`hidden sm:flex fixed z-40 bottom-24 left-0 right-0 justify-center pointer-events-none ${panelCls}`}>
         <div
-          className={`pointer-events-auto w-56 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom-right ${
+          className={`pointer-events-auto w-56 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom ${
             settingsOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
           }`}
         >
