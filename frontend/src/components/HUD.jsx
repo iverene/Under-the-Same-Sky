@@ -22,6 +22,16 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
   }, []);
 
   const show = !uiHidden;
+
+  // Dismiss the sky picker on Escape
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setSettingsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [settingsOpen]);
   const pillCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`;
   const barCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-6 scale-95 pointer-events-none'}`;
   const panelCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'}`;
@@ -98,6 +108,11 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           )}
         </button>
       </div>
+
+      {/* Dismiss layer for the sky picker — taps anywhere outside it close it */}
+      {settingsOpen && (
+        <div className="fixed inset-0 z-30" onClick={() => setSettingsOpen(false)} aria-hidden />
+      )}
 
       {/* ============================================================
           MOBILE LAYOUT — old design, left & right columns
