@@ -35,9 +35,12 @@ const IntroDialogue = ({ onDone, camera, dialogueIndex }) => {
         v.copy(p).project(camera);
         return { x: (v.x * 0.5 + 0.5) * w, y: (-v.y * 0.5 + 0.5) * h, behind: v.z > 1 };
       };
-      const b = project(boy), g = project(girl);
-      const clamp = (x, y) => ({ x: Math.min(Math.max(x, 90), w - 90), y: Math.min(Math.max(y, 80), h - 120) });
-      const bc = clamp(b.x + 90, b.y - 60), gc = clamp(g.x - 90, g.y - 60);
+    const b = project(boy), g = project(girl);
+    // Narrow screens can't fit 220px bubbles on 90px side offsets without
+    // kissing the screen edges, so pull the offsets in on small viewports.
+    const side = w < 640 ? 55 : 90;
+    const clamp = (x, y) => ({ x: Math.min(Math.max(x, 85), w - 85), y: Math.min(Math.max(y, 80), h - 120) });
+    const bc = clamp(b.x + side, b.y - 60), gc = clamp(g.x - side, g.y - 60);
       setPos({ bx: bc.x, by: bc.y, gx: gc.x, gy: gc.y, visible: !b.behind && !g.behind });
       raf = requestAnimationFrame(tick);
     };

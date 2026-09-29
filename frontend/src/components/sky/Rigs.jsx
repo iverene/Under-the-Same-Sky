@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { FOCUS_DISTANCE } from '../../three/config';
-import { HOME_POS, groundHeight } from '../../three/terrain';
+import { HOME_POS, HOME_TARGET, groundHeight } from '../../three/terrain';
 import { SKY_THEMES } from '../../three/themes';
 
 // One-time fly-to-star, then full user control.
@@ -13,8 +13,8 @@ import { SKY_THEMES } from '../../three/themes';
 // overrides the perch (used by the sign overlook shot).
 export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal, introHold }) => {
   const wasFocused = useRef(false);
-  // Rest gaze aims at the signage area so it sits centered on reset
-  const homeTarget = useMemo(() => new THREE.Vector3(0, 1, 0), []);
+  // Rest gaze shared with the initial orbit pivot (see HOME_TARGET)
+  const homeTarget = useMemo(() => HOME_TARGET.clone(), []);
   const tmpDir = useMemo(() => new THREE.Vector3(), []);
   const tmpDesired = useMemo(() => new THREE.Vector3(), []);
   const tmpFocus = useMemo(() => new THREE.Vector3(), []);

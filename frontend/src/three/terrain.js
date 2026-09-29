@@ -67,7 +67,14 @@ export const DECK_FOCUS = new THREE.Vector3(DECK_X, FLAT_Y + 1.1, DECK_Z);
 export const SIGN_CAM = new THREE.Vector3(BENCH_X, groundHeight(BENCH_X, BENCH_Z + 11) + 5.5, BENCH_Z + 11);
 export const OVERLOOK = new THREE.Vector3(BENCH_X, 26, -80);
 
-// Seated eye position: behind the (human-scale) bench seat
-export const HOME_POS = new THREE.Vector3(BENCH_X, groundHeight(BENCH_X, BENCH_Z + 4.5) + 1.45, BENCH_Z + 4.5);
+// Home eye position: on the hill behind the bench seat, aimed so the
+// stargazing couple sits near frame center (their intro bubbles need
+// screen room on both sides) with the trail sign left of them.
+export const HOME_POS = new THREE.Vector3(-7, groundHeight(-7, 34.5) + 1.45, 34.5);
+// Home gaze target: shared by the initial orbit pivot and the reset glide
+// so load and reset land on the same framing. Kept in one place so the
+// three home-framing spots (HOME_POS, OrbitControls target, CameraRig
+// homeTarget) can't drift apart again.
+export const HOME_TARGET = new THREE.Vector3(3.5, -4, 23);
 // Bench close-up focus point for click-to-zoom
 export const BENCH_FOCUS = new THREE.Vector3(BENCH_X, groundHeight(BENCH_X, BENCH_Z) + 1.2, BENCH_Z);

@@ -10,7 +10,7 @@ import TeamModal from './TeamModal';
 import HUD from './HUD';
 import TopBar from './TopBar';
 import { FRESH_GLOW_MS, TAP_TOLERANCE_SQ } from '../three/config';
-import { BENCH_FOCUS, HOME_POS, OVERLOOK, SIGN_CAM, DECK_FOCUS } from '../three/terrain';
+import { BENCH_FOCUS, HOME_POS, HOME_TARGET, OVERLOOK, SIGN_CAM, DECK_FOCUS } from '../three/terrain';
 import { THEME_CYCLE, THEME_CYCLE_MS } from '../three/themes';
 import { normalizeMessage, randomLanternPosition, getRandomPositionOnSphere, toVector3 } from '../three/messages';
 import {
@@ -508,8 +508,8 @@ const NightSky = () => {
         <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} introHold={showIntro} />
         <OrbitControls
           ref={controlsRef}
-          // Rest gaze aims at the signage so it sits centered on reset
-          target={[0, 1, 0]}
+          // Rest gaze aims between the couple and the sign (see HOME_TARGET)
+          target={HOME_TARGET.toArray()}
           enablePan={false}
           enabled={!showIntro}
           enableZoom={true}
