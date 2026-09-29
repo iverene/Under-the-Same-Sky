@@ -16,8 +16,9 @@ app.use(helmet());
 
 // CORS allowlist: comma-separated origins, e.g.
 // CORS_ORIGIN=https://under-the-same-sky.app,https://www.under-the-same-sky.app
-// Defaults to the local Vite dev server; same-origin needs no CORS anyway.
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+// Defaults cover local Vite dev servers (Vite bumps 5173 -> 5174 when busy);
+// same-origin needs no CORS anyway.
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174')
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);
