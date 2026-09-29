@@ -592,7 +592,7 @@ const NightSky = () => {
       )}
 
       {ready && !splashVisible && showIntro && (<IntroScreen onStart={handleIntroStart} />)}
-      {!showIntro && !uiHidden && <TopBar />}
+      {!showIntro && !uiHidden && <TopBar skyTheme={skyTheme} />}
 
       {!showIntro && (
       <HUD
