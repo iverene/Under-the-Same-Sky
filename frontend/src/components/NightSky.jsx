@@ -66,6 +66,14 @@ const NightSky = () => {
     return () => clearTimeout(t);
   }, [sendError]);
 
+  // Last successful send — celebratory banner (auto-clears)
+  const [sendSuccess, setSendSuccess] = useState(false);
+  useEffect(() => {
+    if (!sendSuccess) return;
+    const t = setTimeout(() => setSendSuccess(false), 6000);
+    return () => clearTimeout(t);
+  }, [sendSuccess]);
+
   // Fresh arrivals (id -> release timestamp): they glow brightly for
   // FRESH_GLOW_MS so you can spot where yours landed, then settle
   const [freshMap, setFreshMap] = useState({});
@@ -333,6 +341,7 @@ const NightSky = () => {
       }
       setMessages(prev => [...prev, normalized]);
       markFresh(normalized.id);
+      setSendSuccess(true);
       // Showcase the new arrival: fly the camera out to it (stops at focus
       // distance — close enough to see, never on top of it)
       if (normalized.type === 'lantern') handleSelectLantern(normalized, normalized.position);
@@ -572,6 +581,27 @@ const NightSky = () => {
             onSelect={handleSelectSearchResult}
             onClose={() => setIsSearching(false)}
           />
+        </div>
+      )}
+
+      {/* Send success banner — top-center, dismissible, auto-clears */}
+      {sendSuccess && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md">
+          <div className="flex items-center gap-3 bg-emerald-950/90 backdrop-blur-xl border border-emerald-500/30 rounded-xl px-4 py-3 shadow-[0_0_30px_rgba(52,211,153,0.25)] animate-in fade-in slide-in-from-top-4 duration-300">
+            <span aria-hidden className="text-emerald-400 text-lg shrink-0">✦</span>
+            <div className="flex-1 leading-snug">
+              <p className="text-sm text-emerald-100 font-medium">Your voice is now part of the sky.</p>
+              <p className="text-xs text-emerald-200/80 mt-0.5">Someone else may be looking up at this same light.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSendSuccess(false)}
+              aria-label="Dismiss confirmation"
+              className="shrink-0 text-emerald-400/70 hover:text-emerald-300 text-lg leading-none transition-colors"
+            >
+              ×
+            </button>
+          </div>
         </div>
       )}
 
