@@ -21,7 +21,7 @@ export const GirlFigure = memo(() => (
 GirlFigure.displayName = 'GirlFigure';
 
 export const BoyFigure = memo(() => (
-  <svg width="86" height="150" viewBox="0 0 86 150" role="img" aria-label="Boy stargazer">
+  <svg width="96" height="168" viewBox="0 0 86 150" role="img" aria-label="Boy stargazer">
     <ellipse cx="43" cy="144" rx="30" ry="6" fill="#000" opacity="0.45" />
     <rect x="30" y="96" width="11" height="44" rx="4" fill="#26304a" />
     <rect x="45" y="96" width="11" height="44" rx="4" fill="#26304a" />
