@@ -54,12 +54,12 @@ const IntroScreen = ({ onStart }) => {
 
   const boyType = useTypewriter(pair.boy, {
     active: phase === 'boy',
-    speed: 28,
+    speed: 55,
     reduceMotion: prefersReducedMotion,
   });
   const girlType = useTypewriter(pair.girl, {
     active: phase === 'girl',
-    speed: 28,
+    speed: 55,
     reduceMotion: prefersReducedMotion,
   });
 
