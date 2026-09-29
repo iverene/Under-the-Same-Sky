@@ -44,7 +44,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
   return (
     <>
       {/* 1. Instructional pill */}
-      <div className={`fixed bottom-4 sm:bottom-24 left-0 w-full z-40 pointer-events-none flex justify-center px-4 ${pillCls}`}>
+      <div className={`fixed bottom-2 sm:bottom-24 left-0 w-full z-40 pointer-events-none flex justify-center px-4 ${pillCls}`}>
         <div className="bg-slate-950/40 backdrop-blur-md border border-white/5 px-4 sm:px-6 py-2 rounded-full shadow-lg max-w-full">
           <p className="text-blue-100/60 text-[9px] sm:text-[10px] font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-center leading-relaxed text-balance">
             {isTouch
