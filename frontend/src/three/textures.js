@@ -86,10 +86,12 @@ export const usePaperTexture = () => {
     canvas.height = s;
     const ctx = canvas.getContext('2d');
 
+    // Brightest at the canvas bottom (= shell base, v0) where the flame
+    // breathes; dimmer toward the top, like real sky lanterns
     const base = ctx.createLinearGradient(0, 0, 0, s);
-    base.addColorStop(0, '#fff6e3');
+    base.addColorStop(0, '#e3bd92');
     base.addColorStop(0.5, '#ffedd2');
-    base.addColorStop(1, '#f7d9ae');
+    base.addColorStop(1, '#fff8e6');
     ctx.fillStyle = base;
     ctx.fillRect(0, 0, s, s);
 

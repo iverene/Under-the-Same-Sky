@@ -21,6 +21,13 @@ const MessageStar = ({ position, message, baseSize, texture, corona, selected, o
 
   const tint = useMemo(() => STAR_TINTS[numericId % STAR_TINTS.length], [numericId]);
   const vecPosition = useMemo(() => toVector3(position), [position]);
+  // Realistic depth cue: nearer stars render brighter and a touch larger.
+  // Stored stars sit on a ~36-54 shell (×1.8 at render), so the factor spans
+  // roughly 0.84-1.25 — visible, never extreme.
+  const distFactor = useMemo(() => {
+    const d = vecPosition ? vecPosition.length() : 81;
+    return THREE.MathUtils.clamp(81 / d, 0.55, 1.6);
+  }, [vecPosition]);
 
   useFrame(({ clock }, delta) => {
     const time = clock.getElapsedTime();
@@ -33,14 +40,14 @@ const MessageStar = ({ position, message, baseSize, texture, corona, selected, o
     const glow = bornAt ? Math.max(0, 1 - (Date.now() - bornAt) / FRESH_GLOW_MS) : 0;
 
     if (coreRef.current) {
-      coreRef.current.material.opacity = Math.min(1, (active ? 1 : shimmer) + glow);
-      const target = (active ? baseSize * 2.4 : baseSize) * (1 + glow * 1.5);
+      coreRef.current.material.opacity = Math.min(1, ((active ? 1 : shimmer) + glow) * distFactor);
+      const target = (active ? baseSize * 2.4 : baseSize) * (1 + glow * 1.5) * (0.8 + 0.2 * distFactor);
       const s = THREE.MathUtils.damp(coreRef.current.scale.x, target, 8, delta);
       coreRef.current.scale.set(s, s, 1);
     }
     if (coronaRef.current) {
-      coronaRef.current.material.opacity = Math.min(1, (active ? 0.85 : 0.38) * shimmer + glow * 0.6);
-      const target = baseSize * 3.4 * (active ? 1.2 : 1 + 0.06 * Math.sin(time * 1.7 + offset)) * (1 + glow);
+      coronaRef.current.material.opacity = Math.min(1, ((active ? 0.85 : 0.38) * shimmer + glow * 0.6) * distFactor);
+      const target = baseSize * 3.4 * (active ? 1.2 : 1 + 0.06 * Math.sin(time * 1.7 + offset)) * (1 + glow) * (0.85 + 0.15 * distFactor);
       const s = THREE.MathUtils.damp(coronaRef.current.scale.x, target, 6, delta);
       coronaRef.current.scale.set(s, s, 1);
     }
