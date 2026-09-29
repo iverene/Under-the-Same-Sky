@@ -11,10 +11,10 @@ const LANTERN_PROFILE = [
   [0.28, -0.55],
   [0.335, -0.48],
   [0.33, -0.3],
-  [0.315, -0.05],
-  [0.295, 0.2],
-  [0.265, 0.4],
-  [0.225, 0.52],
+  [0.32, -0.05],
+  [0.305, 0.2],
+  [0.285, 0.4],
+  [0.25, 0.52],
   [0.02, 0.55],
 ].map(([x, y]) => new THREE.Vector2(x, y));
 
@@ -115,7 +115,7 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, sel
         <meshStandardMaterial color="#7c2d12" roughness={0.8} fog={false} />
       </mesh>
       <mesh position={[0, 0.53, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.21, 0.014, 8, 20]} />
+        <torusGeometry args={[0.24, 0.014, 8, 20]} />
         <meshStandardMaterial color="#7c2d12" roughness={0.8} fog={false} />
       </mesh>
 
