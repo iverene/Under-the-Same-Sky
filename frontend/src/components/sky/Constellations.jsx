@@ -5,6 +5,18 @@ import * as THREE from 'three';
 // fixed positions, gentle glow, no interaction, fog-exempt so they read at depth.
 const SHELL = 700;
 
+// Organic wobble per star (local units — small enough to keep every figure
+// readable). Reseeded each page load so no two skies match exactly.
+const JITTER = 0.18;
+const mulberry32 = (seed) => () => {
+  seed |= 0;
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const loadSeed = Math.floor(Math.random() * 1e9);
+
 // Each figure: [azimuthDeg, elevationDeg, scale, segments]
 // A segment is a pair of [x, y] endpoints in the figure's local frame.
 const FIGURES = [
@@ -78,13 +90,25 @@ const Constellations = () => {
       );
       const u = new THREE.Vector3().crossVectors(up, dir).normalize();
       const v = new THREE.Vector3().crossVectors(dir, u).normalize();
-      const toWorld = ([x, y]) =>
-        dir
+      // Jitter once per unique vertex so shared line joints stay connected
+      const rng = mulberry32(loadSeed + fi * 101);
+      const cache = new Map();
+      const jit = ([x, y]) => {
+        const k = `${x},${y}`;
+        if (!cache.has(k)) {
+          cache.set(k, [x + (rng() - 0.5) * 2 * JITTER, y + (rng() - 0.5) * 2 * JITTER]);
+        }
+        return cache.get(k);
+      };
+      const toWorld = (pt) => {
+        const [x, y] = jit(pt);
+        return dir
           .clone()
           .addScaledVector(u, x * scale)
           .addScaledVector(v, y * scale)
           .normalize()
           .multiplyScalar(SHELL);
+      };
       segments.forEach(([a, b]) => {
         const pa = toWorld(a);
         const pb = toWorld(b);
