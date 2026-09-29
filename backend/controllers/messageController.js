@@ -18,24 +18,17 @@ const calculatePosition = (radius = 45) => {
 };
 
 const MessageController = {
-  // 1. Get Messages — paged wall with cursor envelope.
-  // GET /api/messages?limit=200&cursor=<created_at,id>&type=star|lantern
+  // 1. Get Messages
   getMessages: async (req, res) => {
     try {
-      const messages = await MessageModel.getMessagesPage({
-        limit: req.query.limit,
-        cursor: req.query.cursor,
-        type: req.query.type,
-      });
-
+      const messages = await MessageModel.getAllMessages();
+      
       // Format data for frontend
       const formatted = messages.map(msg => ({
         id: msg.id,
         recipient: msg.recipient,
-        sender: msg.sender || null,
         content: msg.content,
         type: msg.type,
-        created_at: msg.created_at,
         // Only attach position object if coordinates exist (stars/lanterns)
         position: (msg.position_x !== null && msg.position_x !== undefined) ? {
           x: Number(msg.position_x),
@@ -47,11 +40,7 @@ const MessageController = {
         color: msg.type === 'lantern' ? '#ffaa00' : (msg.type === 'falling_star' ? '#aaddff' : 'white')
       }));
 
-      const last = messages[messages.length - 1];
-      res.json({
-        data: formatted,
-        nextCursor: last ? `${new Date(last.created_at).toISOString()},${last.id}` : null,
-      });
+      res.json(formatted);
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Server error fetching messages' });

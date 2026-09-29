@@ -1,21 +1,13 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/messages'; // Make sure port matches your backend
 
-// Paged wall fetch. Returns { rows, nextCursor }. Tolerates the legacy
-// bare-array shape so a not-yet-redeployed backend never blanks the sky.
-export const fetchMessages = async ({ cursor, limit } = {}) => {
+export const fetchMessages = async () => {
   try {
-    const params = new URLSearchParams();
-    if (cursor) params.set('cursor', cursor);
-    if (limit) params.set('limit', String(limit));
-    const qs = params.toString();
-    const response = await fetch(qs ? `${API_URL}?${qs}` : API_URL);
+    const response = await fetch(API_URL);
     if (!response.ok) throw new Error('Network response was not ok');
-    const body = await response.json();
-    if (Array.isArray(body)) return { rows: body, nextCursor: null };
-    return { rows: body.data || [], nextCursor: body.nextCursor || null };
+    return await response.json();
   } catch (error) {
     console.error("API Error:", error);
-    return { rows: [], nextCursor: null };
+    return []; // Return empty array so map doesn't crash
   }
 };
 
