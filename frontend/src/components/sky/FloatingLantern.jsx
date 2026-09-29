@@ -4,18 +4,18 @@ import * as THREE from 'three';
 import { FRESH_GLOW_MS } from '../../three/config';
 import { toVector3, randomLanternPosition } from '../../three/messages';
 
-// Lathe profile: rounded paper shell, open at the bottom where the flame sits
+// Lathe profile: tall tapered Kongming cylinder — wide open base where the
+// flame breathes, gently narrowing walls, nearly flat closed top
 const LANTERN_PROFILE = [
-  [0.02, -0.46],
-  [0.16, -0.46],
-  [0.24, -0.38],
-  [0.30, -0.22],
-  [0.325, -0.05],
-  [0.31, 0.12],
-  [0.26, 0.28],
-  [0.18, 0.39],
-  [0.09, 0.45],
-  [0.02, 0.47],
+  [0.02, -0.55],
+  [0.28, -0.55],
+  [0.335, -0.48],
+  [0.33, -0.3],
+  [0.315, -0.05],
+  [0.295, 0.2],
+  [0.265, 0.4],
+  [0.225, 0.52],
+  [0.02, 0.55],
 ].map(([x, y]) => new THREE.Vector2(x, y));
 
 // Floating sky-lantern: ribbed paper shell, flickering flame, warm halo.
@@ -32,9 +32,9 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, sel
   const randomOffset = useMemo(() => Math.random() * 100, []);
   const flickerSpeed = useMemo(() => 2 + Math.random() * 3, []);
   const riseSpeed = useMemo(() => 0.3 + Math.random() * 0.25, []);
-  // Slight per-lantern warm tint variation
+  // Slight per-lantern warm tint variation (deep festive orange range)
   const tint = useMemo(
-    () => new THREE.Color().setHSL(0.06 + Math.random() * 0.05, 0.9, 0.62),
+    () => new THREE.Color().setHSL(0.045 + Math.random() * 0.04, 0.95, 0.6),
     []
   );
   const vecPosition = useMemo(() => toVector3(position) || randomLanternPosition(), [position]);
@@ -64,8 +64,8 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, sel
       Math.sin(time * 13 + randomOffset * 2) * 0.12;
     // Birth glow: 1 at release → 0 after FRESH_GLOW_MS
     const glowAmt = bornAt ? Math.max(0, 1 - (Date.now() - bornAt) / FRESH_GLOW_MS) : 0;
-    if (lightRef.current) lightRef.current.intensity = 1.8 + flicker + glowAmt * 8;
-    if (shellRef.current) shellRef.current.emissiveIntensity = 1.6 + glowAmt * 2.5;
+    if (lightRef.current) lightRef.current.intensity = 2.2 + flicker + glowAmt * 8;
+    if (shellRef.current) shellRef.current.emissiveIntensity = 1.9 + glowAmt * 2.5;
     if (flameRef.current) {
       const s = 1 + flicker * 0.15;
       flameRef.current.scale.set(s, s, s);
@@ -102,36 +102,48 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, sel
           color={tint}
           emissive="#ff5a00"
           emissiveMap={paper}
-          emissiveIntensity={1.6}
+          emissiveIntensity={1.9}
           roughness={0.9}
           side={THREE.DoubleSide}
           fog={false}
         />
       </mesh>
 
-      {/* Top cap */}
-      <mesh position={[0, 0.48, 0]}>
-        <cylinderGeometry args={[0.07, 0.09, 0.07, 12]} />
+      {/* Top vent cap + thin binding ring */}
+      <mesh position={[0, 0.56, 0]}>
+        <cylinderGeometry args={[0.06, 0.08, 0.06, 12]} />
+        <meshStandardMaterial color="#7c2d12" roughness={0.8} fog={false} />
+      </mesh>
+      <mesh position={[0, 0.53, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.21, 0.014, 8, 20]} />
         <meshStandardMaterial color="#7c2d12" roughness={0.8} fog={false} />
       </mesh>
 
-      {/* Bottom bamboo rim */}
-      <mesh position={[0, -0.46, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.15, 0.022, 8, 20]} />
-        <meshStandardMaterial color="#7c2d12" roughness={0.8} fog={false} />
+      {/* Bottom bamboo rim — wide and glowing like the reference */}
+      <mesh position={[0, -0.55, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.3, 0.03, 8, 24]} />
+        <meshStandardMaterial
+          color="#9a5a22"
+          emissive="#ff5a00"
+          emissiveIntensity={0.5}
+          roughness={0.8}
+          fog={false}
+        />
       </mesh>
 
       {/* Fuel flame glowing through the open base */}
-      <mesh ref={flameRef} position={[0, -0.38, 0]}>
-        <sphereGeometry args={[0.06, 12, 12]} />
-        <meshBasicMaterial color="#ffe3ae" fog={false} />
+      <mesh ref={flameRef} position={[0, -0.47, 0]}>
+        <sphereGeometry args={[0.075, 12, 12]} />
+        <meshBasicMaterial color="#ffedd0" fog={false} />
       </mesh>
 
-      {/* Warm halo (bloom-like glow) — part of the click target for far lanterns */}
+      {/* Warm halo, centered low where the fire burns (bloom-like glow) —
+          part of the click target for far lanterns */}
       {glow && (
         <sprite
           ref={haloRef}
-          scale={[3.0, 3.0, 1]}
+          position={[0, -0.25, 0]}
+          scale={[3.4, 3.4, 1]}
           onClick={(e) => { e.stopPropagation(); onSelect(message, groupRef.current?.position.clone()); }}
           onPointerOver={() => { document.body.style.cursor = 'pointer'; setHovered(true); }}
           onPointerOut={() => { document.body.style.cursor = 'default'; setHovered(false); }}
@@ -170,7 +182,7 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, sel
       )}
 
       {/* Lantern Light */}
-      <pointLight ref={lightRef} position={[0, -0.3, 0]} distance={4} intensity={1.8} color="#ff9a3c" />
+      <pointLight ref={lightRef} position={[0, -0.42, 0]} distance={5} intensity={2.2} color="#ff9a3c" />
     </group>
   );
 };
