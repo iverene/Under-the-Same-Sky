@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { FOCUS_DISTANCE } from '../../three/config';
-import { HOME_POS, HOME_TARGET, groundHeight } from '../../three/terrain';
+import { HOME_POS, groundHeight } from '../../three/terrain';
 import { SKY_THEMES } from '../../three/themes';
 
 // One-time fly-to-star, then full user control.
@@ -11,10 +11,10 @@ import { SKY_THEMES } from '../../three/themes';
 // closing cards or picking other objects never resets your POV.
 // Only the reset button glides you home. An optional explicit focusCam
 // overrides the perch (used by the sign overlook shot).
-export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal, introHold, onHomed }) => {
+export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal }) => {
   const wasFocused = useRef(false);
-  // Rest gaze shared with the initial orbit pivot (see HOME_TARGET)
-  const homeTarget = useMemo(() => HOME_TARGET.clone(), []);
+  // Rest gaze shared with the initial orbit pivot
+  const homeTarget = useMemo(() => new THREE.Vector3(0, 1, 0), []);
   const tmpDir = useMemo(() => new THREE.Vector3(), []);
   const tmpDesired = useMemo(() => new THREE.Vector3(), []);
   const tmpFocus = useMemo(() => new THREE.Vector3(), []);
@@ -50,7 +50,6 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
       controls.target.lerp(homeTarget, t);
       if (camera.position.distanceTo(HOME_POS) < 0.15) {
         flightRef.current.homingCam = false;
-        onHomed && onHomed();
       }
       return;
     }
@@ -88,11 +87,6 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
       // Closing a card or picking another object never moves your POV —
       // only the reset button glides you home.
       controls.autoRotate = true;
-      // Intro hold: glide the pan speed to 0 while the dialogue plays so the
-      // stop and the resume both feel smooth instead of snapping.
-      controls.autoRotateSpeed = THREE.MathUtils.damp(
-        controls.autoRotateSpeed, introHold ? 0 : 0.3, 2.5, delta
-      );
     }
     wasFocused.current = !!focusPoint;
   });
