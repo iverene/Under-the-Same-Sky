@@ -130,9 +130,9 @@ const IntroScreen = ({ onStart }) => {
         {/* Girl (Left) */}
         <div className="relative flex flex-col items-center">
           <div
-            aria-hidden={phase !== 'girl'}
+            aria-hidden={phase !== 'girl' && phase !== 'ready'}
             className={`${bubbleBaseCls} ${
-              phase === 'girl'
+              phase === 'girl' || phase === 'ready'
                 ? 'opacity-100 translate-y-0 scale-100'
                 : 'opacity-0 translate-y-2 scale-95'
             }`}
@@ -160,9 +160,9 @@ const IntroScreen = ({ onStart }) => {
         {/* Boy (Right) */}
         <div className="relative flex flex-col items-center">
           <div
-            aria-hidden={phase !== 'boy'}
+            aria-hidden={phase !== 'boy' && phase !== 'ready'}
             className={`${bubbleBaseCls} ${
-              phase === 'boy'
+              phase === 'boy' || phase === 'ready'
                 ? 'opacity-100 translate-y-0 scale-100'
                 : 'opacity-0 translate-y-2 scale-95'
             }`}
