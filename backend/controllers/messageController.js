@@ -27,6 +27,7 @@ const MessageController = {
       const formatted = messages.map(msg => ({
         id: msg.id,
         recipient: msg.recipient,
+        sender: msg.sender || null,
         content: msg.content,
         type: msg.type,
         // Only attach position object if coordinates exist (stars/lanterns)
