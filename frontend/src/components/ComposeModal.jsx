@@ -64,8 +64,16 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
         <div className="p-8 relative z-0">
           {/* Header */}
           <div className="mb-8 text-center">
+            <div className="flex justify-center mb-3">
+              <div className="p-3 bg-blue-500/10 rounded-full shadow-[0_0_15px_rgba(96,165,250,0.25)]">
+                <svg className="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2c.6 4.8 2.9 7.1 7.7 7.7-4.8.6-7.1 2.9-7.7 7.7-.6-4.8-2.9-7.1-7.7-7.7 4.8-.6 7.1-2.9 7.7-7.7z" />
+                  <path d="M19 15.5c.3 2.1 1.3 3.1 3.4 3.4-2.1.3-3.1 1.3-3.4 3.4-.3-2.1-1.3-3.1-3.4-3.4 2.1-.3 3.1-1.3 3.4-3.4z" opacity="0.6" />
+                </svg>
+              </div>
+            </div>
             <h2 className="text-3xl font-serif text-white mb-2 tracking-wide drop-shadow-lg">
-              Write an Entry
+              Write a Message to the Sky
             </h2>
             <p className="text-blue-200/60 text-xs font-medium tracking-[0.2em] uppercase">
               Cast your thought into the void
