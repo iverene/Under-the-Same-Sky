@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
 import { fetchMessages, sendMessage } from '../api';
 import ComposeModal from './ComposeModal';
@@ -35,6 +35,16 @@ import ReadingCard from './sky/ReadingCard';
 import IntroScreen from './sky/IntroScreen';
 import SearchPanel from './sky/SearchPanel';
 import { useOutsideTapClose } from './sky/useOutsideTapClose';
+
+// Renders a single frame on mount so shaders and textures are warm while the
+// opaque intro covers the screen; the loop itself stays paused until Start.
+const SceneWarmup = () => {
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    invalidate();
+  }, [invalidate]);
+  return null;
+};
 
 // Orchestrator: owns scene state (messages, selection, theme, modals),
 // wires texture instances into scene components via props, and composes
@@ -428,7 +438,8 @@ const NightSky = () => {
         flightRef.current.homingCam = false;
       }}
     >
-      <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} onPointerMissed={handlePointerMissed}>
+      <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} frameloop={showIntro ? 'never' : 'always'} onPointerMissed={handlePointerMissed}>
+        <SceneWarmup />
 
         {/* --- ATMOSPHERE --- */}
         {/* Dark Blue-Black Night Sky */}
