@@ -24,7 +24,7 @@ import {
   useGroundTexture,
   useWoodTexture,
 } from '../three/textures';
-import MessagePoints from './sky/MessagePoints';
+import MessageStar from './sky/MessageStar';
 import FloatingLantern from './sky/FloatingLantern';
 import FallingStarSystem from './sky/FallingStarSystem';
 import Constellations from './sky/Constellations';
@@ -450,7 +450,7 @@ const NightSky = () => {
         flightRef.current.homingCam = false;
       }}
     >
-      <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} frameloop={showIntro ? 'never' : 'always'} raycaster={{ params: { Points: { threshold: 2.2 } } }} onPointerMissed={handlePointerMissed}>
+      <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} frameloop={showIntro ? 'never' : 'always'} onPointerMissed={handlePointerMissed}>
         <SceneWarmup />
 
         {/* --- ATMOSPHERE --- */}
@@ -492,15 +492,20 @@ const NightSky = () => {
         <SkyRig theme={skyTheme} ambientRef={ambientRef} sunRef={sunRef} groundRef={groundMatRef} mtnRef={mtnMatRef} mtnFarRef={mtnFarMatRef} veilRef={veilRef} />
 
         {/* --- CONTENT --- */}
-        {/* Stars — one instanced cloud (core + corona) instead of N components */}
-        <MessagePoints
-          messages={stars}
-          selectedId={selectedId}
-          onSelect={handleSelectStar}
-          texture={starTexture}
-          corona={coronaTexture}
-          freshMap={freshMap}
-        />
+        {/* Stars */}
+        {stars.map((msg) => (
+          <MessageStar
+            key={msg.id}
+            position={msg.position}
+            message={msg}
+            baseSize={(msg.size || 0.5) * 2}
+            texture={starTexture}
+            corona={coronaTexture}
+            selected={msg.id === selectedId}
+            onSelect={handleSelectStar}
+            bornAt={freshMap[msg.id]}
+          />
+        ))}
 
         {/* Lanterns */}
         {lanterns.map((msg) => (
