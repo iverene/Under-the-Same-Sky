@@ -45,7 +45,7 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
 
     if (flightRef.current.homingCam) {
       // Glide home to the bench: position + target together, then release
-      const t = 1 - Math.exp(-2.5 * delta);
+      const t = 1 - Math.exp(-1.5 * delta);
       camera.position.lerp(HOME_POS, t);
       controls.target.lerp(homeTarget, t);
       if (camera.position.distanceTo(HOME_POS) < 0.15) {
@@ -54,7 +54,7 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
       return;
     }
 
-    const t = 1 - Math.exp(-3 * delta);
+    const t = 1 - Math.exp(-1.8 * delta);
 
     if (focusPoint && flightRef.current.flying) {
       controls.autoRotate = false;
@@ -91,7 +91,7 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
       // the pan only begins once the user starts exploring. Input is never
       // locked — the opaque intro simply covers the canvas until Start.
       controls.autoRotateSpeed = THREE.MathUtils.damp(
-        controls.autoRotateSpeed, introHold ? 0 : 0.3, 2.5, delta
+        controls.autoRotateSpeed, introHold ? 0 : 0.15, 2.5, delta
       );
     }
     wasFocused.current = !!focusPoint;

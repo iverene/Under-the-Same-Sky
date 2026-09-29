@@ -537,7 +537,7 @@ const NightSky = () => {
           maxPolarAngle={Math.PI - 0.05}
           // Slow, cinematic rotation
           autoRotate={true}
-          autoRotateSpeed={0.3}
+          autoRotateSpeed={0.15}
           enableDamping={true}
           dampingFactor={0.05}
           rotateSpeed={0.4}
