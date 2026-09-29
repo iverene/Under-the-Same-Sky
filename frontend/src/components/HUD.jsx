@@ -198,20 +198,50 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
 
       {/* Desktop: Write + Wish + Reset + Moon + Share — bottom center bar (search lives in TopBar) */}
       <div className={`hidden sm:flex fixed bottom-8 left-0 right-0 z-40 justify-center items-center gap-3 pointer-events-none ${barCls}`}>
-        <button
-          onClick={() => setSettingsOpen((v) => !v)}
-          aria-label="Sky settings"
-          aria-expanded={settingsOpen}
-          className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
-            settingsOpen
-              ? 'bg-sky-500/20 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
-              : 'bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
-          }`}
-        >
-          <svg aria-hidden="true" className={`w-5 h-5 text-slate-200 transition-transform duration-500 ${settingsOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
-          </svg>
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setSettingsOpen((v) => !v)}
+            aria-label="Sky settings"
+            aria-expanded={settingsOpen}
+            className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
+              settingsOpen
+                ? 'bg-sky-500/20 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
+                : 'bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
+            }`}
+          >
+            <svg aria-hidden="true" className={`w-5 h-5 text-slate-200 transition-transform duration-500 ${settingsOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
+            </svg>
+          </button>
+          {/* Sky panel — anchored above its moon button */}
+          <div className={`absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-40 pointer-events-none ${panelCls}`}>
+            <div
+              className={`pointer-events-auto w-56 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom ${
+                settingsOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
+              }`}
+            >
+              <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Sky</p>
+              {SKY_OPTIONS.map((opt) => {
+                const active = skyTheme === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => onSkyTheme && onSkyTheme(opt.key)}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors duration-200 ${active ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                  >
+                    <span
+                      className={`w-6 h-6 rounded-full shrink-0 border transition-all duration-200 ${active ? 'border-white/70 shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'border-white/20'}`}
+                      style={{ background: opt.dot }}
+                    />
+                    <span className={`font-serif text-sm tracking-wide ${active ? 'text-white' : 'text-slate-300'}`}>{opt.label}</span>
+                    {active && <span className="ml-auto text-sky-300 text-xs">●</span>}
+                  </button>
+                );
+              })}
+              <div className="h-2" />
+            </div>
+          </div>
+        </div>
 
         <button
           onClick={() => onReset && onReset()}
@@ -259,35 +289,6 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           <span className="text-xl filter drop-shadow-[0_0_5px_rgba(253,186,116,0.8)] group-hover:-translate-y-1 transition-transform duration-300">🏮</span>
           <span className="font-serif text-sm tracking-wide">Wish</span>
         </button>
-      </div>
-
-      {/* Desktop: Settings panel — centered just above the bottom bar */}
-      <div className={`hidden sm:flex fixed z-40 bottom-24 left-0 right-0 justify-center pointer-events-none ${panelCls}`}>
-        <div
-          className={`pointer-events-auto w-56 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom ${
-            settingsOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
-          }`}
-        >
-          <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Sky</p>
-          {SKY_OPTIONS.map((opt) => {
-            const active = skyTheme === opt.key;
-            return (
-              <button
-                key={opt.key}
-                onClick={() => onSkyTheme && onSkyTheme(opt.key)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors duration-200 ${active ? 'bg-white/10' : 'hover:bg-white/5'}`}
-              >
-                <span
-                  className={`w-6 h-6 rounded-full shrink-0 border transition-all duration-200 ${active ? 'border-white/70 shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'border-white/20'}`}
-                  style={{ background: opt.dot }}
-                />
-                <span className={`font-serif text-sm tracking-wide ${active ? 'text-white' : 'text-slate-300'}`}>{opt.label}</span>
-                {active && <span className="ml-auto text-sky-300 text-xs">●</span>}
-              </button>
-            );
-          })}
-          <div className="h-2" />
-        </div>
       </div>
 
       {/* Share modal — QR code + link */}
