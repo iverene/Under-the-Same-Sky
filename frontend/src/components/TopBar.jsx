@@ -63,8 +63,23 @@ const TopBar = ({ skyTheme }) => {
         {currentDate}
       </h1>
 
-      {/* Status pills — sky theme beside moon phase */}
-      <div className="flex flex-row flex-wrap items-center gap-2 mt-1">
+      {/* Status pills — moon first, then sky; stacked on mobile, side by side on desktop */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 mt-1">
+      {/* Moon Phase Widget (live API — local math as fallback) */}
+      <div className="flex items-center gap-2 sm:gap-3 bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full">
+        <span className="text-xl sm:text-2xl filter drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">
+          {moon.icon}
+        </span>
+        <div className="flex flex-col">
+          <span className="text-[10px] text-blue-200 uppercase tracking-widest font-bold">
+            Current Moon
+          </span>
+          <span className="text-xs sm:text-sm text-white font-serif leading-none">
+            {moon.name} • {moon.illumination}
+          </span>
+        </div>
+      </div>
+
       {/* Sky Theme Widget — dot glides with the blend, label cross-fades */}
       <div className="flex items-center gap-2 sm:gap-3 bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full">
         <span
@@ -81,21 +96,6 @@ const TopBar = ({ skyTheme }) => {
             className="theme-fade text-xs sm:text-sm text-white font-serif leading-none"
           >
             {theme.label}
-          </span>
-        </div>
-      </div>
-
-      {/* Moon Phase Widget (live API — local math as fallback) */}
-      <div className="flex items-center gap-2 sm:gap-3 bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full">
-        <span className="text-xl sm:text-2xl filter drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">
-          {moon.icon}
-        </span>
-        <div className="flex flex-col">
-          <span className="text-[10px] text-blue-200 uppercase tracking-widest font-bold">
-            Current Moon
-          </span>
-          <span className="text-xs sm:text-sm text-white font-serif leading-none">
-            {moon.name} • {moon.illumination}
           </span>
         </div>
       </div>
