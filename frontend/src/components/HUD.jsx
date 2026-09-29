@@ -196,7 +196,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           DESKTOP LAYOUT — horizontal bar bottom center
           ============================================================ */}
 
-      {/* Desktop: Write + Wish + Reset + Moon + Search — bottom center bar */}
+      {/* Desktop: Write + Wish + Reset + Moon + Share — bottom center bar (search lives in TopBar) */}
       <div className={`hidden sm:flex fixed bottom-8 left-0 right-0 z-40 justify-center items-center gap-3 pointer-events-none ${barCls}`}>
         <button
           onClick={() => setSettingsOpen((v) => !v)}
@@ -222,20 +222,6 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v5h5" />
-          </svg>
-        </button>
-
-        <button
-          onClick={() => onToggleSearch && onToggleSearch()}
-          aria-label="Search by name"
-          className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
-            isSearching
-              ? 'bg-blue-500/20 border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
-              : 'bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
         </button>
 
