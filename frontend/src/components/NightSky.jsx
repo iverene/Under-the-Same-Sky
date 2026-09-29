@@ -188,15 +188,31 @@ const NightSky = () => {
 
   // Load messages from the backend on mount — real user data only.
   // Empty sky (background stars + terrain still render) when empty/offline.
-  // Polls every 10s and merges new arrivals by ID so existing stars
-  // never remount or jump. Also refetches when the tab regains focus.
+  // Initial page of 200, then cheap cursor deltas every 15s; merges new
+  // arrivals by ID so existing stars never remount or jump. Also refetches
+  // when the tab regains focus.
+  // Newest-seen cursor ("created_at,id" — ISO strings sort lexicographically).
+  const cursorRef = useRef(null);
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        const data = await fetchMessages();
+        const { rows, nextCursor } = await fetchMessages(
+          cursorRef.current ? { cursor: cursorRef.current } : { limit: 200 }
+        );
         if (cancelled) return;
-        const incoming = Array.isArray(data) ? data.map(normalizeMessage) : [];
+        const incoming = rows.map(normalizeMessage);
+        // Track the newest row seen so the next poll is a delta, even when
+        // the server had no next page (rows.length < limit).
+        for (const r of rows) {
+          const stamp = r.created_at ? `${new Date(r.created_at).toISOString()},${r.id}` : null;
+          if (stamp && (!cursorRef.current || stamp > cursorRef.current)) {
+            cursorRef.current = stamp;
+          }
+        }
+        if (nextCursor && (!cursorRef.current || nextCursor > cursorRef.current)) {
+          cursorRef.current = nextCursor;
+        }
         setMessages((prev) => {
           if (prev.length === 0) return incoming;
           const byId = new Map(prev.map((m) => [m.id, m]));
@@ -215,8 +231,8 @@ const NightSky = () => {
     };
     load();
 
-    // Poll every 10 seconds for cross-device updates
-    const pollId = setInterval(load, 10000);
+    // Poll every 15 seconds for cross-device updates
+    const pollId = setInterval(load, 15000);
 
     // Refetch when tab becomes visible again
     const onVisibility = () => { if (document.visibilityState === 'visible') load(); };
