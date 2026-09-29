@@ -11,7 +11,7 @@ import { SKY_THEMES } from '../../three/themes';
 // closing cards or picking other objects never resets your POV.
 // Only the reset button glides you home. An optional explicit focusCam
 // overrides the perch (used by the sign overlook shot).
-export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal, introHold }) => {
+export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal, introHold, onHomed }) => {
   const wasFocused = useRef(false);
   // Rest gaze shared with the initial orbit pivot (see HOME_TARGET)
   const homeTarget = useMemo(() => HOME_TARGET.clone(), []);
@@ -50,6 +50,7 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
       controls.target.lerp(homeTarget, t);
       if (camera.position.distanceTo(HOME_POS) < 0.15) {
         flightRef.current.homingCam = false;
+        onHomed && onHomed();
       }
       return;
     }

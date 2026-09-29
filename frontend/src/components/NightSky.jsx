@@ -128,6 +128,18 @@ const NightSky = () => {
   const [introRun, setIntroRun] = useState(() => randomDialogueIndex(-1));
   const showIntroRef = useRef(true);
   showIntroRef.current = showIntro;
+  // Reset replays the intro, but only once the homeward glide has arrived —
+  // starting the dialogue mid-flight leaves the couple out of frame.
+  // The spin stays held for the whole glide so arrival framing is exact.
+  const pendingIntroRef = useRef(false);
+  const [homing, setHoming] = useState(false);
+  const handleHomed = useCallback(() => {
+    setHoming(false);
+    if (pendingIntroRef.current) {
+      pendingIntroRef.current = false;
+      setShowIntro(true);
+    }
+  }, []);
 
   // Memoized starfield for splash so positions don't regenerate on re-render
   const splashStars = useMemo(() =>
@@ -431,6 +443,10 @@ const NightSky = () => {
         downPos.current = [e.clientX, e.clientY];
         flightRef.current.flying = false; // grabbing the scene cancels any flight
         flightRef.current.homingCam = false;
+        // Grabbing mid-glide forfeits the pending replay: the camera won't be
+        // home, so starting the dialogue would frame the couple out of view.
+        pendingIntroRef.current = false;
+        setHoming(false);
       }}
     >
       <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} onPointerMissed={handlePointerMissed}>
@@ -505,7 +521,7 @@ const NightSky = () => {
 
         {/* --- CONTROLS --- */}
         {/* Focus flight runs alongside the controls */}
-        <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} introHold={showIntro} />
+        <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} introHold={showIntro || homing} onHomed={handleHomed} />
         <OrbitControls
           ref={controlsRef}
           // Rest gaze aims between the couple and the sign (see HOME_TARGET)
@@ -601,8 +617,10 @@ const NightSky = () => {
         onToggleUI={() => setUiHidden((v) => !v)}
         onReset={() => {
           clearProps();
+          setShowIntro(false);
           setIntroRun((i) => randomDialogueIndex(i));
-          setShowIntro(true);
+          pendingIntroRef.current = true;
+          setHoming(true);
           setHomeSignal((s) => s + 1);
         }}
         isSearching={isSearching}

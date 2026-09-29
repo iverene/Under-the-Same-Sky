@@ -21,9 +21,9 @@ Intro dialogue exists (`frontend/src/components/sky/IntroDialogue.jsx`, wired in
 1. New file `frontend/src/components/sky/introDialogues.json`: array of `{ "boy": "...", "girl": "..." }`, 7 entries (original + 6 unique user pairs; the user's duplicated "listening/stars" pair is stored once so it isn't double-weighted).
 2. `IntroDialogue.jsx` imports the JSON; helper `randomDialogueIndex(exclude)` picks via `Math.random` at module scope (lint-safe: outside render; stable across remounts; random per page load and per device).
 3. `NightSky.jsx` owns `introRun` state (dialogue index, init random): `<IntroDialogue key={introRun} dialogueIndex={introRun} ... />`. `key` remount resets phases per replay.
-4. HUD reset handler additionally calls `setShowIntro(true)` + `setIntroRun(i => randomDialogueIndex(i))` (never repeats the just-played variation when pool > 1). Existing reset behavior (clear selection, glide home) is unchanged and runs underneath the replay.
+4. HUD reset handler re-rolls (`setIntroRun(i => randomDialogueIndex(i))`, never repeats the just-played variation when pool > 1), hides any showing intro, and arms a pending replay — but the dialogue only (re)starts when the homeward glide arrives (`CameraRig` `onHomed` callback). Starting it mid-flight frames the couple out of view. The spin stays held for the whole glide so arrival framing is exact. Existing reset behavior (clear selection, glide home) is otherwise unchanged.
 5. `BOY_LINE`/`GIRL_LINE` named exports are removed; the component reads the pair by `dialogueIndex`. Phase timing, projection, clamping, aria-live, Skip are unchanged.
-6. Reset pressed mid-intro: restarts intro with another new variation (acceptable, stated explicitly).
+6. Reset pressed mid-intro: current intro hides, camera glides home, replay starts on arrival with another new variation. Grabbing the scene mid-glide cancels the glide and forfeits the pending replay (the camera won't be home).
 
 ## Dialogue pool (exact copy, verbatim)
 1. Boy: "Our stories may be different, but we're under the same sky." / Girl: "And sometimes, knowing we're not alone is enough to keep going."
