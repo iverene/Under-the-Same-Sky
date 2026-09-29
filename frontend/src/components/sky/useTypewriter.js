@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 // render), never synchronous setState in the effect body. Interval callbacks
 // are async and permitted (same as the existing timer setState calls).
 const useTypewriter = (text, { active = true, speed = 28, reduceMotion = false } = {}) => {
-  const [count, setCount] = useState(() => text.length);
+  const [count, setCount] = useState(() => (reduceMotion || !active ? text.length : 0));
   const [prev, setPrev] = useState({ text, active, reduceMotion });
   if (prev.text !== text || prev.active !== active || prev.reduceMotion !== reduceMotion) {
     setPrev({ text, active, reduceMotion });

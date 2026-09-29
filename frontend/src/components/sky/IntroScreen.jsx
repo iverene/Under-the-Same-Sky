@@ -22,6 +22,8 @@ const STARS = Array.from({ length: 95 }, () => ({
   opacity: +(0.4 + rand() * 0.6).toFixed(2),
 }));
 
+const PHASE_ORDER = { boy: 0, girl: 1, ready: 2 };
+
 const IntroScreen = ({ onStart }) => {
   const pair = useMemo(() => POOL[randomDialogueIndex(-1)] || FALLBACK_PAIR, []);
   const [phase, setPhase] = useState('boy');
@@ -39,7 +41,6 @@ const IntroScreen = ({ onStart }) => {
 
   // Monotonic fallback timers: rapid taps must never be regressed by a late
   // timer fire (e.g. reaching `ready` before t1 fires).
-  const PHASE_ORDER = { boy: 0, girl: 1, ready: 2 };
   useEffect(() => {
     const t1 = setTimeout(() => setPhase((p) => (PHASE_ORDER[p] < 1 ? 'girl' : p)), 4200);
     const t2 = setTimeout(() => setPhase((p) => (PHASE_ORDER[p] < 2 ? 'ready' : p)), 8400);
