@@ -33,6 +33,7 @@ import { Bench, Signpost, Stargazers } from './sky/Foreground';
 import { CameraRig, SkyRig, GroundCollision } from './sky/Rigs';
 import ReadingCard from './sky/ReadingCard';
 import IntroDialogue from './sky/IntroDialogue';
+import { randomDialogueIndex } from './sky/introDialogues';
 import SearchPanel from './sky/SearchPanel';
 import { useOutsideTapClose } from './sky/useOutsideTapClose';
 
@@ -124,6 +125,7 @@ const NightSky = () => {
   const [splashVisible, setSplashVisible] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
   const handleIntroDone = useCallback(() => setShowIntro(false), []);
+  const [introRun, setIntroRun] = useState(() => randomDialogueIndex(-1));
   const showIntroRef = useRef(true);
   showIntroRef.current = showIntro;
 
@@ -586,7 +588,7 @@ const NightSky = () => {
       )}
 
       {ready && !splashVisible && showIntro && (
-        <IntroDialogue camera={controlsRef.current?.object ?? null} onDone={handleIntroDone} />
+        <IntroDialogue key={introRun} dialogueIndex={introRun} camera={controlsRef.current?.object ?? null} onDone={handleIntroDone} />
       )}
       {!uiHidden && <TopBar />}
 
@@ -599,6 +601,8 @@ const NightSky = () => {
         onToggleUI={() => setUiHidden((v) => !v)}
         onReset={() => {
           clearProps();
+          setIntroRun((i) => randomDialogueIndex(i));
+          setShowIntro(true);
           setHomeSignal((s) => s + 1);
         }}
         isSearching={isSearching}
