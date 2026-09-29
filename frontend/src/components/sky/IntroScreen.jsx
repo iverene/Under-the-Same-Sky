@@ -37,9 +37,12 @@ const IntroScreen = ({ onStart }) => {
     return () => media.removeEventListener?.('change', handler);
   }, []);
 
+  // Monotonic fallback timers: rapid taps must never be regressed by a late
+  // timer fire (e.g. reaching `ready` before t1 fires).
+  const PHASE_ORDER = { boy: 0, girl: 1, ready: 2 };
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('girl'), 4200);
-    const t2 = setTimeout(() => setPhase('ready'), 8400);
+    const t1 = setTimeout(() => setPhase((p) => (PHASE_ORDER[p] < 1 ? 'girl' : p)), 4200);
+    const t2 = setTimeout(() => setPhase((p) => (PHASE_ORDER[p] < 2 ? 'ready' : p)), 8400);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
