@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
 import { fetchMessages, sendMessage } from '../api';
 import ComposeModal from './ComposeModal';
@@ -27,13 +27,25 @@ import {
 import MessageStar from './sky/MessageStar';
 import FloatingLantern from './sky/FloatingLantern';
 import FallingStarSystem from './sky/FallingStarSystem';
+import Constellations from './sky/Constellations';
 import { NebulaField, Moon } from './sky/Backdrop';
 import { Ground, HillDetails, Fireflies, MountainRange } from './sky/Terrain';
 import { Bench, Signpost, Stargazers } from './sky/Foreground';
 import { CameraRig, SkyRig, GroundCollision } from './sky/Rigs';
 import ReadingCard from './sky/ReadingCard';
+import IntroScreen from './sky/IntroScreen';
 import SearchPanel from './sky/SearchPanel';
 import { useOutsideTapClose } from './sky/useOutsideTapClose';
+
+// Renders a single frame on mount so shaders and textures are warm while the
+// opaque intro covers the screen; the loop itself stays paused until Start.
+const SceneWarmup = () => {
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    invalidate();
+  }, [invalidate]);
+  return null;
+};
 
 // Orchestrator: owns scene state (messages, selection, theme, modals),
 // wires texture instances into scene components via props, and composes
@@ -54,6 +66,14 @@ const NightSky = () => {
     const t = setTimeout(() => setSendError(null), 6000);
     return () => clearTimeout(t);
   }, [sendError]);
+
+  // Last successful send — celebratory banner (auto-clears)
+  const [sendSuccess, setSendSuccess] = useState(false);
+  useEffect(() => {
+    if (!sendSuccess) return;
+    const t = setTimeout(() => setSendSuccess(false), 6000);
+    return () => clearTimeout(t);
+  }, [sendSuccess]);
 
   // Fresh arrivals (id -> release timestamp): they glow brightly for
   // FRESH_GLOW_MS so you can spot where yours landed, then settle
@@ -121,6 +141,8 @@ const NightSky = () => {
   const woodTexture = useWoodTexture();
 
   const [splashVisible, setSplashVisible] = useState(true);
+  const [showIntro, setShowIntro] = useState(true);
+  const handleIntroStart = useCallback(() => setShowIntro(false), []);
 
   // Memoized starfield for splash so positions don't regenerate on re-render
   const splashStars = useMemo(() =>
@@ -306,6 +328,8 @@ const NightSky = () => {
         ...saved,
         // Backend returns a raw row (position_x/y/z); normalizeMessage handles it.
         // Keep the requested lantern type for display even if backend stored otherwise.
+        // Prefer the saved sender row, fall back to what was just typed.
+        sender: saved.sender ?? data.sender ?? null,
         type: data.type || saved.type,
         position: saved.position || saved.position_x !== undefined
           ? (saved.position || { x: saved.position_x, y: saved.position_y, z: saved.position_z })
@@ -318,6 +342,7 @@ const NightSky = () => {
       }
       setMessages(prev => [...prev, normalized]);
       markFresh(normalized.id);
+      setSendSuccess(true);
       // Showcase the new arrival: fly the camera out to it (stops at focus
       // distance — close enough to see, never on top of it)
       if (normalized.type === 'lantern') handleSelectLantern(normalized, normalized.position);
@@ -425,7 +450,8 @@ const NightSky = () => {
         flightRef.current.homingCam = false;
       }}
     >
-      <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} onPointerMissed={handlePointerMissed}>
+      <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} frameloop={showIntro ? 'never' : 'always'} onPointerMissed={handlePointerMissed}>
+        <SceneWarmup />
 
         {/* --- ATMOSPHERE --- */}
         {/* Dark Blue-Black Night Sky */}
@@ -453,6 +479,9 @@ const NightSky = () => {
 
         {/* Subtle floating dust/fireflies */}
         <Sparkles count={300} scale={60} size={2} speed={0.2} opacity={0.3} color="#aaddff" raycast={() => null} />
+
+        {/* Decorative dot-to-dot figures on the far shell (purely ambient) */}
+        <Constellations />
 
         {/* --- LIGHTING --- */}
         <ambientLight ref={ambientRef} intensity={0.5} />
@@ -497,10 +526,9 @@ const NightSky = () => {
 
         {/* --- CONTROLS --- */}
         {/* Focus flight runs alongside the controls */}
-        <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} />
+        <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} introHold={showIntro} />
         <OrbitControls
           ref={controlsRef}
-          // Rest gaze aims at the signage so it sits centered on reset
           target={[0, 1, 0]}
           enablePan={false}
           enableZoom={true}
@@ -522,7 +550,7 @@ const NightSky = () => {
           maxPolarAngle={Math.PI - 0.05}
           // Slow, cinematic rotation
           autoRotate={true}
-          autoRotateSpeed={0.3}
+          autoRotateSpeed={0.15}
           enableDamping={true}
           dampingFactor={0.05}
           rotateSpeed={0.4}
@@ -560,6 +588,27 @@ const NightSky = () => {
         </div>
       )}
 
+      {/* Send success banner — top-center, dismissible, auto-clears */}
+      {sendSuccess && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md">
+          <div className="flex items-center gap-3 bg-emerald-950/90 backdrop-blur-xl border border-emerald-500/30 rounded-xl px-4 py-3 shadow-[0_0_30px_rgba(52,211,153,0.25)] animate-in fade-in slide-in-from-top-4 duration-300">
+            <span aria-hidden className="text-emerald-400 text-lg shrink-0">✦</span>
+            <div className="flex-1 leading-snug">
+              <p className="text-sm text-emerald-100 font-medium">Your voice is now part of the sky.</p>
+              <p className="text-xs text-emerald-200/80 mt-0.5">Someone else may be looking up at this same light.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSendSuccess(false)}
+              aria-label="Dismiss confirmation"
+              className="shrink-0 text-emerald-400/70 hover:text-emerald-300 text-lg leading-none transition-colors"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Send failure banner — top-center, dismissible, auto-clears */}
       {sendError && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md">
@@ -578,8 +627,10 @@ const NightSky = () => {
         </div>
       )}
 
-      {!uiHidden && <TopBar />}
+      {ready && !splashVisible && showIntro && (<IntroScreen onStart={handleIntroStart} />)}
+      {!showIntro && !uiHidden && <TopBar skyTheme={skyTheme} />}
 
+      {!showIntro && (
       <HUD
         onOpenCompose={() => setIsWriting(true)}
         onOpenWish={() => setIsWishing(true)}
@@ -594,6 +645,7 @@ const NightSky = () => {
         isSearching={isSearching}
         onToggleSearch={() => { setIsSearching((v) => !v); clearProps(); }}
       />
+      )}
     </div>
     </>
   );

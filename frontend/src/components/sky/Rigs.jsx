@@ -11,9 +11,9 @@ import { SKY_THEMES } from '../../three/themes';
 // closing cards or picking other objects never resets your POV.
 // Only the reset button glides you home. An optional explicit focusCam
 // overrides the perch (used by the sign overlook shot).
-export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal }) => {
+export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal, introHold }) => {
   const wasFocused = useRef(false);
-  // Rest gaze aims at the signage area so it sits centered on reset
+  // Rest gaze shared with the initial orbit pivot
   const homeTarget = useMemo(() => new THREE.Vector3(0, 1, 0), []);
   const tmpDir = useMemo(() => new THREE.Vector3(), []);
   const tmpDesired = useMemo(() => new THREE.Vector3(), []);
@@ -45,7 +45,7 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
 
     if (flightRef.current.homingCam) {
       // Glide home to the bench: position + target together, then release
-      const t = 1 - Math.exp(-2.5 * delta);
+      const t = 1 - Math.exp(-1.5 * delta);
       camera.position.lerp(HOME_POS, t);
       controls.target.lerp(homeTarget, t);
       if (camera.position.distanceTo(HOME_POS) < 0.15) {
@@ -54,7 +54,7 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
       return;
     }
 
-    const t = 1 - Math.exp(-3 * delta);
+    const t = 1 - Math.exp(-1.8 * delta);
 
     if (focusPoint && flightRef.current.flying) {
       controls.autoRotate = false;
@@ -87,6 +87,12 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
       // Closing a card or picking another object never moves your POV —
       // only the reset button glides you home.
       controls.autoRotate = true;
+      // Intro screen: freeze the opening frame while the dialogue plays so
+      // the pan only begins once the user starts exploring. Input is never
+      // locked — the opaque intro simply covers the canvas until Start.
+      controls.autoRotateSpeed = THREE.MathUtils.damp(
+        controls.autoRotateSpeed, introHold ? 0 : 0.15, 2.5, delta
+      );
     }
     wasFocused.current = !!focusPoint;
   });

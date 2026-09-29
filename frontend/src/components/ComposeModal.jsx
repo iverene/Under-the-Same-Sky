@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const [recipient, setRecipient] = useState('');
+  const [sender, setSender] = useState('');
   const [message, setMessage] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const hideTimer = useRef(null);
   const rootRef = useRef(null);
 
   const RECIPIENT_LIMIT = 60;
+  const SENDER_LIMIT = 60;
   const MESSAGE_LIMIT = 500;
 
   useEffect(() => {
@@ -40,8 +42,9 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!recipient || !message) return;
-    onSend({ recipient, message, type: 'star' });
+    onSend({ recipient, message, sender: sender.trim(), type: 'star' });
     setRecipient('');
+    setSender('');
     setMessage('');
     onClose();
   };
@@ -64,8 +67,16 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
         <div className="p-8 relative z-0">
           {/* Header */}
           <div className="mb-8 text-center">
+            <div className="flex justify-center mb-3">
+              <div className="p-3 bg-blue-500/10 rounded-full shadow-[0_0_15px_rgba(96,165,250,0.25)]">
+                <svg className="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2c.6 4.8 2.9 7.1 7.7 7.7-4.8.6-7.1 2.9-7.7 7.7-.6-4.8-2.9-7.1-7.7-7.7 4.8-.6 7.1-2.9 7.7-7.7z" />
+                  <path d="M19 15.5c.3 2.1 1.3 3.1 3.4 3.4-2.1.3-3.1 1.3-3.4 3.4-.3-2.1-1.3-3.1-3.4-3.4 2.1-.3 3.1-1.3 3.4-3.4z" opacity="0.6" />
+                </svg>
+              </div>
+            </div>
             <h2 className="text-3xl font-serif text-white mb-2 tracking-wide drop-shadow-lg">
-              Write an Entry
+              Write a Message to the Sky
             </h2>
             <p className="text-blue-200/60 text-xs font-medium tracking-[0.2em] uppercase">
               Cast your thought into the void
@@ -90,6 +101,22 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
               />
             </div>
             
+            {/* Sender Input (optional) */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">From <span className="text-slate-600 normal-case font-medium tracking-normal">(optional)</span></label>
+                <span className="text-[10px] text-slate-500 tabular-nums mr-1">{sender.length}/{SENDER_LIMIT}</span>
+              </div>
+              <input
+                type="text"
+                value={sender}
+                maxLength={SENDER_LIMIT}
+                onChange={(e) => setSender(e.target.value)}
+                className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border border-white/5 focus:border-blue-400/50 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-400/30 transition-all duration-200"
+                placeholder="Anonymous"
+              />
+            </div>
+
             {/* Message Input */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">

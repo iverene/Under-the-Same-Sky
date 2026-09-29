@@ -41,6 +41,15 @@
   to { width: 100%; }
 }
 
+@keyframes theme-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.theme-fade {
+  animation: theme-fade 0.8s ease-out both;
+}
+
 @keyframes splashLantern {
   0% { transform: translateY(0) translateX(0) scale(0.6); opacity: 0; }
   10% { opacity: 0.9; }

@@ -48,6 +48,7 @@ export const normalizeMessage = (raw) => {
   return {
     id: raw.id,
     recipient: raw.recipient,
+    sender: raw.sender || null,
     content: raw.content,
     type,
     position,

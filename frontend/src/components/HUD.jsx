@@ -22,6 +22,16 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
   }, []);
 
   const show = !uiHidden;
+
+  // Dismiss the sky picker on Escape
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setSettingsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [settingsOpen]);
   const pillCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`;
   const barCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-6 scale-95 pointer-events-none'}`;
   const panelCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'}`;
@@ -44,12 +54,12 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
   return (
     <>
       {/* 1. Instructional pill */}
-      <div className={`fixed bottom-4 sm:bottom-24 left-0 w-full z-40 pointer-events-none flex justify-center px-4 ${pillCls}`}>
+      <div className={`fixed bottom-2 sm:bottom-24 left-0 w-full z-40 pointer-events-none flex justify-center px-4 ${pillCls}`}>
         <div className="bg-slate-950/40 backdrop-blur-md border border-white/5 px-4 sm:px-6 py-2 rounded-full shadow-lg max-w-full">
           <p className="text-blue-100/60 text-[9px] sm:text-[10px] font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-center leading-relaxed text-balance">
             {isTouch
               ? 'Pinch to Zoom \u2022 Drag \u2022 Tap Stars & Lanterns'
-              : 'Scroll to Zoom \u2022 Drag to Explore \u2022 Click Stars & Lanterns to Fly Closer'}
+              : 'Scroll to Zoom \u2022 Drag to Explore \u2022 Click Stars & Lanterns to discover a message.'}
           </p>
         </div>
       </div>
@@ -98,6 +108,11 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           )}
         </button>
       </div>
+
+      {/* Dismiss layer for the sky picker — taps anywhere outside it close it */}
+      {settingsOpen && (
+        <div className="fixed inset-0 z-30" onClick={() => setSettingsOpen(false)} aria-hidden />
+      )}
 
       {/* ============================================================
           MOBILE LAYOUT — old design, left & right columns
@@ -150,7 +165,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
             return (
               <button
                 key={opt.key}
-                onClick={() => onSkyTheme && onSkyTheme(opt.key)}
+                    onClick={() => { onSkyTheme && onSkyTheme(opt.key); setSettingsOpen(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors duration-200 ${active ? 'bg-white/10' : 'hover:bg-white/5'}`}
               >
                 <span
@@ -196,22 +211,52 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           DESKTOP LAYOUT — horizontal bar bottom center
           ============================================================ */}
 
-      {/* Desktop: Write + Wish + Reset + Moon + Search — bottom center bar */}
+      {/* Desktop: Write + Wish + Reset + Moon + Share — bottom center bar (search lives in TopBar) */}
       <div className={`hidden sm:flex fixed bottom-8 left-0 right-0 z-40 justify-center items-center gap-3 pointer-events-none ${barCls}`}>
-        <button
-          onClick={() => setSettingsOpen((v) => !v)}
-          aria-label="Sky settings"
-          aria-expanded={settingsOpen}
-          className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
-            settingsOpen
-              ? 'bg-sky-500/20 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
-              : 'bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
-          }`}
-        >
-          <svg aria-hidden="true" className={`w-5 h-5 text-slate-200 transition-transform duration-500 ${settingsOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
-          </svg>
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setSettingsOpen((v) => !v)}
+            aria-label="Sky settings"
+            aria-expanded={settingsOpen}
+            className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
+              settingsOpen
+                ? 'bg-sky-500/20 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
+                : 'bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
+            }`}
+          >
+            <svg aria-hidden="true" className={`w-5 h-5 text-slate-200 transition-transform duration-500 ${settingsOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
+            </svg>
+          </button>
+          {/* Sky panel — anchored above its moon button */}
+          <div className={`absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-40 pointer-events-none ${panelCls}`}>
+            <div
+              className={`pointer-events-auto w-56 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom ${
+                settingsOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
+              }`}
+            >
+              <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Sky</p>
+              {SKY_OPTIONS.map((opt) => {
+                const active = skyTheme === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                onClick={() => { onSkyTheme && onSkyTheme(opt.key); setSettingsOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors duration-200 ${active ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                  >
+                    <span
+                      className={`w-6 h-6 rounded-full shrink-0 border transition-all duration-200 ${active ? 'border-white/70 shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'border-white/20'}`}
+                      style={{ background: opt.dot }}
+                    />
+                    <span className={`font-serif text-sm tracking-wide ${active ? 'text-white' : 'text-slate-300'}`}>{opt.label}</span>
+                    {active && <span className="ml-auto text-sky-300 text-xs">●</span>}
+                  </button>
+                );
+              })}
+              <div className="h-2" />
+            </div>
+          </div>
+        </div>
 
         <button
           onClick={() => onReset && onReset()}
@@ -222,20 +267,6 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v5h5" />
-          </svg>
-        </button>
-
-        <button
-          onClick={() => onToggleSearch && onToggleSearch()}
-          aria-label="Search by name"
-          className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
-            isSearching
-              ? 'bg-blue-500/20 border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
-              : 'bg-slate-900/40 border-white/10 hover:border-white/30 text-slate-200'
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
         </button>
 
@@ -273,35 +304,6 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           <span className="text-xl filter drop-shadow-[0_0_5px_rgba(253,186,116,0.8)] group-hover:-translate-y-1 transition-transform duration-300">🏮</span>
           <span className="font-serif text-sm tracking-wide">Wish</span>
         </button>
-      </div>
-
-      {/* Desktop: Settings panel only — bottom right */}
-      <div className={`hidden sm:flex fixed z-40 bottom-20 right-6 flex-col items-end ${panelCls}`}>
-        <div
-          className={`pointer-events-auto w-56 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom-right ${
-            settingsOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
-          }`}
-        >
-          <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Sky</p>
-          {SKY_OPTIONS.map((opt) => {
-            const active = skyTheme === opt.key;
-            return (
-              <button
-                key={opt.key}
-                onClick={() => onSkyTheme && onSkyTheme(opt.key)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors duration-200 ${active ? 'bg-white/10' : 'hover:bg-white/5'}`}
-              >
-                <span
-                  className={`w-6 h-6 rounded-full shrink-0 border transition-all duration-200 ${active ? 'border-white/70 shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'border-white/20'}`}
-                  style={{ background: opt.dot }}
-                />
-                <span className={`font-serif text-sm tracking-wide ${active ? 'text-white' : 'text-slate-300'}`}>{opt.label}</span>
-                {active && <span className="ml-auto text-sky-300 text-xs">●</span>}
-              </button>
-            );
-          })}
-          <div className="h-2" />
-        </div>
       </div>
 
       {/* Share modal — QR code + link */}

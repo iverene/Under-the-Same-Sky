@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getMoonData, fetchMoonData } from '../moon';
+import { SKY_THEMES } from '../three/themes';
 
-const TopBar = () => {
+const TopBar = ({ skyTheme }) => {
   const [now, setNow] = useState(() => new Date());
-  const [apiMoon, setApiMoon] = useState(null);
 
-  // Refresh at local midnight so date + moon phase never go stale
+  // Refresh at local midnight so the date never goes stale
   useEffect(() => {
     const scheduleTick = () => {
       const current = new Date();
@@ -20,22 +19,6 @@ const TopBar = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Live phase from the open API, local math as instant fallback
-  useEffect(() => {
-    let live = true;
-    fetchMoonData(now).then(
-      (data) => {
-        if (live) setApiMoon(data);
-      },
-      () => {
-        if (live) setApiMoon(null);
-      }
-    );
-    return () => {
-      live = false;
-    };
-  }, [now]);
-
   // Complete date on every screen size
   const currentDate = useMemo(
     () =>
@@ -47,8 +30,9 @@ const TopBar = () => {
       }).format(now),
     [now]
   );
-  const localMoon = useMemo(() => getMoonData(now), [now]);
-  const moon = apiMoon || localMoon;
+
+  // Live sky theme, mirroring the SkyRig blend (same fallback)
+  const theme = SKY_THEMES[skyTheme] || SKY_THEMES.deepnight;
 
   return (
     <div className="fixed top-4 left-4 sm:top-6 sm:left-6 z-40 flex flex-col items-start gap-1 pointer-events-none select-none">
@@ -58,17 +42,22 @@ const TopBar = () => {
         {currentDate}
       </h1>
 
-      {/* Moon Phase Widget (live API — local math as fallback) */}
+      {/* Sky Theme Widget — dot glides with the blend, label cross-fades */}
       <div className="flex items-center gap-2 sm:gap-3 bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full mt-1">
-        <span className="text-xl sm:text-2xl filter drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">
-          {moon.icon}
-        </span>
+        <span
+          aria-hidden
+          className="h-5 w-5 sm:h-6 sm:w-6 rounded-full border border-white/20 drop-shadow-[0_0_8px_rgba(255,255,255,0.35)] transition-colors duration-1000"
+          style={{ backgroundColor: theme.bg }}
+        />
         <div className="flex flex-col">
           <span className="text-[10px] text-blue-200 uppercase tracking-widest font-bold">
-            Current Moon
+            Current Sky
           </span>
-          <span className="text-xs sm:text-sm text-white font-serif leading-none">
-            {moon.name} • {moon.illumination}
+          <span
+            key={skyTheme || 'deepnight'}
+            className="theme-fade text-xs sm:text-sm text-white font-serif leading-none"
+          >
+            {theme.label}
           </span>
         </div>
       </div>

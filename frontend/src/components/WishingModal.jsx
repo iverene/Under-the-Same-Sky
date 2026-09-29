@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getMoonData, fetchMoonData } from '../moon';
 
 // Lantern Icon
 const LanternIcon = () => (
@@ -18,26 +17,6 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
 
   const NAME_LIMIT = 60;
   const WISH_LIMIT = 500;
-  // Live lunar state for the availability badge (API first, local math fallback)
-  const [apiMoon, setApiMoon] = useState(null);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    let live = true;
-    fetchMoonData().then(
-      (data) => {
-        if (live) setApiMoon(data);
-      },
-      () => {
-        if (live) setApiMoon(null);
-      }
-    );
-    return () => {
-      live = false;
-    };
-  }, [isOpen]);
-
-  const moon = apiMoon || getMoonData();
 
   useEffect(() => {
     if (isOpen) {
@@ -102,20 +81,9 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
             <h2 className="text-3xl font-serif text-amber-50 mb-2 tracking-wide drop-shadow-lg">
               Make a Wish
             </h2>
-            <p className="text-amber-200/60 text-xs font-medium tracking-[0.2em] uppercase mb-4">
+            <p className="text-amber-200/60 text-xs font-medium tracking-[0.2em] uppercase">
               Light a lantern for hope
             </p>
-
-            {/* Live moon availability badge — actual phase + illumination */}
-            <div className="inline-block max-w-full px-5 py-2 rounded-full bg-amber-950/40 border border-amber-500/20 text-center">
-              <p className="text-amber-400/90 text-[10px] font-serif italic tracking-wide leading-relaxed text-balance">
-                {moon.isFull ? (
-                  'The moon is full'
-                ) : (
-                  <span className="block">{moon.name} • {moon.illumination} illuminated</span>
-                )}
-              </p>
-            </div>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
