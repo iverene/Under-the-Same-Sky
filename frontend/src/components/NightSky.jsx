@@ -27,6 +27,7 @@ import {
 import MessageStar from './sky/MessageStar';
 import FloatingLantern from './sky/FloatingLantern';
 import FallingStarSystem from './sky/FallingStarSystem';
+import Constellations from './sky/Constellations';
 import { NebulaField, Moon } from './sky/Backdrop';
 import { Ground, HillDetails, Fireflies, MountainRange } from './sky/Terrain';
 import { Bench, Signpost, Stargazers } from './sky/Foreground';
@@ -478,6 +479,9 @@ const NightSky = () => {
 
         {/* Subtle floating dust/fireflies */}
         <Sparkles count={300} scale={60} size={2} speed={0.2} opacity={0.3} color="#aaddff" raycast={() => null} />
+
+        {/* Decorative dot-to-dot figures on the far shell (purely ambient) */}
+        <Constellations />
 
         {/* --- LIGHTING --- */}
         <ambientLight ref={ambientRef} intensity={0.5} />
