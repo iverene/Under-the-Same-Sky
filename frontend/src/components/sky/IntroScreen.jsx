@@ -91,13 +91,21 @@ const IntroScreen = ({ onStart }) => {
           </div>
           <svg width="86" height="150" viewBox="0 0 86 150" role="img" aria-label="Girl stargazer">
             <ellipse cx="43" cy="144" rx="30" ry="6" fill="#000" opacity="0.5" />
-            <path d="M43 62 L28 118 L58 118 Z" fill="#8a4f6e" />
-            <rect x="36" y="46" width="14" height="20" rx="5" fill="#8a4f6e" />
-            <circle cx="43" cy="36" r="11" fill="#eab88f" />
-            <path d="M32 34 a11 11 0 0 1 22 0 l0 -4 a11 8 0 0 0 -22 0" fill="#4a2c1a" />
-            <rect x="30" y="40" width="26" height="26" rx="9" fill="none" stroke="#4a2c1a" strokeWidth="5" />
-            <rect x="24" y="66" width="8" height="26" rx="4" fill="#8a4f6e" />
-            <rect x="54" y="52" width="8" height="26" rx="4" fill="#8a4f6e" transform="rotate(-24 58 56)" />
+            {/* long back hair framing the face */}
+            <ellipse cx="43" cy="52" rx="15" ry="24" fill="#4a2c1a" />
+            <rect x="26" y="52" width="9" height="34" rx="4.5" fill="#4a2c1a" />
+            <rect x="51" y="52" width="9" height="34" rx="4.5" fill="#4a2c1a" />
+            {/* dress + torso */}
+            <path d="M43 64 L28 118 L58 118 Z" fill="#8a4f6e" />
+            <rect x="36" y="50" width="14" height="18" rx="5" fill="#8a4f6e" />
+            {/* arms relaxed at the sides */}
+            <rect x="24" y="68" width="8" height="28" rx="4" fill="#8a4f6e" />
+            <rect x="54" y="68" width="8" height="28" rx="4" fill="#8a4f6e" />
+            {/* neck + face */}
+            <rect x="39" y="42" width="8" height="10" fill="#eab88f" />
+            <circle cx="43" cy="34" r="10.5" fill="#eab88f" />
+            {/* hair cap */}
+            <path d="M32.5 33.5 a10.5 10.5 0 0 1 21 0 Z" fill="#4a2c1a" />
           </svg>
           <p className="mt-2 text-center font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-pink-200/80">
             Girl

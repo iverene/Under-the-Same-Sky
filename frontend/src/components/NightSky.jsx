@@ -500,7 +500,7 @@ const NightSky = () => {
 
         {/* --- CONTROLS --- */}
         {/* Focus flight runs alongside the controls */}
-        <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} />
+        <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} introHold={showIntro} />
         <OrbitControls
           ref={controlsRef}
           target={[0, 1, 0]}
@@ -581,8 +581,9 @@ const NightSky = () => {
       )}
 
       {ready && !splashVisible && showIntro && (<IntroScreen onStart={handleIntroStart} />)}
-      {!uiHidden && <TopBar />}
+      {!showIntro && !uiHidden && <TopBar />}
 
+      {!showIntro && (
       <HUD
         onOpenCompose={() => setIsWriting(true)}
         onOpenWish={() => setIsWishing(true)}
@@ -597,6 +598,7 @@ const NightSky = () => {
         isSearching={isSearching}
         onToggleSearch={() => { setIsSearching((v) => !v); clearProps(); }}
       />
+      )}
     </div>
     </>
   );
