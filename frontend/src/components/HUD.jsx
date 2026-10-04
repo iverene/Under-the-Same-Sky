@@ -10,6 +10,7 @@ const SKY_OPTIONS = [
 const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
 
@@ -66,6 +67,14 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
 
       {/* 2. Top-right buttons — search fades with UI, hide toggle always visible */}
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2">
+        {/* Help — mobile only, holds the instructions */}
+        <button
+          onClick={() => setHelpOpen((v) => !v)}
+          aria-label="How to explore"
+          className="sm:hidden pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 text-slate-200 font-serif text-lg font-bold transition-all duration-300 active:scale-95"
+        >
+          ?
+        </button>
         {/* Search — fades with UI */}
         <button
           onClick={() => onToggleSearch && onToggleSearch()}
@@ -302,6 +311,33 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           <span className="font-serif text-sm tracking-wide">Wish</span>
         </button>
       </div>
+
+      {/* Help modal — instructions, mobile entry via the ? button */}
+      {helpOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6" onClick={() => setHelpOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-xs bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 text-center"
+          >
+            <p className="text-[10px] font-bold text-blue-200/70 uppercase tracking-[0.25em] mb-3">
+              How to explore
+            </p>
+            <div className="space-y-2.5 text-sm text-slate-200 font-serif">
+              <p>Pinch to zoom in on the sky</p>
+              <p>Drag to look around</p>
+              <p>Tap stars &amp; lanterns to discover a message</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setHelpOpen(false)}
+              className="mt-5 px-8 py-2.5 rounded-xl bg-blue-600/80 hover:bg-blue-500/80 text-white text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Share modal — QR code + link */}
       {shareOpen && (
