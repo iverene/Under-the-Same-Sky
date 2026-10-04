@@ -71,7 +71,11 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         <button
           onClick={() => setHelpOpen((v) => !v)}
           aria-label="How to explore"
-          className="sm:hidden pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 text-slate-200 font-serif text-lg font-bold transition-all duration-300 active:scale-95"
+          className={`sm:hidden pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-95 ${
+            uiHidden
+              ? 'opacity-0 pointer-events-none scale-90'
+              : 'opacity-100 bg-slate-900/40 border-white/10 text-slate-200 font-serif text-lg font-bold'
+          }`}
         >
           ?
         </button>
