@@ -127,21 +127,8 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           MOBILE LAYOUT — old design, left & right columns
           ============================================================ */}
 
-      {/* Mobile: Reset + sky toggle — bottom left */}
+      {/* Mobile: sky toggle + Reset — bottom left */}
       <div className={`sm:hidden fixed z-40 left-4 bottom-6 flex flex-col gap-3 items-center ${barCls}`}>
-        {/* Reset */}
-        <button
-          onClick={() => onReset && onReset()}
-          aria-label="Reset view to bench"
-          title="Back to the bench"
-          className="pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 text-slate-200 transition-all duration-300 active:scale-95"
-        >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v5h5" />
-          </svg>
-        </button>
-
         {/* Moon toggle */}
         <button
           onClick={() => setSettingsOpen((v) => !v)}
@@ -155,6 +142,19 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         >
           <svg aria-hidden="true" className="w-6 h-6 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
+          </svg>
+        </button>
+
+        {/* Reset */}
+        <button
+          onClick={() => onReset && onReset()}
+          aria-label="Reset view to bench"
+          title="Back to the bench"
+          className="pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 text-slate-200 transition-all duration-300 active:scale-95"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v5h5" />
           </svg>
         </button>
       </div>
