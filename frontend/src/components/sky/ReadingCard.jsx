@@ -11,22 +11,23 @@ const ReadingCard = ({ message, isLantern, cardRef }) => {
           <h3 className={`text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] ${isLantern ? 'text-amber-200' : 'text-blue-200'}`}>
             {isLantern ? 'A Wish Floating By' : 'Addressed To'}
           </h3>
-          <p className="text-white font-serif text-xl sm:text-2xl leading-tight mt-1 break-all">{message.recipient}</p>
+          <p className="text-white font-serif text-xl sm:text-2xl leading-tight mt-1 break-words">{message.recipient}</p>
         </div>
         {/* Full message flows naturally — no inner scrollbar */}
         <div className="relative mt-3">
           <span aria-hidden className="absolute -top-2 left-0 text-4xl text-white/10 font-serif leading-none">“</span>
           <p
-            className="text-[15px] sm:text-base font-serif text-slate-300 leading-relaxed italic text-center px-6 break-all max-w-full"
-            style={{ overflowWrap: 'anywhere', wordBreak: 'break-all' }}
+            className="text-[15px] sm:text-base font-serif text-slate-300 leading-relaxed italic text-center px-6 break-words max-w-full"
+            style={{ overflowWrap: 'anywhere' }}
           >
             {message.content}
           </p>
           {message.sender && (
-            <p className="mt-2 text-xs font-sans text-slate-400 text-center tracking-wide break-all">
+            <p className="mt-2 text-xs font-sans text-slate-400 text-center tracking-wide break-words">
               — from {message.sender}
             </p>
           )}
+          <span aria-hidden className="absolute -bottom-3 right-1 text-4xl text-white/10 font-serif leading-none">”</span>
         </div>
       </div>
     </div>
