@@ -266,14 +266,15 @@ export const Stargazers = ({ wood, glow, onSelect }) => {
       </mesh>
       {/* Warm spill so the pair reads in the dark */}
       <pointLight position={[0, deck.top + 1.8, 0.2]} distance={7} intensity={2} decay={2} color="#ff9a4e" />
-      {/* Invisible click box over the couple — roomy for touch taps */}
+      {/* Invisible click box hugging the couple — snug so nearby star and
+          lantern taps reach their targets instead of opening the team modal */}
       <mesh
-        position={[0, deck.top + 1, 0]}
+        position={[0, deck.top + 0.95, 0]}
         onClick={(e) => { e.stopPropagation(); onSelect && onSelect(); }}
         onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
         onPointerOut={() => { document.body.style.cursor = 'default'; }}
       >
-        <boxGeometry args={[3.0, 2.6, 2.2]} />
+        <boxGeometry args={[1.7, 2.0, 1.2]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 

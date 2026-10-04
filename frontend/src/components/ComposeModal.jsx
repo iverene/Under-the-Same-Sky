@@ -59,12 +59,23 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
       />
 
       {/* Modern Glass Card */}
-      <div className={`relative w-full max-w-lg overflow-hidden bg-slate-900/50 border border-white/10 rounded-3xl shadow-2xl shadow-blue-900/20 transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
+      <div className={`scroll-celestial relative w-full max-w-lg max-h-[92dvh] overflow-y-auto bg-slate-900/50 border border-white/10 rounded-3xl shadow-2xl shadow-blue-900/20 transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
+        {/* Close — mobile only (desktop uses backdrop / Escape) */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="sm:hidden absolute top-3 right-3 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-black/40 border border-white/10 text-slate-300"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
         
         {/* Subtle Ambient Light Effect at Top */}
         <div className="absolute top-0 left-0 w-full h-32 bg-linear-to-b from-blue-500/10 to-transparent pointer-events-none" />
         
-        <div className="p-8 relative z-0">
+        <div className="p-5 sm:p-8 relative z-0">
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="flex justify-center mb-3">

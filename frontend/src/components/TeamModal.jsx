@@ -21,11 +21,22 @@ const TeamModal = ({ open, onClose }) => {
       <div className="absolute inset-0 bg-slate-950/60" onClick={onClose} />
 
       {/* Glass card */}
-      <div className="modal-pop relative w-full max-w-md overflow-hidden bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-blue-900/20">
+      <div className="scroll-celestial modal-pop relative w-full max-w-md max-h-[92dvh] overflow-y-auto bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-blue-900/20">
+        {/* Close — mobile only (desktop uses backdrop / Escape) */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="sm:hidden absolute top-3 right-3 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-black/40 border border-white/10 text-slate-300"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
         {/* Subtle ambient light at top */}
         <div className="absolute top-0 left-0 w-full h-32 bg-linear-to-b from-blue-500/10 to-transparent pointer-events-none" />
 
-        <div className="p-8 relative z-0 text-center">
+        <div className="p-5 sm:p-8 relative z-0 text-center">
           <p className="text-blue-200/60 text-xs font-medium tracking-[0.25em] uppercase mb-2">
             The Stargazers
           </p>

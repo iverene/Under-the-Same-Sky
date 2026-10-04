@@ -577,6 +577,15 @@ const NightSky = () => {
       <SignModal open={selectedSign} onClose={() => setSelectedSign(false)} />
       <TeamModal open={selectedTeam} onClose={() => setSelectedTeam(false)} />
 
+      {/* Mobile search takeover — blurred backdrop, panel above it */}
+      {isSearching && (
+        <div
+          aria-hidden
+          className="sm:hidden fixed inset-0 z-40 bg-[#020205]/60 backdrop-blur-[3px]"
+          onClick={() => setIsSearching(false)}
+        />
+      )}
+
       {/* Search panel — centered on mobile, top-right on desktop */}
       {isSearching && (
         <div className="fixed top-16 left-4 right-4 sm:top-20 sm:right-6 sm:left-auto sm:w-auto z-50 flex sm:block justify-center">
@@ -628,7 +637,7 @@ const NightSky = () => {
       )}
 
       {ready && !splashVisible && showIntro && (<IntroScreen onStart={handleIntroStart} />)}
-      {!showIntro && !uiHidden && <TopBar skyTheme={skyTheme} />}
+      {!showIntro && !uiHidden && !(isSearching && isTouchDevice) && <TopBar skyTheme={skyTheme} />}
 
       {!showIntro && (
       <HUD
@@ -644,6 +653,7 @@ const NightSky = () => {
         }}
         isSearching={isSearching}
         onToggleSearch={() => { setIsSearching((v) => !v); clearProps(); }}
+        modalOpen={isWriting || isWishing || selectedSign || selectedTeam || isSearching}
       />
       )}
     </div>

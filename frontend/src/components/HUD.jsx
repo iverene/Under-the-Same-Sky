@@ -7,9 +7,10 @@ const SKY_OPTIONS = [
   { key: 'dawn', label: 'Early Dawn', dot: 'linear-gradient(135deg, #173f52 50%, #ffcf9a 100%)' },
 ];
 
-const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch }) => {
+const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch, modalOpen }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
 
@@ -54,7 +55,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
   return (
     <>
       {/* 1. Instructional pill */}
-      <div className={`fixed bottom-2 sm:bottom-24 left-0 w-full z-40 pointer-events-none flex justify-center px-4 ${pillCls}`}>
+      <div className={`fixed bottom-2 sm:bottom-24 left-0 w-full z-40 pointer-events-none hidden sm:flex justify-center px-4 ${pillCls}`}>
         <div className="bg-slate-950/40 backdrop-blur-md border border-white/5 px-4 sm:px-6 py-2 rounded-full shadow-lg max-w-full">
           <p className="text-blue-100/60 text-[9px] sm:text-[10px] font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-center leading-relaxed text-balance">
             {isTouch
@@ -64,8 +65,20 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         </div>
       </div>
 
-      {/* 2. Top-right buttons — search fades with UI, hide toggle always visible */}
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2">
+      {/* 2. Top-right buttons — hidden under modals, search fades with UI */}
+      <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 transition-opacity duration-300 ${modalOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        {/* Help — mobile only, holds the instructions */}
+        <button
+          onClick={() => setHelpOpen((v) => !v)}
+          aria-label="How to explore"
+          className={`sm:hidden pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-95 ${
+            uiHidden
+              ? 'opacity-0 pointer-events-none scale-90'
+              : 'opacity-100 bg-slate-900/40 border-white/10 text-slate-200 font-serif text-lg font-bold'
+          }`}
+        >
+          ?
+        </button>
         {/* Search — fades with UI */}
         <button
           onClick={() => onToggleSearch && onToggleSearch()}
@@ -118,44 +131,45 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           MOBILE LAYOUT — old design, left & right columns
           ============================================================ */}
 
-      {/* Mobile: Write + Wish — bottom left */}
-      <div className={`sm:hidden fixed z-40 left-4 bottom-16 flex flex-col gap-2 items-start ${barCls}`}>
+      {/* Mobile: sky toggle + Reset — bottom left (fades fast during search takeover) */}
+      <div className={`sm:hidden fixed z-40 left-4 bottom-6 flex flex-col gap-3 items-center ${barCls}`}>
+      <div className={`flex flex-col gap-3 items-center transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        {/* Moon toggle */}
         <button
-          onClick={onOpenCompose}
-          className="group relative pointer-events-auto flex flex-col items-center gap-1 px-3 py-2 w-[60px] h-[60px]
-                     bg-slate-900/40 hover:bg-slate-800/60 backdrop-blur-xl
-                     border border-blue-400/20 hover:border-blue-400/50
-                     rounded-2xl text-white transition-all duration-300
-                     hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:scale-105 active:scale-95"
+          onClick={() => setSettingsOpen((v) => !v)}
+          aria-label="Sky settings"
+          aria-expanded={settingsOpen}
+          className={`pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-xl border transition-all duration-300 active:scale-95 ${
+            settingsOpen
+              ? 'bg-sky-500/20 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
+              : 'bg-slate-900/40 border-white/10'
+          }`}
         >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          <span className="text-xl filter drop-shadow-[0_0_5px_rgba(191,219,254,0.8)] group-hover:rotate-12 transition-transform duration-300">
-            ✎
-          </span>
-          <span className="font-serif tracking-wide text-[10px] leading-none">Write</span>
+          <svg aria-hidden="true" className="w-6 h-6 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
+          </svg>
         </button>
 
+        {/* Reset */}
         <button
-          onClick={onOpenWish}
-          className="group relative pointer-events-auto flex flex-col items-center gap-1 px-3 py-2 w-[60px] h-[60px]
-                     bg-amber-950/30 hover:bg-amber-900/50 backdrop-blur-xl
-                     border border-amber-500/20 hover:border-amber-500/50
-                     rounded-2xl text-amber-50 transition-all duration-300
-                     hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:scale-105 active:scale-95"
+          onClick={() => onReset && onReset()}
+          aria-label="Reset view to bench"
+          title="Back to the bench"
+          className="pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 text-slate-200 transition-all duration-300 active:scale-95"
         >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500/0 via-amber-500/10 to-amber-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          <span className="text-xl filter drop-shadow-[0_0_5px_rgba(253,186,116,0.8)] group-hover:-translate-y-1 transition-transform duration-300">
-            🏮
-          </span>
-          <span className="font-serif tracking-wide text-[10px] leading-none">Wish</span>
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v5h5" />
+          </svg>
         </button>
       </div>
+      </div>
 
-      {/* Mobile: Settings panel + Reset + Moon toggle — bottom right */}
-      <div className={`sm:hidden fixed z-40 bottom-16 right-4 flex flex-col items-end gap-2 ${panelCls}`}>
-        {/* Settings panel */}
+      {/* Mobile: Sky panel — floats above the left buttons, fades fast during search */}
+      <div className={`sm:hidden fixed z-40 bottom-44 left-4 flex flex-col items-start ${panelCls}`}>
+      <div className={`flex flex-col items-start transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div
-          className={`pointer-events-auto w-52 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom-right ${
+          className={`pointer-events-auto w-52 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom-left ${
             settingsOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
           }`}
         >
@@ -165,7 +179,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
             return (
               <button
                 key={opt.key}
-                    onClick={() => { onSkyTheme && onSkyTheme(opt.key); setSettingsOpen(false); }}
+                onClick={() => { onSkyTheme && onSkyTheme(opt.key); setSettingsOpen(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors duration-200 ${active ? 'bg-white/10' : 'hover:bg-white/5'}`}
               >
                 <span
@@ -179,32 +193,36 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           })}
           <div className="h-2" />
         </div>
+      </div>
+      </div>
 
-        {/* Reset */}
+      {/* Mobile: Write + Wish only — bottom right, fades fast during search */}
+      <div className={`sm:hidden fixed z-40 right-4 bottom-6 flex flex-col gap-3 items-center ${barCls}`}>
+      <div className={`flex flex-col gap-3 items-center transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        {/* Wish */}
         <button
-          onClick={() => onReset && onReset()}
-          aria-label="Reset view to bench"
-          title="Back to the bench"
-          className="pointer-events-auto flex items-center justify-center w-[60px] h-[60px] rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 hover:border-white/30 text-slate-200 transition-all duration-300 hover:scale-105 active:scale-95"
+          onClick={onOpenWish}
+          aria-label="Make a wish"
+          className="pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full bg-amber-950/30 backdrop-blur-xl border border-amber-500/20 text-amber-50 transition-all duration-300 active:scale-95"
         >
-          <span className="text-xl">⟲</span>
-        </button>
-
-        {/* Moon toggle */}
-        <button
-          onClick={() => setSettingsOpen((v) => !v)}
-          aria-label="Sky settings"
-          aria-expanded={settingsOpen}
-          className={`pointer-events-auto flex items-center justify-center w-[60px] h-[60px] rounded-full backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
-            settingsOpen
-              ? 'bg-sky-500/20 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
-              : 'bg-slate-900/40 border-white/10 hover:border-white/30'
-          }`}
-        >
-          <svg aria-hidden="true" className={`w-6 h-6 text-slate-200 transition-transform duration-500 ${settingsOpen ? 'scale-110' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <ellipse cx="12" cy="12" rx="5" ry="7" fill="#f59e0b" opacity="0.85" />
+            <rect x="9" y="3.5" width="6" height="2" rx="1" fill="#92400e" />
+            <rect x="10" y="19" width="4" height="1.6" rx="0.8" fill="#92400e" />
           </svg>
         </button>
+
+        {/* Write */}
+        <button
+          onClick={onOpenCompose}
+          aria-label="Write a message"
+          className="pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full bg-slate-900/40 backdrop-blur-xl border border-blue-400/20 text-white transition-all duration-300 active:scale-95"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4L16.5 3.5z" />
+          </svg>
+        </button>
+      </div>
       </div>
 
       {/* ============================================================
@@ -292,7 +310,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           className="pointer-events-auto group relative flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-slate-900/40 hover:bg-slate-800/60 backdrop-blur-xl border border-blue-400/20 hover:border-blue-400/50 text-white transition-all duration-300 hover:shadow-[0_0_24px_rgba(59,130,246,0.25)] hover:scale-105 active:scale-95"
         >
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          <span className="text-xl filter drop-shadow-[0_0_5px_rgba(191,219,254,0.8)] group-hover:rotate-12 transition-transform duration-300">✎</span>
+          <span className="flex items-center justify-center w-6 h-6 text-xl filter drop-shadow-[0_0_5px_rgba(191,219,254,0.8)] group-hover:rotate-12 transition-transform duration-300">✎</span>
           <span className="font-serif text-sm tracking-wide">Write</span>
         </button>
 
@@ -301,10 +319,41 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           className="pointer-events-auto group relative flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-amber-950/30 hover:bg-amber-900/50 backdrop-blur-xl border border-amber-500/20 hover:border-amber-500/50 text-amber-50 transition-all duration-300 hover:shadow-[0_0_24px_rgba(245,158,11,0.2)] hover:scale-105 active:scale-95"
         >
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500/0 via-amber-500/10 to-amber-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          <span className="text-xl filter drop-shadow-[0_0_5px_rgba(253,186,116,0.8)] group-hover:-translate-y-1 transition-transform duration-300">🏮</span>
+          <svg className="w-6 h-6 filter drop-shadow-[0_0_5px_rgba(253,186,116,0.8)] group-hover:-translate-y-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <ellipse cx="12" cy="12" rx="5" ry="7" fill="#f59e0b" opacity="0.85" />
+            <rect x="9" y="3.5" width="6" height="2" rx="1" fill="#92400e" />
+            <rect x="10" y="19" width="4" height="1.6" rx="0.8" fill="#92400e" />
+          </svg>
           <span className="font-serif text-sm tracking-wide">Wish</span>
         </button>
       </div>
+
+      {/* Help modal — instructions, mobile entry via the ? button */}
+      {helpOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6" onClick={() => setHelpOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-xs bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 text-center"
+          >
+            <p className="text-[10px] font-bold text-blue-200/70 uppercase tracking-[0.25em] mb-3">
+              How to explore
+            </p>
+            <div className="space-y-2.5 text-sm text-slate-200 font-serif">
+              <p>Pinch to zoom in on the sky</p>
+              <p>Drag to look around</p>
+              <p>Tap stars &amp; lanterns to discover a message</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setHelpOpen(false)}
+              className="mt-5 px-8 py-2.5 rounded-xl bg-blue-600/80 hover:bg-blue-500/80 text-white text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Share modal — QR code + link */}
       {shareOpen && (
