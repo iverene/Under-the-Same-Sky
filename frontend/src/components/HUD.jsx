@@ -54,7 +54,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
   return (
     <>
       {/* 1. Instructional pill */}
-      <div className={`fixed bottom-2 sm:bottom-24 left-0 w-full z-40 pointer-events-none flex justify-center px-4 ${pillCls}`}>
+      <div className={`fixed bottom-2 sm:bottom-24 left-0 w-full z-40 pointer-events-none hidden sm:flex justify-center px-4 ${pillCls}`}>
         <div className="bg-slate-950/40 backdrop-blur-md border border-white/5 px-4 sm:px-6 py-2 rounded-full shadow-lg max-w-full">
           <p className="text-blue-100/60 text-[9px] sm:text-[10px] font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-center leading-relaxed text-balance">
             {isTouch
@@ -118,41 +118,64 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           MOBILE LAYOUT — old design, left & right columns
           ============================================================ */}
 
-      {/* Mobile: Write + Wish — bottom left */}
-      <div className={`sm:hidden fixed z-40 left-4 bottom-16 flex flex-col gap-2 items-start ${barCls}`}>
+      {/* Mobile: icon-only action stack — bottom right (primary last = thumb-nearest) */}
+      <div className={`sm:hidden fixed z-40 right-4 bottom-6 flex flex-col gap-3 items-center ${barCls}`}>
+        {/* Moon toggle */}
         <button
-          onClick={onOpenCompose}
-          className="group relative pointer-events-auto flex flex-col items-center gap-1 px-3 py-2 w-[60px] h-[60px]
-                     bg-slate-900/40 hover:bg-slate-800/60 backdrop-blur-xl
-                     border border-blue-400/20 hover:border-blue-400/50
-                     rounded-2xl text-white transition-all duration-300
-                     hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:scale-105 active:scale-95"
+          onClick={() => setSettingsOpen((v) => !v)}
+          aria-label="Sky settings"
+          aria-expanded={settingsOpen}
+          className={`pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-xl border transition-all duration-300 active:scale-95 ${
+            settingsOpen
+              ? 'bg-sky-500/20 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
+              : 'bg-slate-900/40 border-white/10'
+          }`}
         >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          <span className="text-xl filter drop-shadow-[0_0_5px_rgba(191,219,254,0.8)] group-hover:rotate-12 transition-transform duration-300">
-            ✎
-          </span>
-          <span className="font-serif tracking-wide text-[10px] leading-none">Write</span>
+          <svg aria-hidden="true" className="w-6 h-6 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
+          </svg>
         </button>
 
+        {/* Reset */}
+        <button
+          onClick={() => onReset && onReset()}
+          aria-label="Reset view to bench"
+          title="Back to the bench"
+          className="pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 text-slate-200 transition-all duration-300 active:scale-95"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v5h5" />
+          </svg>
+        </button>
+
+        {/* Wish */}
         <button
           onClick={onOpenWish}
-          className="group relative pointer-events-auto flex flex-col items-center gap-1 px-3 py-2 w-[60px] h-[60px]
-                     bg-amber-950/30 hover:bg-amber-900/50 backdrop-blur-xl
-                     border border-amber-500/20 hover:border-amber-500/50
-                     rounded-2xl text-amber-50 transition-all duration-300
-                     hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:scale-105 active:scale-95"
+          aria-label="Make a wish"
+          className="pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full bg-amber-950/30 backdrop-blur-xl border border-amber-500/20 text-amber-50 transition-all duration-300 active:scale-95"
         >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500/0 via-amber-500/10 to-amber-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          <span className="text-xl filter drop-shadow-[0_0_5px_rgba(253,186,116,0.8)] group-hover:-translate-y-1 transition-transform duration-300">
-            🏮
-          </span>
-          <span className="font-serif tracking-wide text-[10px] leading-none">Wish</span>
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <ellipse cx="12" cy="12" rx="5" ry="7" fill="#f59e0b" opacity="0.85" />
+            <rect x="9" y="3.5" width="6" height="2" rx="1" fill="#92400e" />
+            <rect x="10" y="19" width="4" height="1.6" rx="0.8" fill="#92400e" />
+          </svg>
+        </button>
+
+        {/* Write */}
+        <button
+          onClick={onOpenCompose}
+          aria-label="Write a message"
+          className="pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full bg-slate-900/40 backdrop-blur-xl border border-blue-400/20 text-white transition-all duration-300 active:scale-95"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4L16.5 3.5z" />
+          </svg>
         </button>
       </div>
 
-      {/* Mobile: Settings panel + Reset + Moon toggle — bottom right */}
-      <div className={`sm:hidden fixed z-40 bottom-16 right-4 flex flex-col items-end gap-2 ${panelCls}`}>
+      {/* Mobile: Sky panel — floats above the action stack */}
+      <div className={`sm:hidden fixed z-40 bottom-72 right-4 flex flex-col items-end ${panelCls}`}>
         {/* Settings panel */}
         <div
           className={`pointer-events-auto w-52 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom-right ${
@@ -179,32 +202,6 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           })}
           <div className="h-2" />
         </div>
-
-        {/* Reset */}
-        <button
-          onClick={() => onReset && onReset()}
-          aria-label="Reset view to bench"
-          title="Back to the bench"
-          className="pointer-events-auto flex items-center justify-center w-[60px] h-[60px] rounded-full backdrop-blur-xl bg-slate-900/40 border border-white/10 hover:border-white/30 text-slate-200 transition-all duration-300 hover:scale-105 active:scale-95"
-        >
-          <span className="text-xl">⟲</span>
-        </button>
-
-        {/* Moon toggle */}
-        <button
-          onClick={() => setSettingsOpen((v) => !v)}
-          aria-label="Sky settings"
-          aria-expanded={settingsOpen}
-          className={`pointer-events-auto flex items-center justify-center w-[60px] h-[60px] rounded-full backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
-            settingsOpen
-              ? 'bg-sky-500/20 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
-              : 'bg-slate-900/40 border-white/10 hover:border-white/30'
-          }`}
-        >
-          <svg aria-hidden="true" className={`w-6 h-6 text-slate-200 transition-transform duration-500 ${settingsOpen ? 'scale-110' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
-          </svg>
-        </button>
       </div>
 
       {/* ============================================================
