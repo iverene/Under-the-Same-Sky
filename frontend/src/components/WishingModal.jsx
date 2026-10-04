@@ -86,12 +86,12 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
       />
 
       {/* Glass Card - Amber Theme */}
-      <div className={`relative w-full max-w-lg overflow-hidden bg-slate-900/90 backdrop-blur-2xl border border-amber-500/20 rounded-3xl shadow-2xl shadow-amber-900/20 transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
+      <div className={`scroll-celestial relative w-full max-w-lg max-h-[92dvh] overflow-y-auto bg-slate-900/90 backdrop-blur-2xl border border-amber-500/20 rounded-3xl shadow-2xl shadow-amber-900/20 transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
         
         {/* Warm Ambient Light Effect */}
         <div className="absolute top-0 left-0 w-full h-32 bg-linear-to-b from-amber-500/10 to-transparent pointer-events-none" />
         
-        <div className="p-8 relative z-0">
+        <div className="p-5 sm:p-8 relative z-0">
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="flex justify-center mb-3">
