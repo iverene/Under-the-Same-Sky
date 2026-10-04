@@ -127,8 +127,8 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           MOBILE LAYOUT — old design, left & right columns
           ============================================================ */}
 
-      {/* Mobile: sky toggle + Reset — bottom left (hidden during search takeover) */}
-      <div className={`sm:hidden fixed z-40 left-4 bottom-6 flex flex-col gap-3 items-center ${barCls} ${isSearching ? 'opacity-0 pointer-events-none' : ''}`}>
+      {/* Mobile: sky toggle + Reset — bottom left (gone during search takeover) */}
+      <div className={`sm:hidden fixed z-40 left-4 bottom-6 flex flex-col gap-3 items-center ${barCls} ${isSearching ? 'invisible pointer-events-none' : ''}`}>
         {/* Moon toggle */}
         <button
           onClick={() => setSettingsOpen((v) => !v)}
@@ -159,8 +159,8 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         </button>
       </div>
 
-      {/* Mobile: Sky panel — floats above the left buttons, hidden during search */}
-      <div className={`sm:hidden fixed z-40 bottom-44 left-4 flex flex-col items-start ${panelCls} ${isSearching ? 'opacity-0 pointer-events-none' : ''}`}>
+      {/* Mobile: Sky panel — floats above the left buttons, gone during search */}
+      <div className={`sm:hidden fixed z-40 bottom-44 left-4 flex flex-col items-start ${panelCls} ${isSearching ? 'invisible pointer-events-none' : ''}`}>
         <div
           className={`pointer-events-auto w-52 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom-left ${
             settingsOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
@@ -188,8 +188,8 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         </div>
       </div>
 
-      {/* Mobile: Write + Wish only — bottom right, hidden during search takeover */}
-      <div className={`sm:hidden fixed z-40 right-4 bottom-6 flex flex-col gap-3 items-center ${barCls} ${isSearching ? 'opacity-0 pointer-events-none' : ''}`}>
+      {/* Mobile: Write + Wish only — bottom right, gone during search takeover */}
+      <div className={`sm:hidden fixed z-40 right-4 bottom-6 flex flex-col gap-3 items-center ${barCls} ${isSearching ? 'invisible pointer-events-none' : ''}`}>
         {/* Wish */}
         <button
           onClick={onOpenWish}

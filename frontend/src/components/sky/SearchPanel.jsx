@@ -12,7 +12,7 @@ const SearchPanel = ({ messages, onSelect, onClose }) => {
   }, [query, messages]);
 
   return (
-    <div className="pointer-events-auto w-72 sm:w-80 bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="pointer-events-auto w-full sm:w-80 bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
       {/* Search input */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
         <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
