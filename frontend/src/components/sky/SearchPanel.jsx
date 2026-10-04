@@ -34,7 +34,7 @@ const SearchPanel = ({ messages, onSelect, onClose }) => {
       </div>
 
       {/* Results */}
-      <div className="max-h-64 overflow-y-auto">
+      <div className="scroll-celestial max-h-64 overflow-y-auto">
         {query.trim() && results.length === 0 && (
           <p className="px-4 py-6 text-center text-slate-500 text-xs">No stars or lanterns found</p>
         )}

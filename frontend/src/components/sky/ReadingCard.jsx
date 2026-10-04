@@ -6,7 +6,7 @@ const ReadingCard = ({ message, isLantern, cardRef }) => {
 
   return (
     <div className="fixed bottom-52 sm:bottom-40 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] sm:w-full max-w-md pointer-events-none">
-      <div ref={cardRef} className={`pointer-events-auto relative max-h-[55vh] overflow-y-auto bg-slate-950/80 backdrop-blur-xl border rounded-2xl px-5 py-5 sm:px-8 sm:py-6 animate-in fade-in slide-in-from-bottom-4 duration-300 ${isLantern ? 'border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 'border-white/10 shadow-[0_0_50px_rgba(150,180,255,0.15)]'}`}>
+      <div ref={cardRef} className={`scroll-celestial pointer-events-auto relative max-h-[55vh] overflow-y-auto bg-slate-950/80 backdrop-blur-xl border rounded-2xl px-5 py-5 sm:px-8 sm:py-6 animate-in fade-in slide-in-from-bottom-4 duration-300 ${isLantern ? 'border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 'border-white/10 shadow-[0_0_50px_rgba(150,180,255,0.15)]'}`}>
         <div className="text-center">
           <h3 className={`text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] ${isLantern ? 'text-amber-200' : 'text-blue-200'}`}>
             {isLantern ? 'A Wish Floating By' : 'Addressed To'}

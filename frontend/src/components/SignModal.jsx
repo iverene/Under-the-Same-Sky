@@ -94,7 +94,7 @@ const SignModal = ({ open, onClose }) => {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Sign assembly — generous padding so drop shadows never clip */}
-      <div className="modal-pop relative w-full max-w-md sm:max-w-2xl max-h-[92vh] overflow-y-auto px-6 sm:px-8 pt-5 pb-12">
+      <div className="scroll-celestial modal-pop relative w-full max-w-md sm:max-w-2xl max-h-[92vh] overflow-y-auto px-6 sm:px-8 pt-5 pb-12">
         <div className="relative px-5 sm:px-8">
           {/* Mounting posts peeking out below the board */}
           <Post className="left-8 sm:left-11" />
