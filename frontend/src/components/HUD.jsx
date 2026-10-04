@@ -7,7 +7,7 @@ const SKY_OPTIONS = [
   { key: 'dawn', label: 'Early Dawn', dot: 'linear-gradient(135deg, #173f52 50%, #ffcf9a 100%)' },
 ];
 
-const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch }) => {
+const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch, modalOpen }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -65,8 +65,8 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
         </div>
       </div>
 
-      {/* 2. Top-right buttons — search fades with UI, hide toggle always visible */}
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2">
+      {/* 2. Top-right buttons — hidden under modals, search fades with UI */}
+      <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 transition-opacity duration-300 ${modalOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         {/* Help — mobile only, holds the instructions */}
         <button
           onClick={() => setHelpOpen((v) => !v)}

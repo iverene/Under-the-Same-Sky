@@ -644,6 +644,7 @@ const NightSky = () => {
         }}
         isSearching={isSearching}
         onToggleSearch={() => { setIsSearching((v) => !v); clearProps(); }}
+        modalOpen={isWriting || isWishing || selectedSign || selectedTeam || isSearching}
       />
       )}
     </div>
