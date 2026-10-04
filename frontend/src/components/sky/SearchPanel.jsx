@@ -31,6 +31,13 @@ const SearchPanel = ({ messages, onSelect, onClose }) => {
             Clear
           </button>
         )}
+        <button
+          onClick={onClose}
+          aria-label="Close search"
+          className="shrink-0 text-slate-400 hover:text-white text-lg leading-none transition-colors"
+        >
+          ×
+        </button>
       </div>
 
       {/* Results */}
