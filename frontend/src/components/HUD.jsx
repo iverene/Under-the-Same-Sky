@@ -239,7 +239,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           className="pointer-events-auto group relative flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-slate-900/40 hover:bg-slate-800/60 backdrop-blur-xl border border-blue-400/20 hover:border-blue-400/50 text-white transition-all duration-300 hover:shadow-[0_0_24px_rgba(59,130,246,0.25)] hover:scale-105 active:scale-95"
         >
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          <span className="text-xl filter drop-shadow-[0_0_5px_rgba(191,219,254,0.8)] group-hover:rotate-12 transition-transform duration-300">✎</span>
+          <span className="flex items-center justify-center w-6 h-6 text-xl filter drop-shadow-[0_0_5px_rgba(191,219,254,0.8)] group-hover:rotate-12 transition-transform duration-300">✎</span>
           <span className="font-serif text-sm tracking-wide">Write</span>
         </button>
 
@@ -248,7 +248,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           className="pointer-events-auto group relative flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-amber-950/30 hover:bg-amber-900/50 backdrop-blur-xl border border-amber-500/20 hover:border-amber-500/50 text-amber-50 transition-all duration-300 hover:shadow-[0_0_24px_rgba(245,158,11,0.2)] hover:scale-105 active:scale-95"
         >
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500/0 via-amber-500/10 to-amber-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          <svg className="w-5 h-5 filter drop-shadow-[0_0_5px_rgba(253,186,116,0.8)] group-hover:-translate-y-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <svg className="w-6 h-6 filter drop-shadow-[0_0_5px_rgba(253,186,116,0.8)] group-hover:-translate-y-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <ellipse cx="12" cy="12" rx="5" ry="7" fill="#f59e0b" opacity="0.85" />
             <rect x="9" y="3.5" width="6" height="2" rx="1" fill="#92400e" />
             <rect x="10" y="19" width="4" height="1.6" rx="0.8" fill="#92400e" />
