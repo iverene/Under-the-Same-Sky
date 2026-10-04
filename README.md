@@ -111,7 +111,7 @@ To ensure the platform remains a place for release rather than validation:
 | Role | Name |
 | --- | --- |
 | **Frontend Developer** | **Iverene Grace Causapin** |
-| **Backend Developer** | **John Rey Bagunas** |
+| **Full-Stack Developer** | **John Rey Bagunas** |
 
 ---
 
@@ -144,14 +144,7 @@ copy backend\.env.example backend\.env   # then fill in DATABASE_URL
 | `frontend/.env` | `VITE_API_URL` | Backend base URL + `/api/messages` (defaults to `http://localhost:5000/api/messages`, so local dev works without this file). |
 
 
-4. **Database Setup** (Supabase SQL editor, run once)
-```sql
-ALTER TABLE messages ADD COLUMN IF NOT EXISTS sender TEXT;
-```
-The `messages` table needs `recipient`, `content`, `type`, `position_x/y/z`, `created_at`, plus the `sender` column above. The backend logs a loud warning and saves unsigned if the column is missing — migrate before deploying, not after.
-
-
-5. **Run the Project**
+4. **Run the Project**
 ```bash
 # Terminal 1 — backend (http://localhost:5000)
 cd backend && npm start
