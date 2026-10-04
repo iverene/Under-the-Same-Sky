@@ -131,8 +131,9 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           MOBILE LAYOUT — old design, left & right columns
           ============================================================ */}
 
-      {/* Mobile: sky toggle + Reset — bottom left (gone during search takeover) */}
-      <div className={`sm:hidden fixed z-40 left-4 bottom-6 flex flex-col gap-3 items-center ${barCls} ${isSearching ? 'invisible pointer-events-none' : ''}`}>
+      {/* Mobile: sky toggle + Reset — bottom left (fades fast during search takeover) */}
+      <div className={`sm:hidden fixed z-40 left-4 bottom-6 flex flex-col gap-3 items-center ${barCls}`}>
+      <div className={`flex flex-col gap-3 items-center transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         {/* Moon toggle */}
         <button
           onClick={() => setSettingsOpen((v) => !v)}
@@ -162,9 +163,11 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           </svg>
         </button>
       </div>
+      </div>
 
-      {/* Mobile: Sky panel — floats above the left buttons, gone during search */}
-      <div className={`sm:hidden fixed z-40 bottom-44 left-4 flex flex-col items-start ${panelCls} ${isSearching ? 'invisible pointer-events-none' : ''}`}>
+      {/* Mobile: Sky panel — floats above the left buttons, fades fast during search */}
+      <div className={`sm:hidden fixed z-40 bottom-44 left-4 flex flex-col items-start ${panelCls}`}>
+      <div className={`flex flex-col items-start transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div
           className={`pointer-events-auto w-52 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom-left ${
             settingsOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
@@ -191,9 +194,11 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           <div className="h-2" />
         </div>
       </div>
+      </div>
 
-      {/* Mobile: Write + Wish only — bottom right, gone during search takeover */}
-      <div className={`sm:hidden fixed z-40 right-4 bottom-6 flex flex-col gap-3 items-center ${barCls} ${isSearching ? 'invisible pointer-events-none' : ''}`}>
+      {/* Mobile: Write + Wish only — bottom right, fades fast during search */}
+      <div className={`sm:hidden fixed z-40 right-4 bottom-6 flex flex-col gap-3 items-center ${barCls}`}>
+      <div className={`flex flex-col gap-3 items-center transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         {/* Wish */}
         <button
           onClick={onOpenWish}
@@ -217,6 +222,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4L16.5 3.5z" />
           </svg>
         </button>
+      </div>
       </div>
 
       {/* ============================================================
