@@ -95,6 +95,17 @@ const SignModal = ({ open, onClose }) => {
 
       {/* Sign assembly — generous padding so drop shadows never clip */}
       <div className="scroll-celestial modal-pop relative w-full max-w-md sm:max-w-2xl max-h-[92vh] overflow-y-auto px-6 sm:px-8 pt-5 pb-12">
+        {/* Close — mobile only (desktop uses backdrop / Escape) */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="sm:hidden absolute top-3 right-3 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-black/40 border border-white/10 text-slate-300"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
         <div className="relative px-5 sm:px-8">
           {/* Mounting posts peeking out below the board */}
           <Post className="left-8 sm:left-11" />
