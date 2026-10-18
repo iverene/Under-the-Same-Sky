@@ -153,7 +153,7 @@ const normalizeApiPhase = (value) =>
 // to local getMoonData(). Resolves { name, icon, illumination, isFull }
 // or throws.
 const apiBase = () =>
-  (import.meta.env.VITE_API_URL || 'http://localhost:5000/api/messages').replace(/\/messages$/, '');
+  (import.meta.env.VITE_API_URL || '/api/messages').replace(/\/messages$/, '');
 
 const parseMoonRow = (json) => {
   const row = Array.isArray(json) ? json[0] : json;
