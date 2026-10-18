@@ -37,16 +37,17 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
   const barCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-6 scale-95 pointer-events-none'}`;
   const panelCls = `transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'}`;
 
-  const sendUrl = useMemo(() => {
-    const loc = window.location;
-    return `${loc.origin}/send`;
-  }, []);
-  const qrUrl = useMemo(() =>
-    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(sendUrl)}&bgcolor=020205&color=ffffff`,
-    [sendUrl]
+  const [shareTab, setShareTab] = useState('site');
+  const siteUrl = useMemo(() => `${window.location.origin}/`, []);
+  const sendUrl = useMemo(() => `${window.location.origin}/send`, []);
+  const activeUrl = shareTab === 'site' ? siteUrl : sendUrl;
+  const qrUrl = useMemo(
+    () =>
+      `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(activeUrl)}&bgcolor=020205&color=ffffff`,
+    [activeUrl]
   );
   const handleCopy = () => {
-    navigator.clipboard.writeText(sendUrl).then(() => {
+    navigator.clipboard.writeText(activeUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -363,21 +364,48 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-sm bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 animate-in zoom-in-95 fade-in duration-200"
           >
-            <div className="text-center mb-5">
-              <h3 className="text-lg font-serif text-white tracking-wide">Share Send Page</h3>
-              <p className="text-slate-400 text-xs mt-1">Scan or share the link</p>
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-serif text-white tracking-wide">Share the Sky</h3>
+              <p className="text-slate-400 text-xs mt-1">Someone you share with lands under the same sky</p>
+            </div>
+
+            {/* Website / Send page toggle */}
+            <div className="flex bg-white/5 border border-white/10 rounded-full p-1 mb-5" role="tablist" aria-label="Share target">
+              {[
+                { key: 'site', label: 'Website' },
+                { key: 'send', label: 'Send page' },
+              ].map((t) => (
+                <button
+                  key={t.key}
+                  role="tab"
+                  aria-selected={shareTab === t.key}
+                  onClick={() => setShareTab(t.key)}
+                  className={`flex-1 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-200 ${
+                    shareTab === t.key
+                      ? 'bg-white/15 text-white shadow'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
             </div>
 
             {/* QR Code */}
             <div className="flex justify-center mb-5">
               <div className="bg-white p-3 rounded-2xl">
-                <img src={qrUrl} alt="QR Code" className="w-40 h-40" />
+                <img
+                  key={activeUrl}
+                  src={qrUrl}
+                  alt={shareTab === 'site' ? 'QR code for the website' : 'QR code for the send page'}
+                  className="w-40 h-40"
+                />
               </div>
             </div>
 
             {/* URL + Copy */}
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-3">
-              <span className="flex-1 text-xs text-slate-300 truncate font-mono">{sendUrl}</span>
+              <span className="flex-1 text-xs text-slate-300 truncate font-mono">{activeUrl}</span>
               <button
                 onClick={handleCopy}
                 className="shrink-0 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
@@ -389,7 +417,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
             {/* Download QR */}
             <a
               href={qrUrl}
-              download="under-the-same-sky-qr.png"
+              download={shareTab === 'site' ? 'under-the-same-sky.png' : 'under-the-same-sky-send.png'}
               target="_blank"
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-400/30 hover:border-emerald-400/50 text-emerald-300 text-xs font-bold uppercase tracking-wider transition-all duration-300"
             >
