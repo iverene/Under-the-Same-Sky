@@ -51,9 +51,12 @@ const NightSky = () => {
 
   // Active sky view ('3d' | '2d'), restored from storage
   const [view, setView] = useState(readView);
+  const [viewTransition, setViewTransition] = useState(false);
+  const viewTransitionTimer = useRef(null);
   useEffect(() => {
     writeView(view);
   }, [view]);
+  useEffect(() => () => clearTimeout(viewTransitionTimer.current), []);
   const [graphicsQuality, setGraphicsQuality] = useState(readGraphicsQuality);
   const handleGraphicsQuality = useCallback((quality) => {
     setGraphicsQuality(quality);
@@ -241,7 +244,10 @@ const NightSky = () => {
 
   const handleToggleView = useCallback(() => {
     clearProps();
+    clearTimeout(viewTransitionTimer.current);
+    setViewTransition(true);
     setView((v) => (v === '3d' ? '2d' : '3d'));
+    viewTransitionTimer.current = setTimeout(() => setViewTransition(false), 700);
   }, [clearProps]);
 
   // Ref to the reading card: taps inside it never close it
@@ -471,6 +477,20 @@ const NightSky = () => {
           />
         </div>
       )}
+
+      <div
+        aria-hidden={!viewTransition}
+        className={`pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-[#0b1024]/95 transition-opacity duration-300 ${
+          viewTransition ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        <div className="flex flex-col items-center gap-3 text-center">
+          <span className="h-7 w-7 animate-spin rounded-full border-2 border-blue-200/20 border-t-blue-200/80" />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-100/70">
+            Opening the sky
+          </span>
+        </div>
+      </div>
 
       {/* Selected star / lantern message — responsive bottom-center reading card */}
       {selectedStar && (
