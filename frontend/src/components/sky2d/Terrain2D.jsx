@@ -57,13 +57,13 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
         </g>
       </svg>
 
-      {/* Decorative bench, tucked beside the couple */}
-      <div aria-hidden className="absolute bottom-[10%] left-[66%]">
+      {/* Decorative bench, planted beside the couple on the near hill */}
+      <div aria-hidden className="absolute bottom-[6%] left-[70%]">
         <svg width="80" height="42" viewBox="0 0 64 34" fill="none">
-          <rect x="4" y="8" width="56" height="4" rx="2" fill={theme.mtn} />
-          <rect x="4" y="14" width="56" height="3" rx="1.5" fill={theme.mtn} opacity="0.8" />
-          <rect x="10" y="17" width="3" height="14" rx="1.5" fill={theme.mtn} />
-          <rect x="51" y="17" width="3" height="14" rx="1.5" fill={theme.mtn} />
+          <rect x="4" y="8" width="56" height="4" rx="2" fill="#6b4a2b" />
+          <rect x="4" y="14" width="56" height="3" rx="1.5" fill="#8a6338" />
+          <rect x="10" y="17" width="3" height="14" rx="1.5" fill="#4a3220" />
+          <rect x="51" y="17" width="3" height="14" rx="1.5" fill="#4a3220" />
         </svg>
       </div>
 
@@ -72,11 +72,11 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
         type="button"
         onClick={onSelectSign}
         aria-label="Read the trail sign"
-        className="pointer-events-auto absolute bottom-[16%] left-[20%] flex h-24 w-20 items-center justify-center rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+        className="pointer-events-auto absolute bottom-[7%] left-[20%] flex h-24 w-20 items-center justify-center rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
       >
         <svg aria-hidden width="66" height="84" viewBox="0 0 44 56">
-          <rect x="20" y="10" width="4" height="46" rx="2" fill="#3b2a1c" />
-          <rect x="4" y="12" width="36" height="12" rx="2" fill="#5b3d24" />
+          <rect x="20" y="10" width="4" height="46" rx="2" fill="#6b4a2b" />
+          <rect x="4" y="12" width="36" height="12" rx="2" fill="#7a5533" />
           <rect x="8" y="15" width="28" height="2" rx="1" fill="#d9b98a" opacity="0.8" />
           <rect x="8" y="19" width="18" height="2" rx="1" fill="#d9b98a" opacity="0.55" />
         </svg>
