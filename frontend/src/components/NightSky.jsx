@@ -487,7 +487,7 @@ const NightSky = () => {
         <div className="flex flex-col items-center gap-3 text-center">
           <span className="h-7 w-7 animate-spin rounded-full border-2 border-blue-200/20 border-t-blue-200/80" />
           <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-100/70">
-            Opening the sky
+            Entering the sky
           </span>
         </div>
       </div>
