@@ -7,7 +7,33 @@ const SKY_OPTIONS = [
   { key: 'dawn', label: 'Early Dawn', dot: 'linear-gradient(135deg, #173f52 50%, #ffcf9a 100%)' },
 ];
 
-const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch, modalOpen }) => {
+const ViewToggle = ({ view, onToggle }) => (
+  <div
+    role="group"
+    aria-label="Sky view"
+    className="pointer-events-auto flex items-center rounded-full border border-white/10 bg-slate-900/40 p-1 backdrop-blur-xl"
+  >
+    {['2d', '3d'].map((v) => (
+      <button
+        key={v}
+        type="button"
+        onClick={() => {
+          if (view !== v) onToggle?.();
+        }}
+        aria-pressed={view === v}
+        className={`min-h-[36px] rounded-full px-3 text-[10px] font-bold uppercase tracking-widest transition-all duration-200 ${
+          view === v
+            ? 'bg-white/15 text-white shadow'
+            : 'text-slate-400 hover:text-slate-200'
+        }`}
+      >
+        {v.toUpperCase()}
+      </button>
+    ))}
+  </div>
+);
+
+const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch, modalOpen, view = '3d', onToggleView }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -53,15 +79,20 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
     });
   };
 
+  const instructions =
+    view === '2d'
+      ? 'Tap stars & lanterns to discover a message'
+      : isTouch
+        ? 'Pinch to Zoom \u2022 Drag \u2022 Tap Stars & Lanterns'
+        : 'Scroll to Zoom \u2022 Drag to Explore \u2022 Click Stars & Lanterns to discover a message.';
+
   return (
     <>
       {/* 1. Instructional pill */}
       <div className={`fixed bottom-2 sm:bottom-24 left-0 w-full z-40 pointer-events-none hidden sm:flex justify-center px-4 ${pillCls}`}>
         <div className="bg-slate-950/40 backdrop-blur-md border border-white/5 px-4 sm:px-6 py-2 rounded-full shadow-lg max-w-full">
           <p className="text-blue-100/60 text-[9px] sm:text-[10px] font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-center leading-relaxed text-balance">
-            {isTouch
-              ? 'Pinch to Zoom \u2022 Drag \u2022 Tap Stars & Lanterns'
-              : 'Scroll to Zoom \u2022 Drag to Explore \u2022 Click Stars & Lanterns to discover a message.'}
+            {instructions}
           </p>
         </div>
       </div>
@@ -163,6 +194,8 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v5h5" />
           </svg>
         </button>
+
+        <ViewToggle view={view} onToggle={onToggleView} />
       </div>
       </div>
 
@@ -289,6 +322,8 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
           </svg>
         </button>
 
+        <ViewToggle view={view} onToggle={onToggleView} />
+
         <button
           onClick={() => setShareOpen((v) => !v)}
           aria-label="Share send page"
@@ -341,9 +376,19 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
               How to explore
             </p>
             <div className="space-y-2.5 text-sm text-slate-200 font-serif">
-              <p>Pinch to zoom in on the sky</p>
-              <p>Drag to look around</p>
-              <p>Tap stars &amp; lanterns to discover a message</p>
+              {view === '2d' ? (
+                <>
+                  <p>Tap a star or lantern to read its message</p>
+                  <p>Tap the couple or the sign to look closer</p>
+                  <p>Switch back to 3D any time from the view toggle</p>
+                </>
+              ) : (
+                <>
+                  <p>Pinch to zoom in on the sky</p>
+                  <p>Drag to look around</p>
+                  <p>Tap stars &amp; lanterns to discover a message</p>
+                </>
+              )}
             </div>
             <button
               type="button"
