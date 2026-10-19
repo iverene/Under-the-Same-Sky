@@ -38,7 +38,7 @@ export const NebulaField = ({ texture }) => {
 };
 
 export const Moon = ({ texture, glow }) => (
-  <group position={[-345, 237, -496]}>
+  <group position={[345, 237, -496]}>
     <mesh raycast={() => null}>
       <sphereGeometry args={[16, 32, 32]} />
       <meshStandardMaterial

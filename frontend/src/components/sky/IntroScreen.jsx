@@ -102,7 +102,7 @@ const IntroScreen = ({ onStart }) => {
       {/* Moon glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute top-[9%] right-[14%] h-20 w-20 rounded-full bg-gradient-to-br from-amber-50 to-amber-200 shadow-[0_0_90px_rgba(255,245,210,0.35)]"
+        className="pointer-events-none absolute top-[9%] right-[10%] h-20 w-20 rounded-full bg-gradient-to-br from-amber-50 to-amber-200 shadow-[0_0_90px_rgba(255,245,210,0.35)]"
       />
 
       {/* Stars */}

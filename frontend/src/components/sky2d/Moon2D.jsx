@@ -3,7 +3,7 @@ const Moon2D = ({ skyTheme }) => {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute left-[20%] top-[12%] -translate-x-1/2 transition-opacity duration-1000"
+      className="pointer-events-none absolute right-[20%] top-[12%] translate-x-1/2 transition-opacity duration-1000"
     >
       <div
         className={`h-16 w-16 rounded-full sm:h-24 sm:w-24 ${
