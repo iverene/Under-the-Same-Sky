@@ -17,6 +17,7 @@ import ReadingCard from './sky/ReadingCard';
 import IntroScreen from './sky/IntroScreen';
 import SearchPanel from './sky/SearchPanel';
 import { useOutsideTapClose } from './sky/useOutsideTapClose';
+import { readGraphicsQuality, writeGraphicsQuality } from '../graphicsSettings';
 
 const INTRO_SEEN_KEY = 'utss.intro-seen:v1';
 
@@ -53,6 +54,11 @@ const NightSky = () => {
   useEffect(() => {
     writeView(view);
   }, [view]);
+  const [graphicsQuality, setGraphicsQuality] = useState(readGraphicsQuality);
+  const handleGraphicsQuality = useCallback((quality) => {
+    setGraphicsQuality(quality);
+    writeGraphicsQuality(quality);
+  }, []);
 
   // Last failed send — shown as a dismissible banner (auto-clears)
   const [sendError, setSendError] = useState(null);
@@ -434,6 +440,7 @@ const NightSky = () => {
             selectedIsLantern={selectedIsLantern}
             freshMap={freshMap}
             skyTheme={skyTheme}
+            graphicsQuality={graphicsQuality}
             showIntro={showIntro}
             isTouchDevice={isTouchDevice}
             landmarkFocus={landmarkFocus}
@@ -455,6 +462,7 @@ const NightSky = () => {
             messages={messages}
             selectedId={selectedId}
             skyTheme={skyTheme}
+            graphicsQuality={graphicsQuality}
             freshMap={freshMap}
             onSelectStar={handleSelectStar}
             onSelectLantern={handleSelectLantern}
@@ -545,6 +553,8 @@ const NightSky = () => {
         onOpenWish={() => setIsWishing(true)}
         skyTheme={skyTheme}
         onSkyTheme={setSkyTheme}
+        graphicsQuality={graphicsQuality}
+        onGraphicsQuality={handleGraphicsQuality}
         view={view}
         onToggleView={handleToggleView}
         uiHidden={uiHidden}

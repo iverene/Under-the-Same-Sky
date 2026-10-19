@@ -5,24 +5,27 @@ import Moon2D from './Moon2D';
 import Terrain2D from './Terrain2D';
 import Star2D from './Star2D';
 import Lantern2D from './Lantern2D';
+import { GRAPHICS_PRESETS } from '../../graphicsSettings';
 
 const Sky2D = ({
   messages,
   selectedId,
   skyTheme,
+  graphicsQuality,
   freshMap,
   onSelectStar,
   onSelectLantern,
   onSelectTeam,
   onSelectSign,
 }) => {
+  const graphics = GRAPHICS_PRESETS[graphicsQuality] || GRAPHICS_PRESETS.medium;
   const theme = SKY_THEMES[skyTheme] || SKY_THEMES.deepnight;
   const stars = useMemo(
     () => messages.filter((m) => m.type === 'star' && m.position),
     [messages]
   );
   const lanterns = useMemo(() => messages.filter((m) => m.type === 'lantern'), [messages]);
-  const starfield = useMemo(() => makeStarfield(20261019, 95), []);
+  const starfield = useMemo(() => makeStarfield(20261019, graphics.starfieldCount), [graphics.starfieldCount]);
 
   const [reduceMotion, setReduceMotion] = useState(
     () =>
@@ -37,7 +40,7 @@ const Sky2D = ({
   }, []);
 
   // Density guard: keep twinkle/bob cheap on low-end phones.
-  const animateObjects = stars.length + lanterns.length <= 150;
+  const animateObjects = graphics.animateObjects && stars.length + lanterns.length <= 150;
 
   return (
     <div data-sky-surface className="absolute inset-0 overflow-hidden">

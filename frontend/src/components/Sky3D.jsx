@@ -23,6 +23,7 @@ import { NebulaField, Moon } from './sky/Backdrop';
 import { Ground, HillDetails, Fireflies, MountainRange } from './sky/Terrain';
 import { Bench, Signpost, Stargazers } from './sky/Foreground';
 import { CameraRig, SkyRig, GroundCollision } from './sky/Rigs';
+import { GRAPHICS_PRESETS } from '../graphicsSettings';
 
 const SceneWarmup = () => {
   const invalidate = useThree((s) => s.invalidate);
@@ -40,6 +41,7 @@ const Sky3D = ({
   selectedIsLantern,
   freshMap,
   skyTheme,
+  graphicsQuality,
   showIntro,
   isTouchDevice,
   landmarkFocus,
@@ -54,6 +56,7 @@ const Sky3D = ({
   onSelectTeam,
   onPointerMissed,
 }) => {
+  const graphics = GRAPHICS_PRESETS[graphicsQuality] || GRAPHICS_PRESETS.medium;
   const starTexture = useStarTexture();
   const coronaTexture = useCoronaTexture();
   const glowTexture = useGlowTexture();
@@ -97,16 +100,16 @@ const Sky3D = ({
       <Signpost wood={woodTexture} onSelect={onSelectSign} />
       <Stargazers wood={woodTexture} glow={glowTexture} onSelect={onSelectTeam} />
       <HillDetails />
-      <Fireflies texture={coronaTexture} />
+      {graphics.showSecondaryEffects && <Fireflies texture={coronaTexture} />}
       <MountainRange nearRef={mtnMatRef} farRef={mtnFarMatRef} />
 
-      <NebulaField texture={nebulaTexture} />
+      {graphics.showSecondaryEffects && <NebulaField texture={nebulaTexture} />}
       <Moon texture={moonTexture} glow={coronaTexture} />
 
-      <Stars radius={800} depth={100} count={7000} factor={4} saturation={0} fade speed={0.5} raycast={() => null} />
-      <Stars ref={veilRef} radius={500} depth={80} count={6000} factor={5} saturation={0} fade speed={0.6} raycast={() => null} />
-      <Sparkles count={300} scale={60} size={2} speed={0.2} opacity={0.3} color="#aaddff" raycast={() => null} />
-      <Constellations />
+      <Stars radius={800} depth={100} count={graphics.starsCount} factor={4} saturation={0} fade speed={0.5} raycast={() => null} />
+      <Stars ref={veilRef} radius={500} depth={80} count={graphics.veilCount} factor={5} saturation={0} fade speed={0.6} raycast={() => null} />
+      {graphics.showSecondaryEffects && <Sparkles count={graphics.sparklesCount} scale={60} size={2} speed={0.2} opacity={0.3} color="#aaddff" raycast={() => null} />}
+      {graphics.showSecondaryEffects && <Constellations />}
 
       <ambientLight ref={ambientRef} intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} />
