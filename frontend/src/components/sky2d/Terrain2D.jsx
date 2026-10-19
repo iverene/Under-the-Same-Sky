@@ -4,14 +4,14 @@ import { SKY_THEMES } from '../../three/themes';
 // Deterministic firefly table (literal coords — no randomness during render).
 // Percent coordinates, clustered around the couple on the hill.
 const FIREFLIES = [
-  { left: 36, top: 80, size: 3, delay: 0.2, dur: 4.2, fx: 5, fy: -8 },
-  { left: 43, top: 74, size: 2, delay: 1.1, dur: 5.1, fx: -4, fy: -6 },
-  { left: 48, top: 86, size: 3, delay: 2.0, dur: 3.8, fx: 6, fy: -5 },
-  { left: 55, top: 71, size: 2, delay: 0.7, dur: 4.7, fx: -5, fy: -9 },
-  { left: 61, top: 83, size: 3, delay: 1.6, dur: 5.4, fx: 4, fy: -7 },
-  { left: 66, top: 76, size: 2, delay: 2.4, dur: 4.4, fx: -6, fy: -6 },
-  { left: 40, top: 90, size: 2, delay: 3.0, dur: 5.0, fx: 5, fy: -4 },
-  { left: 58, top: 92, size: 3, delay: 0.4, dur: 4.0, fx: -4, fy: -8 },
+  { left: 60, top: 80, size: 3, delay: 0.2, dur: 4.2, fx: 5, fy: -8 },
+  { left: 67, top: 74, size: 2, delay: 1.1, dur: 5.1, fx: -4, fy: -6 },
+  { left: 72, top: 86, size: 3, delay: 2.0, dur: 3.8, fx: 6, fy: -5 },
+  { left: 79, top: 71, size: 2, delay: 0.7, dur: 4.7, fx: -5, fy: -9 },
+  { left: 85, top: 83, size: 3, delay: 1.6, dur: 5.4, fx: 4, fy: -7 },
+  { left: 90, top: 76, size: 2, delay: 2.4, dur: 4.4, fx: -6, fy: -6 },
+  { left: 64, top: 90, size: 2, delay: 3.0, dur: 5.0, fx: 5, fy: -4 },
+  { left: 82, top: 92, size: 3, delay: 0.4, dur: 4.0, fx: -4, fy: -8 },
 ];
 
 const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
@@ -57,8 +57,8 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
         </g>
       </svg>
 
-      {/* Decorative bench, planted beside the couple on the near hill */}
-      <div aria-hidden className="absolute bottom-[6%] left-[70%]">
+      {/* Decorative bench, left of the signpost on the near hill */}
+      <div aria-hidden className="absolute bottom-[6%] left-[38%]">
         <svg width="80" height="42" viewBox="0 0 64 34" fill="none">
           <rect x="4" y="8" width="56" height="4" rx="2" fill="#6b4a2b" />
           <rect x="4" y="14" width="56" height="3" rx="1.5" fill="#8a6338" />
@@ -72,7 +72,7 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
         type="button"
         onClick={onSelectSign}
         aria-label="Read the trail sign"
-        className="pointer-events-auto absolute bottom-[7%] left-[20%] flex h-24 w-20 items-center justify-center rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+        className="pointer-events-auto absolute bottom-[7%] left-1/2 flex h-24 w-20 -translate-x-1/2 items-center justify-center rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
       >
         <svg aria-hidden width="66" height="84" viewBox="0 0 44 56">
           <rect x="20" y="10" width="4" height="46" rx="2" fill="#6b4a2b" />
@@ -110,7 +110,7 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
         type="button"
         onClick={onSelectTeam}
         aria-label="Meet the stargazers"
-        className="pointer-events-auto absolute bottom-[8%] left-1/2 flex origin-bottom -translate-x-1/2 scale-75 items-end gap-1 rounded-2xl transition-transform duration-300 hover:scale-[0.8] active:scale-[0.72] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:scale-100 sm:hover:scale-105 sm:active:scale-95"
+        className="pointer-events-auto absolute bottom-[8%] left-[62%] flex origin-bottom -translate-x-1/2 scale-75 items-end gap-1 rounded-2xl transition-transform duration-300 hover:scale-[0.8] active:scale-[0.72] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:scale-100 sm:hover:scale-105 sm:active:scale-95"
       >
         <GirlFigure />
         <BoyFigure />

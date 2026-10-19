@@ -11,7 +11,7 @@ export const STAR_TINTS = ['#ffffff', '#cfe4ff', '#ffe9c9', '#e8d8ff'];
 
 // New arrivals glow brightly so you can spot where yours landed,
 // then settle back to normal over this long (ms)
-export const FRESH_GLOW_MS = 30000;
+export const FRESH_GLOW_MS = 5000;
 
 // Falling-star flight time (s)
 export const FALL_DURATION = 2.2;
