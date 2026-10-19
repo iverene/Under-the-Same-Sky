@@ -131,6 +131,7 @@ const Sky2D = ({
 
       <Terrain2D
         skyTheme={skyTheme}
+        reduceMotion={reduceMotion}
         onSelectTeam={onSelectTeam}
         onSelectSign={onSelectSign}
       />
