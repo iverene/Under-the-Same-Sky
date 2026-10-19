@@ -21,12 +21,13 @@ Some users struggle to navigate the 3D sky: orbiting, pinching, and flying the c
 8. `IntroScreen` and splash behavior is untouched. If the remembered view is `2d`, `Sky2D` mounts behind the intro and the 3D warmup is simply not rendered.
 
 ## Section 2 — 2D scene composition (approved)
-1. `Sky2D` is a full-screen, `overflow-hidden` container that reuses the intro's language: layered night bands from `SKY_THEMES[skyTheme]` (`bg`, then masked `mtnFar`/`mtn` haze so `transition-colors` can animate them), a deterministic CSS starfield (seeded `mulberry32` star table), a soft moon glow disc, and the `splashStar` twinkle plus a hand-rolled lantern-bob keyframe.
+1. `Sky2D` is a full-screen, `overflow-hidden` container that reuses the intro's language: layered night bands from `SKY_THEMES[skyTheme]` (`bg`, then masked `mtnFar`/`mtn` haze so `transition-colors` can animate them), a deterministic CSS starfield (seeded `mulberry32` star table), a soft moon glow disc in the upper left (`left-[20%] top-[12%]`), and the `splashStar` twinkle plus a hand-rolled lantern-bob keyframe.
 2. Terrain layer (`Terrain2D.jsx`): flat SVG silhouettes — near hill with the couple's platform, a ridge line behind it, and a few pine triangles. Colors derive from the theme (`mtn`, `mtnFar`, `ground`).
 3. Landmarks, matching every 3D entry point:
    - Couple: reuse `Couple.jsx` `GirlFigure` / `BoyFigure`, standing on the hill. Tappable → `handleSelectTeam` (About/Team modal).
-   - Signpost: small illustrated post+board. Tappable → `handleSelectSign`.
-   - Bench: decorative wood SVG, `aria-hidden`, no interaction (matches 3D, where the bench has no content).
+   - Signpost: illustrated post+board, sized to read at a glance (`66x84` art in a `h-24 w-20` tap target). Tappable → `handleSelectSign`.
+   - Bench: decorative wood SVG beside the couple, `aria-hidden`, no interaction (matches 3D, where the bench has no content). Rendered at every breakpoint.
+   - Fireflies: eight deterministic glowing dots drifting around the couple (literal coordinate table, `fireflyGlow` keyframe), decorative and `aria-hidden`; suppressed under reduced motion.
 4. Bands: sky occupies roughly the top 62% (stars), the horizon/lantern band ~45–72%, terrain silhouette below ~58%, matching the intro's `bottom-[18%]` couple layout.
 
 ## Section 3 — Placement & projection (approved)
@@ -43,11 +44,11 @@ Some users struggle to navigate the 3D sky: orbiting, pinching, and flying the c
 3. Tapping empty sky closes the reading card using the existing fast outside-tap + Escape behavior, reusing `useOutsideTapClose` with the "outside" selector broadened from `canvas` to `[data-sky-surface], canvas` so it works in both views. Tapping the already-selected star/lantern closes it and does not reopen it (pointerdown records the pre-close selection).
 4. Search results, Write, Wish, theme changes, help, and share work through the same handlers; a selected object closes when a modal opens (`clearProps`).
 5. Keyboard: all interactive objects are tab-reachable with visible focus rings; decorative layers are `aria-hidden`.
-6. Reduced motion: `prefers-reduced-motion` disables twinkle, lantern rise, and firefly drift (content still renders), mirroring `IntroScreen`.
+6. Reduced motion: `prefers-reduced-motion` disables twinkle, lantern bob, and firefly drift (content still renders statically), mirroring `IntroScreen`.
 
 ## Section 5 — Themes, motion & density (approved)
 1. Theme palette is derived from `SKY_THEMES[skyTheme]` (`bg` / `mtnFar` / `mtn` bands, `ground`, `veil` star opacity); switching crossfades ~1s, so the HUD sky picker keeps full parity in 2D.
-2. Gentle idle motion: slow lantern bob, starfield twinkle. No falling stars, fireflies, or camera motion.
+2. Gentle idle motion: slow lantern bob, starfield twinkle, and a slow firefly drift near the couple. No falling stars or camera motion.
 3. Density guard: above ~150 stars/lanterns, render all objects static (no twinkle/bob) while the decorative starfield keeps twinkling, protecting low-end phones.
 4. `overflow-hidden` and percentage coordinates keep the composition correct from 320px phones to wide desktop.
 
