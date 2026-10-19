@@ -44,6 +44,17 @@ const Sky2D = ({
   const entryCount = stars.length + lanterns.length;
   const denseEntries = entryCount > 180;
   const animateObjects = graphics.animateObjects && entryCount <= 150;
+  const shootingStars = useMemo(
+    () =>
+      Array.from({ length: graphics.shootingStarCount }, (_, index) => ({
+        key: index,
+        left: 12 + index * 29,
+        top: 12 + (index % 2) * 15,
+        delay: index * 4.5,
+        duration: 1.8 + (index % 2) * 0.3,
+      })),
+    [graphics.shootingStarCount]
+  );
 
   return (
     <div data-sky-surface className="absolute inset-0 overflow-hidden">
@@ -77,6 +88,12 @@ const Sky2D = ({
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
         }
+        @keyframes shootingStar2D {
+          0%, 72% { opacity: 0; transform: translate3d(0, 0, 0) rotate(32deg) scaleX(0.35); }
+          76% { opacity: 1; }
+          88% { opacity: 0.9; transform: translate3d(18vw, 15vh, 0) rotate(32deg) scaleX(1); }
+          100% { opacity: 0; transform: translate3d(24vw, 20vh, 0) rotate(32deg) scaleX(1.1); }
+        }
       `}</style>
 
       <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -97,6 +114,22 @@ const Sky2D = ({
           />
         ))}
       </div>
+
+      {!reduceMotion && (
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          {shootingStars.map((star) => (
+            <span
+              key={star.key}
+              className="absolute h-px w-16 origin-left rounded-full bg-gradient-to-r from-transparent via-blue-100 to-white shadow-[0_0_8px_2px_rgba(190,220,255,0.65)]"
+              style={{
+                left: `${star.left}%`,
+                top: `${star.top}%`,
+                animation: `shootingStar2D ${star.duration}s ease-in-out ${star.delay}s infinite`,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <Moon2D skyTheme={skyTheme} />
 

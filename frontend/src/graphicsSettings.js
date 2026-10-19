@@ -13,6 +13,7 @@ export const GRAPHICS_PRESETS = {
     starsCount: 2500,
     veilCount: 1800,
     sparklesCount: 80,
+    shootingStarCount: 1,
     showSecondaryEffects: false,
   },
   medium: {
@@ -21,6 +22,7 @@ export const GRAPHICS_PRESETS = {
     starsCount: 7000,
     veilCount: 6000,
     sparklesCount: 300,
+    shootingStarCount: 2,
     showSecondaryEffects: true,
   },
   high: {
@@ -29,6 +31,7 @@ export const GRAPHICS_PRESETS = {
     starsCount: 11000,
     veilCount: 9000,
     sparklesCount: 500,
+    shootingStarCount: 3,
     showSecondaryEffects: true,
   },
 };
