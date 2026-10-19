@@ -58,8 +58,8 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
       </svg>
 
       {/* Decorative bench, left of the signpost on the near hill */}
-      <div aria-hidden className="absolute bottom-[6%] left-[38%]">
-        <svg width="150" height="80" viewBox="0 0 64 34" fill="none">
+      <div aria-hidden className="absolute bottom-[6%] left-[20%] sm:left-[38%]">
+        <svg className="h-auto w-[100px] sm:w-[150px]" viewBox="0 0 64 34" fill="none">
           <rect x="4" y="8" width="56" height="4" rx="2" fill="#6b4a2b" />
           <rect x="4" y="14" width="56" height="3" rx="1.5" fill="#8a6338" />
           <rect x="10" y="17" width="3" height="14" rx="1.5" fill="#4a3220" />
@@ -72,9 +72,9 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
         type="button"
         onClick={onSelectSign}
         aria-label="Read the trail sign"
-        className="pointer-events-auto absolute bottom-[7%] left-1/2 flex h-32 w-28 -translate-x-1/2 items-center justify-center rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+        className="pointer-events-auto absolute bottom-[7%] left-1/2 flex h-28 w-20 -translate-x-1/2 items-center justify-center rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:h-32 sm:w-28"
       >
-        <svg aria-hidden width="92" height="126" viewBox="0 0 44 56">
+        <svg aria-hidden className="h-auto w-[70px] sm:w-[92px]" viewBox="0 0 44 56">
           <rect x="20" y="10" width="4" height="46" rx="2" fill="#6b4a2b" />
           <rect x="4" y="12" width="36" height="12" rx="2" fill="#7a5533" />
           <rect x="8" y="15" width="28" height="2" rx="1" fill="#d9b98a" opacity="0.8" />
@@ -110,7 +110,7 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
         type="button"
         onClick={onSelectTeam}
         aria-label="Meet the stargazers"
-        className="pointer-events-auto absolute bottom-[8%] left-[62%] flex origin-bottom -translate-x-1/2 scale-75 items-end gap-1 rounded-2xl transition-transform duration-300 hover:scale-[0.8] active:scale-[0.72] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:scale-100 sm:hover:scale-105 sm:active:scale-95"
+        className="pointer-events-auto absolute bottom-[8%] left-[68%] flex origin-bottom -translate-x-1/2 scale-[0.6] items-end gap-1 rounded-2xl transition-transform duration-300 hover:scale-[0.65] active:scale-[0.56] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:left-[62%] sm:scale-100 sm:hover:scale-105 sm:active:scale-95"
       >
         <GirlFigure />
         <BoyFigure />
