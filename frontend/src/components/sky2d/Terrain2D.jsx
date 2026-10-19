@@ -59,7 +59,7 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
 
       {/* Decorative bench, left of the signpost on the near hill */}
       <div aria-hidden className="absolute bottom-[6%] left-[38%]">
-        <svg width="80" height="42" viewBox="0 0 64 34" fill="none">
+        <svg width="150" height="80" viewBox="0 0 64 34" fill="none">
           <rect x="4" y="8" width="56" height="4" rx="2" fill="#6b4a2b" />
           <rect x="4" y="14" width="56" height="3" rx="1.5" fill="#8a6338" />
           <rect x="10" y="17" width="3" height="14" rx="1.5" fill="#4a3220" />
@@ -72,9 +72,9 @@ const Terrain2D = ({ skyTheme, reduceMotion, onSelectTeam, onSelectSign }) => {
         type="button"
         onClick={onSelectSign}
         aria-label="Read the trail sign"
-        className="pointer-events-auto absolute bottom-[7%] left-1/2 flex h-24 w-20 -translate-x-1/2 items-center justify-center rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+        className="pointer-events-auto absolute bottom-[7%] left-1/2 flex h-32 w-28 -translate-x-1/2 items-center justify-center rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
       >
-        <svg aria-hidden width="66" height="84" viewBox="0 0 44 56">
+        <svg aria-hidden width="92" height="126" viewBox="0 0 44 56">
           <rect x="20" y="10" width="4" height="46" rx="2" fill="#6b4a2b" />
           <rect x="4" y="12" width="36" height="12" rx="2" fill="#7a5533" />
           <rect x="8" y="15" width="28" height="2" rx="1" fill="#d9b98a" opacity="0.8" />
