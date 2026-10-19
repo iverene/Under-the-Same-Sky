@@ -21,7 +21,7 @@ Some users struggle to navigate the 3D sky: orbiting, pinching, and flying the c
 8. `IntroScreen` and splash behavior is untouched. If the remembered view is `2d`, `Sky2D` mounts behind the intro and the 3D warmup is simply not rendered.
 
 ## Section 2 — 2D scene composition (approved)
-1. `Sky2D` is a full-screen, `overflow-hidden` container that reuses the intro's language: vertical night gradient from `SKY_THEMES[skyTheme]`, a deterministic CSS starfield (same `mulberry32` star table as `IntroScreen`), a soft moon glow disc, and `splashStar` / `splashLantern` keyframes.
+1. `Sky2D` is a full-screen, `overflow-hidden` container that reuses the intro's language: layered night bands from `SKY_THEMES[skyTheme]` (`bg`, then masked `mtnFar`/`mtn` haze so `transition-colors` can animate them), a deterministic CSS starfield (seeded `mulberry32` star table), a soft moon glow disc, and the `splashStar` twinkle plus a hand-rolled lantern-bob keyframe.
 2. Terrain layer (`Terrain2D.jsx`): flat SVG silhouettes — near hill with the couple's platform, a ridge line behind it, and a few pine triangles. Colors derive from the theme (`mtn`, `mtnFar`, `ground`).
 3. Landmarks, matching every 3D entry point:
    - Couple: reuse `Couple.jsx` `GirlFigure` / `BoyFigure`, standing on the hill. Tappable → `handleSelectTeam` (About/Team modal).
@@ -30,25 +30,25 @@ Some users struggle to navigate the 3D sky: orbiting, pinching, and flying the c
 4. Bands: sky occupies roughly the top 62% (stars), the horizon/lantern band ~45–72%, terrain silhouette below ~58%, matching the intro's `bottom-[18%]` couple layout.
 
 ## Section 3 — Placement & projection (approved)
-1. New `projection.js` exports `messageTo2D(message)` → `{ x, y }` in percentages plus a `lane` (`'sky' | 'horizon'`).
-2. Stars: `d = position.clone().normalize()`; azimuth `a = atan2(d.x, -d.z)` (−z is the home view direction), elevation `e = asin(clamp(d.y, −1, 1))`. Map azimuth across `FOV_HALF ≈ 1.2 rad` → `x = 50 + (a / FOV_HALF) * 50`, clamped to `[4, 96]`; map elevation across `[−0.05, 1.4]` → `y` in `[6, 62]`.
+1. New `projection.js` exports `messageTo2D(message)` → `{ x, y }` in percentages.
+2. Stars: `d = position.clone().normalize()`; azimuth `a = atan2(d.x, -d.z)` (−z is the home view direction), elevation `e = asin(clamp(d.y, −1, 1))`. Wrap the full circle across the width: `x = ((a + π) / 2π) * 100`, so the whole stored sky spreads across the frame instead of piling up at the edges; map elevation `[−0.2, 1.45]` → `y` in `[62, 6]` (the sky band). Clamp `x` to `[4, 96]` and `y` to `[6, 62]` only for final safety.
 3. Lanterns: use the horizontal direction only (`atan2(x, -z)`) for `x`; because `randomLanternPosition` gives every lantern the same `y`, add a deterministic vertical stagger from a message-id hash inside the horizon band `[45, 72]` so they don't form one flat row.
 4. Overlap: add a tiny deterministic jitter (id hash, ±1.5%) so identical directions don't stack exactly; heavy clusters are resolved visually by glow bloom, not by repositioning.
 5. Parity with 3D: stars with no position stay hidden in 2D (same filter as the 3D sky) but remain searchable. Lanterns always have a position after `normalizeMessage`.
 6. New arrivals (`markFresh`) get the same bright-glow treatment as in 3D for `FRESH_GLOW_MS`, then settle.
 
 ## Section 4 — Interaction & accessibility (approved)
-1. Each star/lantern renders as a real `<button>` with a ≥44px hit area and an `aria-label` like `Star message for Alice` / `Lantern message for Alice`.
+1. Each star/lantern renders as a real `<button>` with a ≥44px hit area and an `aria-label` like `Star message for Alice` / `Lantern wish for Alice`.
 2. Tap/click calls the existing `handleSelectStar` / `handleSelectLantern`; the selected object scales up and brightens (selected state mirrors the 3D selected glow). `ReadingCard` opens unchanged at the bottom center.
-3. Tapping empty sky closes the reading card using the existing fast outside-tap + Escape behavior, reusing `useOutsideTapClose` semantics (canvas-specific check dropped; the scene container is the "outside" region).
+3. Tapping empty sky closes the reading card using the existing fast outside-tap + Escape behavior, reusing `useOutsideTapClose` with the "outside" selector broadened from `canvas` to `[data-sky-surface], canvas` so it works in both views. Tapping the already-selected star/lantern closes it and does not reopen it (pointerdown records the pre-close selection).
 4. Search results, Write, Wish, theme changes, help, and share work through the same handlers; a selected object closes when a modal opens (`clearProps`).
 5. Keyboard: all interactive objects are tab-reachable with visible focus rings; decorative layers are `aria-hidden`.
 6. Reduced motion: `prefers-reduced-motion` disables twinkle, lantern rise, and firefly drift (content still renders), mirroring `IntroScreen`.
 
 ## Section 5 — Themes, motion & density (approved)
-1. Theme palette is derived from `SKY_THEMES[skyTheme]` (`bg` gradient, `mtn`/`mtnFar` silhouettes, `ground`, `veil` star opacity); switching crossfades ~1s, so the HUD sky picker keeps full parity in 2D.
-2. Gentle idle motion: slow lantern rise (reusing `splashLantern` drift math), starfield twinkle, and a faint firefly layer over the hill. No falling stars or camera motion.
-3. Density guard: above ~150 stars/lanterns, animate only the most recent/nearest set and render the remainder as static dots, protecting low-end phones.
+1. Theme palette is derived from `SKY_THEMES[skyTheme]` (`bg` / `mtnFar` / `mtn` bands, `ground`, `veil` star opacity); switching crossfades ~1s, so the HUD sky picker keeps full parity in 2D.
+2. Gentle idle motion: slow lantern bob, starfield twinkle. No falling stars, fireflies, or camera motion.
+3. Density guard: above ~150 stars/lanterns, render all objects static (no twinkle/bob) while the decorative starfield keeps twinkling, protecting low-end phones.
 4. `overflow-hidden` and percentage coordinates keep the composition correct from 320px phones to wide desktop.
 
 ## Data flow
@@ -66,9 +66,9 @@ Mount → read `utss.view` → render `Sky3D` or `Sky2D` behind shared overlays 
 - No test infra (unchanged constraint).
 
 ## Files
-- New: `frontend/src/components/sky2d/Sky2D.jsx`, `sky2d/projection.js`, `sky2d/Star2D.jsx`, `sky2d/Lantern2D.jsx`, `sky2d/Terrain2D.jsx`, `sky2d/Moon2D.jsx`.
+- New: `frontend/src/components/sky2d/Sky2D.jsx`, `sky2d/projection.js`, `sky2d/Star2D.jsx`, `sky2d/Lantern2D.jsx`, `sky2d/Terrain2D.jsx`, `sky2d/Moon2D.jsx`, `sky2d/viewStorage.js`.
 - New: `frontend/src/components/Sky3D.jsx` (extracted Canvas + texture hooks).
-- Changed: `frontend/src/components/NightSky.jsx` (view state, view switch, shared overlays), `frontend/src/components/HUD.jsx` (toggle pill, view-aware copy). Reused untouched: `sky/Couple.jsx`, `sky/ReadingCard.jsx`, `sky/SearchPanel.jsx`, `sky/IntroScreen.jsx`, `three/themes.js`, modals, `ConfirmDialog`.
+- Changed: `frontend/src/components/NightSky.jsx` (view state, view switch, shared overlays), `frontend/src/components/HUD.jsx` (toggle pill, view-aware copy), `frontend/src/components/sky/useOutsideTapClose.js` (accept the 2D surface as an outside-tap region). Reused untouched: `sky/Couple.jsx`, `sky/ReadingCard.jsx`, `sky/SearchPanel.jsx`, `sky/IntroScreen.jsx`, `three/themes.js`, modals, `ConfirmDialog`.
 
 ## Out of scope
 - Changing the 3D scene, OrbitControls, camera rigs, or textures.
