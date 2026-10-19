@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import ConfirmDialog from './ConfirmDialog';
 
 const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const [recipient, setRecipient] = useState('');
   const [sender, setSender] = useState('');
   const [message, setMessage] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const hideTimer = useRef(null);
   const rootRef = useRef(null);
@@ -11,6 +13,29 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const RECIPIENT_LIMIT = 60;
   const SENDER_LIMIT = 60;
   const MESSAGE_LIMIT = 500;
+
+  const isDirty = [recipient, sender, message].some((value) => value.trim() !== '');
+
+  const resetForm = useCallback(() => {
+    setRecipient('');
+    setSender('');
+    setMessage('');
+  }, []);
+
+  const requestClose = useCallback(() => {
+    if (isDirty) {
+      setConfirmOpen(true);
+      return;
+    }
+    resetForm();
+    onClose();
+  }, [isDirty, resetForm, onClose]);
+
+  const discardAndClose = useCallback(() => {
+    setConfirmOpen(false);
+    resetForm();
+    onClose();
+  }, [resetForm, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -31,11 +56,11 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !confirmOpen) requestClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose]);
+  }, [isOpen, confirmOpen, requestClose]);
 
   if (!isVisible && !isOpen) return null;
 
@@ -43,9 +68,7 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
     e.preventDefault();
     if (!recipient || !message) return;
     onSend({ recipient, message, sender: sender.trim(), type: 'star' });
-    setRecipient('');
-    setSender('');
-    setMessage('');
+    resetForm();
     onClose();
   };
 
@@ -55,15 +78,15 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
       {/* Darkened Overlay */}
       <div 
         className="absolute inset-0 bg-slate-950/60 transition-opacity" 
-        onClick={onClose}
+        onClick={requestClose}
       />
 
       {/* Modern Glass Card */}
-      <div className={`scroll-celestial relative w-full max-w-lg max-h-[92dvh] overflow-y-auto bg-slate-900/50 border border-white/10 rounded-3xl shadow-2xl shadow-blue-900/20 transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
+      <div inert={confirmOpen} className={`scroll-celestial relative w-full max-w-lg max-h-[92dvh] overflow-y-auto bg-slate-900/50 border border-white/10 rounded-3xl shadow-2xl shadow-blue-900/20 transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
         {/* Close — mobile only (desktop uses backdrop / Escape) */}
         <button
           type="button"
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
           className="sm:hidden absolute top-3 right-3 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-black/40 border border-white/10 text-slate-300"
         >
@@ -155,6 +178,15 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        accent="blue"
+        title="Discard this message?"
+        description="Your unsent message will be lost."
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={discardAndClose}
+      />
     </div>
   );
 };

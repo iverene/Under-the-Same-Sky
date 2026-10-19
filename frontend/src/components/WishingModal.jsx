@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getMoonData, fetchMoonData } from '../moon';
+import ConfirmDialog from './ConfirmDialog';
 
 // Lantern Icon
 const LanternIcon = () => (
@@ -12,6 +13,7 @@ const LanternIcon = () => (
 const WishingModal = ({ isOpen, onClose, onSend }) => {
   const [name, setName] = useState('');
   const [wish, setWish] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const hideTimer = useRef(null);
   const rootRef = useRef(null);
@@ -20,6 +22,28 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
   const WISH_LIMIT = 500;
   // Live lunar state for the availability badge (API first, local math fallback)
   const [apiMoon, setApiMoon] = useState(null);
+
+  const isDirty = [name, wish].some((value) => value.trim() !== '');
+
+  const resetForm = useCallback(() => {
+    setName('');
+    setWish('');
+  }, []);
+
+  const requestClose = useCallback(() => {
+    if (isDirty) {
+      setConfirmOpen(true);
+      return;
+    }
+    resetForm();
+    onClose();
+  }, [isDirty, resetForm, onClose]);
+
+  const discardAndClose = useCallback(() => {
+    setConfirmOpen(false);
+    resetForm();
+    onClose();
+  }, [resetForm, onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -58,11 +82,11 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !confirmOpen) requestClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose]);
+  }, [isOpen, confirmOpen, requestClose]);
 
   if (!isVisible && !isOpen) return null;
 
@@ -71,8 +95,7 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
     if (!wish) return; 
     onSend({ name: name || 'Anonymous', wish, type: 'lantern' });
     
-    setName('');
-    setWish('');
+    resetForm();
     onClose();
   };
 
@@ -82,15 +105,15 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
       {/* Darkened Overlay */}
       <div 
         className="absolute inset-0 bg-slate-950/60 transition-opacity" 
-        onClick={onClose}
+        onClick={requestClose}
       />
 
       {/* Glass Card - Amber Theme */}
-      <div className={`scroll-celestial relative w-full max-w-lg max-h-[92dvh] overflow-y-auto bg-slate-900/90 backdrop-blur-2xl border border-amber-500/20 rounded-3xl shadow-2xl shadow-amber-900/20 transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
+      <div inert={confirmOpen} className={`scroll-celestial relative w-full max-w-lg max-h-[92dvh] overflow-y-auto bg-slate-900/90 backdrop-blur-2xl border border-amber-500/20 rounded-3xl shadow-2xl shadow-amber-900/20 transform transition-all duration-300 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
         {/* Close — mobile only (desktop uses backdrop / Escape) */}
         <button
           type="button"
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
           className="sm:hidden absolute top-3 right-3 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-black/40 border border-white/10 text-slate-300"
         >
@@ -174,6 +197,15 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        accent="amber"
+        title="Discard this wish?"
+        description="Your unsent wish will be lost."
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={discardAndClose}
+      />
     </div>
   );
 };
