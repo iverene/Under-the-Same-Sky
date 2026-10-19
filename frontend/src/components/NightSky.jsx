@@ -1,7 +1,4 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import * as THREE from 'three';
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
 import { fetchMessages, sendMessage } from '../api';
 import ComposeModal from './ComposeModal';
 import WishingModal from './WishingModal';
@@ -10,46 +7,18 @@ import TeamModal from './TeamModal';
 import HUD from './HUD';
 import TopBar from './TopBar';
 import { FRESH_GLOW_MS, TAP_TOLERANCE_SQ } from '../three/config';
-import { BENCH_FOCUS, HOME_POS, OVERLOOK, SIGN_CAM, DECK_FOCUS } from '../three/terrain';
+import { BENCH_FOCUS, OVERLOOK, SIGN_CAM, DECK_FOCUS } from '../three/terrain';
 import { THEME_CYCLE, THEME_CYCLE_MS } from '../three/themes';
-import { normalizeMessage, randomLanternPosition, getRandomPositionOnSphere, toVector3 } from '../three/messages';
-import {
-  useStarTexture,
-  useCoronaTexture,
-  useGlowTexture,
-  usePaperTexture,
-  useTrailTexture,
-  useNebulaTexture,
-  useMoonTexture,
-  useGroundTexture,
-  useWoodTexture,
-} from '../three/textures';
-import MessageStar from './sky/MessageStar';
-import FloatingLantern from './sky/FloatingLantern';
-import FallingStarSystem from './sky/FallingStarSystem';
-import Constellations from './sky/Constellations';
-import { NebulaField, Moon } from './sky/Backdrop';
-import { Ground, HillDetails, Fireflies, MountainRange } from './sky/Terrain';
-import { Bench, Signpost, Stargazers } from './sky/Foreground';
-import { CameraRig, SkyRig, GroundCollision } from './sky/Rigs';
+import { normalizeMessage, randomLanternPosition, getRandomPositionOnSphere } from '../three/messages';
+import Sky3D from './Sky3D';
 import ReadingCard from './sky/ReadingCard';
 import IntroScreen from './sky/IntroScreen';
 import SearchPanel from './sky/SearchPanel';
 import { useOutsideTapClose } from './sky/useOutsideTapClose';
 
-// Renders a single frame on mount so shaders and textures are warm while the
-// opaque intro covers the screen; the loop itself stays paused until Start.
-const SceneWarmup = () => {
-  const invalidate = useThree((s) => s.invalidate);
-  useEffect(() => {
-    invalidate();
-  }, [invalidate]);
-  return null;
-};
-
 // Orchestrator: owns scene state (messages, selection, theme, modals),
-// wires texture instances into scene components via props, and composes
-// the Canvas + HTML overlays. All 3D/presentational work lives in ./sky/*.
+// wires state into Sky3D via props, and composes the Canvas + HTML overlays.
+// All 3D/presentational work lives in ./Sky3D and ./sky/*.
 const NightSky = () => {
   const [messages, setMessages] = useState([]);
   const [ready, setReady] = useState(false);
@@ -106,13 +75,6 @@ const NightSky = () => {
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
   }, []);
-  const ambientRef = useRef(null);
-  const sunRef = useRef(null);
-  const groundMatRef = useRef(null);
-  const mtnMatRef = useRef(null);
-  const mtnFarMatRef = useRef(null);
-  const veilRef = useRef(null);
-
   // Click-to-focus: which object the camera is flying to (null = free explore)
   const [selectedId, setSelectedId] = useState(null);
   // Trail sign selection (its own state — it isn't a message row)
@@ -121,24 +83,11 @@ const NightSky = () => {
   const [selectedBench, setSelectedBench] = useState(false);
   // Stargazer couple selection (opens the team modal)
   const [selectedTeam, setSelectedTeam] = useState(false);
-  // Lanterns drift as they rise, so we snapshot the lantern's live position on click
-  const [focusOverride, setFocusOverride] = useState(null);
-  const controlsRef = useRef(null);
   const downPos = useRef(null);
   // Flight state shared with the CameraRig (grabbing the scene cancels motion)
   const flightRef = useRef({ flying: false, homingCam: false });
   // Reset-to-bench signal consumed by the CameraRig
   const [homeSignal, setHomeSignal] = useState(0);
-
-  const starTexture = useStarTexture();
-  const coronaTexture = useCoronaTexture();
-  const glowTexture = useGlowTexture();
-  const paperTexture = usePaperTexture();
-  const trailTexture = useTrailTexture();
-  const nebulaTexture = useNebulaTexture();
-  const moonTexture = useMoonTexture();
-  const groundTexture = useGroundTexture();
-  const woodTexture = useWoodTexture();
 
   const [splashVisible, setSplashVisible] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
@@ -238,19 +187,18 @@ const NightSky = () => {
     [messages, selectedId]
   );
   const selectedIsLantern = selectedStar?.type === 'lantern';
-  const focusPoint = useMemo(() => {
+  const landmarkFocus = useMemo(() => {
     if (selectedSign) return OVERLOOK;
     if (selectedBench) return BENCH_FOCUS;
     if (selectedTeam) return DECK_FOCUS;
-    if (!selectedId) return null;
-    return toVector3(focusOverride) || toVector3(selectedStar?.position);
-  }, [selectedId, selectedSign, selectedBench, selectedTeam, focusOverride, selectedStar]);
+    return null;
+  }, [selectedSign, selectedBench, selectedTeam]);
   // Directed camera perch (sign overlook) — null means "hold current side"
   const focusCam = useMemo(() => (selectedSign ? SIGN_CAM : null), [selectedSign]);
+  const lockTarget = selectedId !== null || selectedSign || selectedBench || selectedTeam;
 
   const clearProps = useCallback(() => {
     setSelectedId(null);
-    setFocusOverride(null);
     setSelectedSign(false);
     setSelectedBench(false);
     setSelectedTeam(false);
@@ -269,12 +217,9 @@ const NightSky = () => {
     }
   };
 
-  const handleSelectLantern = (msg, livePos) => {
+  const handleSelectLantern = (msg) => {
     clearProps();
-    if (msg) {
-      setSelectedId(msg.id);
-      setFocusOverride(livePos || msg.position);
-    }
+    if (msg) setSelectedId(msg.id);
   };
 
   const handleSelectSign = () => {
@@ -284,12 +229,7 @@ const NightSky = () => {
 
   const handleSelectSearchResult = (msg) => {
     clearProps();
-    if (msg.type === 'lantern') {
-      setSelectedId(msg.id);
-      setFocusOverride(msg.position);
-    } else {
-      setSelectedId(msg.id);
-    }
+    if (msg) setSelectedId(msg.id);
   };
 
   const handleSelectBench = () => {
@@ -345,7 +285,7 @@ const NightSky = () => {
       setSendSuccess(true);
       // Showcase the new arrival: fly the camera out to it (stops at focus
       // distance — close enough to see, never on top of it)
-      if (normalized.type === 'lantern') handleSelectLantern(normalized, normalized.position);
+      if (normalized.type === 'lantern') handleSelectLantern(normalized);
       else handleSelectStar(normalized);
     } catch (err) {
       // Surface the failure so the user knows their wish wasn't saved
@@ -450,119 +390,28 @@ const NightSky = () => {
         flightRef.current.homingCam = false;
       }}
     >
-      <Canvas camera={{ position: HOME_POS.toArray(), fov: 50 }} frameloop={showIntro ? 'never' : 'always'} onPointerMissed={handlePointerMissed}>
-        <SceneWarmup />
-
-        {/* --- ATMOSPHERE --- */}
-        {/* Dark Blue-Black Night Sky */}
-        <color attach="background" args={['#020205']} />
-        {/* Long-range fog: crisp hilltop nearby, hazy ridges far (melts peaks into sky) */}
-        <fog attach="fog" args={['#020205', 25, 300]} />
-
-        {/* Hilltop POV: ground, bench, signpost, pines, rocks, fireflies + mountain ranges */}
-        <Ground texture={groundTexture} matRef={groundMatRef} />
-        <Bench wood={woodTexture} glow={glowTexture} onSelect={handleSelectBench} />
-        <Signpost wood={woodTexture} onSelect={handleSelectSign} />
-        <Stargazers wood={woodTexture} glow={glowTexture} onSelect={handleSelectTeam} />
-        <HillDetails />
-        <Fireflies texture={coronaTexture} />
-        <MountainRange nearRef={mtnMatRef} farRef={mtnFarMatRef} />
-
-        {/* Deep-space nebula clouds + moon */}
-        <NebulaField texture={nebulaTexture} />
-        <Moon texture={moonTexture} glow={coronaTexture} />
-
-        {/* Thousands of distant background stars (shell sits beyond the moon) */}
-        <Stars radius={800} depth={100} count={7000} factor={4} saturation={0} fade speed={0.5} raycast={() => null} />
-        {/* Brighter near veil: extra depth at deep night, breathed by SkyRig */}
-        <Stars ref={veilRef} radius={500} depth={80} count={6000} factor={5} saturation={0} fade speed={0.6} raycast={() => null} />
-
-        {/* Subtle floating dust/fireflies */}
-        <Sparkles count={300} scale={60} size={2} speed={0.2} opacity={0.3} color="#aaddff" raycast={() => null} />
-
-        {/* Decorative dot-to-dot figures on the far shell (purely ambient) */}
-        <Constellations />
-
-        {/* --- LIGHTING --- */}
-        <ambientLight ref={ambientRef} intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        {/* Key light: moonlight by night, low warm sun at dusk/dawn (driven by SkyRig) */}
-        <directionalLight ref={sunRef} position={[-345, 237, -496]} intensity={0.35} color="#b9c8ff" />
-        {/* Sky theme blender */}
-        <SkyRig theme={skyTheme} ambientRef={ambientRef} sunRef={sunRef} groundRef={groundMatRef} mtnRef={mtnMatRef} mtnFarRef={mtnFarMatRef} veilRef={veilRef} />
-
-        {/* --- CONTENT --- */}
-        {/* Stars */}
-        {stars.map((msg) => (
-          <MessageStar
-            key={msg.id}
-            position={msg.position}
-            message={msg}
-            baseSize={(msg.size || 0.5) * 2}
-            texture={starTexture}
-            corona={coronaTexture}
-            selected={msg.id === selectedId}
-            onSelect={handleSelectStar}
-            bornAt={freshMap[msg.id]}
-          />
-        ))}
-
-        {/* Lanterns */}
-        {lanterns.map((msg) => (
-            <FloatingLantern
-              key={msg.id}
-              position={msg.position}
-              message={msg}
-              onSelect={handleSelectLantern}
-              glow={glowTexture}
-              paper={paperTexture}
-              bornAt={freshMap[msg.id]}
-              selected={msg.id === selectedId && selectedIsLantern}
-              onLivePosition={msg.id === selectedId && selectedIsLantern ? (pos) => setFocusOverride(pos) : undefined}
-            />
-        ))}
-
-        <FallingStarSystem headTexture={starTexture} trailTexture={trailTexture} />
-
-        {/* --- CONTROLS --- */}
-        {/* Focus flight runs alongside the controls */}
-        <CameraRig controlsRef={controlsRef} focusPoint={focusPoint} focusCam={focusCam} flightRef={flightRef} homeSignal={homeSignal} introHold={showIntro} />
-        <OrbitControls
-          ref={controlsRef}
-          target={[0, 1, 0]}
-          enablePan={false}
-          enableZoom={true}
-          // Deep dynamic zoom: dive right up to a star, pull back for the wide
-          // hilltop vista — capped so scrolling out can't leave the scene
-          minDistance={2.5}
-          maxDistance={80}
-          // Touch tuning: pinch moves less per gesture than a wheel, so it
-          // gets a higher speed; zoomToCursor is off on touch so the target
-          // doesn't drift under the fingers mid-pinch.
-          zoomSpeed={isTouchDevice ? 1.8 : 1.2}
-          zoomToCursor={!isTouchDevice}
-          touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
-          // Full vertical freedom: dragging down swoops the camera to the grass
-          // so you can lie back and gaze straight up (GroundCollision below
-          // keeps you from tunneling through the hill). Dragging up stops
-          // before a top-down view so you never lose the sky to dirt.
-          minPolarAngle={0.6}
-          maxPolarAngle={Math.PI - 0.05}
-          // Slow, cinematic rotation
-          autoRotate={true}
-          autoRotateSpeed={0.15}
-          enableDamping={true}
-          dampingFactor={0.05}
-          rotateSpeed={0.4}
-          reverseOrbit={true}
-        />
-        {/* Terrain collision: runs after the controls, slides the camera
-            along the hill instead of letting it sink through */}
-        <GroundCollision
-          controlsRef={controlsRef}
-          lockTarget={selectedId !== null || selectedSign || selectedBench || selectedTeam}
-        />
-      </Canvas>
+      <Sky3D
+        stars={stars}
+        lanterns={lanterns}
+        selectedId={selectedId}
+        selectedMessage={selectedStar}
+        selectedIsLantern={selectedIsLantern}
+        freshMap={freshMap}
+        skyTheme={skyTheme}
+        showIntro={showIntro}
+        isTouchDevice={isTouchDevice}
+        landmarkFocus={landmarkFocus}
+        focusCam={focusCam}
+        flightRef={flightRef}
+        homeSignal={homeSignal}
+        lockTarget={lockTarget}
+        onSelectStar={handleSelectStar}
+        onSelectLantern={handleSelectLantern}
+        onSelectBench={handleSelectBench}
+        onSelectSign={handleSelectSign}
+        onSelectTeam={handleSelectTeam}
+        onPointerMissed={handlePointerMissed}
+      />
 
       {/* Selected star / lantern message — responsive bottom-center reading card */}
       {selectedStar && (
