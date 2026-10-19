@@ -11,6 +11,8 @@ import { BENCH_FOCUS, OVERLOOK, SIGN_CAM, DECK_FOCUS } from '../three/terrain';
 import { THEME_CYCLE, THEME_CYCLE_MS } from '../three/themes';
 import { normalizeMessage, randomLanternPosition, getRandomPositionOnSphere } from '../three/messages';
 import Sky3D from './Sky3D';
+import Sky2D from './sky2d/Sky2D';
+import { readView, writeView } from './sky2d/viewStorage';
 import ReadingCard from './sky/ReadingCard';
 import IntroScreen from './sky/IntroScreen';
 import SearchPanel from './sky/SearchPanel';
@@ -27,6 +29,12 @@ const NightSky = () => {
   const [isWriting, setIsWriting] = useState(false);
   const [isWishing, setIsWishing] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Active sky view ('3d' | '2d'), restored from storage
+  const [view, setView] = useState(readView);
+  useEffect(() => {
+    writeView(view);
+  }, [view]);
 
   // Last failed send — shown as a dismissible banner (auto-clears)
   const [sendError, setSendError] = useState(null);
@@ -203,6 +211,11 @@ const NightSky = () => {
     setSelectedBench(false);
     setSelectedTeam(false);
   }, []);
+
+  const handleToggleView = useCallback(() => {
+    clearProps();
+    setView((v) => (v === '3d' ? '2d' : '3d'));
+  }, [clearProps]);
 
   // Ref to the reading card: taps inside it never close it
   const cardRef = useRef(null);
@@ -390,28 +403,45 @@ const NightSky = () => {
         flightRef.current.homingCam = false;
       }}
     >
-      <Sky3D
-        stars={stars}
-        lanterns={lanterns}
-        selectedId={selectedId}
-        selectedMessage={selectedStar}
-        selectedIsLantern={selectedIsLantern}
-        freshMap={freshMap}
-        skyTheme={skyTheme}
-        showIntro={showIntro}
-        isTouchDevice={isTouchDevice}
-        landmarkFocus={landmarkFocus}
-        focusCam={focusCam}
-        flightRef={flightRef}
-        homeSignal={homeSignal}
-        lockTarget={lockTarget}
-        onSelectStar={handleSelectStar}
-        onSelectLantern={handleSelectLantern}
-        onSelectBench={handleSelectBench}
-        onSelectSign={handleSelectSign}
-        onSelectTeam={handleSelectTeam}
-        onPointerMissed={handlePointerMissed}
-      />
+      {view === '3d' ? (
+        <div key="sky3d" className="absolute inset-0 modal-fade">
+          <Sky3D
+            stars={stars}
+            lanterns={lanterns}
+            selectedId={selectedId}
+            selectedMessage={selectedStar}
+            selectedIsLantern={selectedIsLantern}
+            freshMap={freshMap}
+            skyTheme={skyTheme}
+            showIntro={showIntro}
+            isTouchDevice={isTouchDevice}
+            landmarkFocus={landmarkFocus}
+            focusCam={focusCam}
+            flightRef={flightRef}
+            homeSignal={homeSignal}
+            lockTarget={lockTarget}
+            onSelectStar={handleSelectStar}
+            onSelectLantern={handleSelectLantern}
+            onSelectBench={handleSelectBench}
+            onSelectSign={handleSelectSign}
+            onSelectTeam={handleSelectTeam}
+            onPointerMissed={handlePointerMissed}
+          />
+        </div>
+      ) : (
+        <div key="sky2d" className="absolute inset-0 modal-fade">
+          <Sky2D
+            messages={messages}
+            selectedId={selectedId}
+            skyTheme={skyTheme}
+            freshMap={freshMap}
+            onSelectStar={handleSelectStar}
+            onSelectLantern={handleSelectLantern}
+            onSelectTeam={handleSelectTeam}
+            onSelectSign={handleSelectSign}
+          />
+        </div>
+      )}
 
       {/* Selected star / lantern message — responsive bottom-center reading card */}
       {selectedStar && (
@@ -494,6 +524,8 @@ const NightSky = () => {
         onOpenWish={() => setIsWishing(true)}
         skyTheme={skyTheme}
         onSkyTheme={setSkyTheme}
+        view={view}
+        onToggleView={handleToggleView}
         uiHidden={uiHidden}
         onToggleUI={() => setUiHidden((v) => !v)}
         onReset={() => {
