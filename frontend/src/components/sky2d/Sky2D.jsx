@@ -88,6 +88,11 @@ const Sky2D = ({
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
         }
+        @keyframes lanternRise2D {
+          0% { opacity: 0; transform: translate3d(0, 100vh, 0) scale(0.65); }
+          72% { opacity: 0.9; transform: translate3d(0, -5px, 0) scale(1.02); }
+          100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
         @keyframes shootingStar2D {
           0%, 72% { opacity: 0; transform: translate3d(0, 0, 0) rotate(32deg) scaleX(0.35); }
           76% { opacity: 1; }
