@@ -51,15 +51,37 @@ const Lantern2D = ({ message, x, y, selected, fresh, animate, dense, reduceMotio
           }}
         >
           <span
-            className={`absolute inset-0 rounded-[45%_45%_50%_50%] bg-gradient-to-b from-amber-100 to-amber-400 ${
+            className={`absolute inset-0 overflow-visible rounded-[38%_38%_46%_46%] border border-orange-300/70 bg-gradient-to-r from-orange-400 via-amber-200 to-orange-500 ${
               selected
                 ? 'shadow-[0_0_26px_rgba(255,200,100,0.9)]'
                 : dense
                   ? 'shadow-[0_0_8px_rgba(255,190,90,0.4)]'
                   : 'shadow-[0_0_18px_rgba(255,190,90,0.55)]'
             }`}
-          />
-          <span className="absolute inset-[22%] rounded-[45%] bg-yellow-100/90 blur-[1px]" />
+          >
+            <span
+              aria-hidden
+              className="absolute -top-[3px] left-1/2 h-[5px] w-[82%] -translate-x-1/2 rounded-[50%] border-2 border-orange-950/90 bg-orange-900/90"
+            >
+              <span className="absolute left-1/2 top-0 h-1.5 w-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-950" />
+            </span>
+            <span
+              aria-hidden
+              className="absolute inset-x-[12%] top-0 bottom-0 opacity-25"
+              style={{
+                  backgroundImage:
+                    'repeating-linear-gradient(90deg, transparent 0 3px, rgba(180, 75, 20, 0.7) 4px 5px, transparent 6px 9px)',
+              }}
+            />
+            <span
+              aria-hidden
+              className="absolute -bottom-[2px] left-1/2 h-[5px] w-[94%] -translate-x-1/2 rounded-[50%] bg-orange-600 shadow-[0_1px_5px_rgba(255,130,30,0.9)]"
+            />
+            <span
+              aria-hidden
+              className="absolute inset-[18%] rounded-[45%] bg-yellow-100/25 blur-[2px]"
+            />
+          </span>
         </span>
       </span>
       {fresh && (
