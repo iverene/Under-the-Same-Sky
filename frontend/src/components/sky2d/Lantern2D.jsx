@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { hashString } from './projection';
 
-const Lantern2D = ({ message, x, y, selected, fresh, animate, reduceMotion, onSelect }) => {
+const Lantern2D = ({ message, x, y, selected, fresh, animate, dense, reduceMotion, onSelect }) => {
   const wasSelected = useRef(false);
   const bob = useMemo(() => {
     const h = hashString(`bob-${message.id}`);
@@ -26,7 +26,7 @@ const Lantern2D = ({ message, x, y, selected, fresh, animate, reduceMotion, onSe
     >
       <span
         aria-hidden
-        className="relative block h-8 w-6 transition-transform duration-300 group-hover:scale-110"
+        className={`relative block transition-transform duration-300 group-hover:scale-110 ${dense ? 'h-6 w-5' : 'h-8 w-6'}`}
         style={{
           animation:
             animate && !reduceMotion
@@ -38,7 +38,9 @@ const Lantern2D = ({ message, x, y, selected, fresh, animate, reduceMotion, onSe
           className={`absolute inset-0 rounded-[45%_45%_50%_50%] bg-gradient-to-b from-amber-100 to-amber-400 ${
             selected
               ? 'shadow-[0_0_26px_rgba(255,200,100,0.9)]'
-              : 'shadow-[0_0_18px_rgba(255,190,90,0.55)]'
+              : dense
+                ? 'shadow-[0_0_8px_rgba(255,190,90,0.4)]'
+                : 'shadow-[0_0_18px_rgba(255,190,90,0.55)]'
           }`}
         />
         <span className="absolute inset-[22%] rounded-[45%] bg-yellow-100/90 blur-[1px]" />

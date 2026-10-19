@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { messageTo2D, makeStarfield } from './projection';
+import { layoutMessages2D, makeStarfield } from './projection';
 import { SKY_THEMES } from '../../three/themes';
 import Moon2D from './Moon2D';
 import Terrain2D from './Terrain2D';
@@ -25,6 +25,7 @@ const Sky2D = ({
     [messages]
   );
   const lanterns = useMemo(() => messages.filter((m) => m.type === 'lantern'), [messages]);
+  const entryPositions = useMemo(() => layoutMessages2D([...stars, ...lanterns]), [stars, lanterns]);
   const starfield = useMemo(() => makeStarfield(20261019, graphics.starfieldCount), [graphics.starfieldCount]);
 
   const [reduceMotion, setReduceMotion] = useState(
@@ -39,8 +40,10 @@ const Sky2D = ({
     return () => mq.removeEventListener?.('change', onChange);
   }, []);
 
-  // Density guard: keep twinkle/bob cheap on low-end phones.
-  const animateObjects = graphics.animateObjects && stars.length + lanterns.length <= 150;
+  // Keep every entry visible while removing expensive effects as density rises.
+  const entryCount = stars.length + lanterns.length;
+  const denseEntries = entryCount > 180;
+  const animateObjects = graphics.animateObjects && entryCount <= 150;
 
   return (
     <div data-sky-surface className="absolute inset-0 overflow-hidden">
@@ -99,7 +102,7 @@ const Sky2D = ({
 
       <div className="absolute inset-0">
         {stars.map((m) => {
-          const p = messageTo2D(m);
+          const p = entryPositions.get(m.id);
           return (
             <Star2D
               key={m.id}
@@ -109,13 +112,14 @@ const Sky2D = ({
               selected={m.id === selectedId}
               fresh={!!freshMap[m.id]}
               animate={animateObjects}
+              dense={denseEntries}
               reduceMotion={reduceMotion}
               onSelect={onSelectStar}
             />
           );
         })}
         {lanterns.map((m) => {
-          const p = messageTo2D(m);
+          const p = entryPositions.get(m.id);
           return (
             <Lantern2D
               key={m.id}
@@ -125,6 +129,7 @@ const Sky2D = ({
               selected={m.id === selectedId}
               fresh={!!freshMap[m.id]}
               animate={animateObjects}
+              dense={denseEntries}
               reduceMotion={reduceMotion}
               onSelect={onSelectLantern}
             />

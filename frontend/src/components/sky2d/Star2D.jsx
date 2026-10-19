@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { hashString } from './projection';
 
-const Star2D = ({ message, x, y, selected, fresh, animate, reduceMotion, onSelect }) => {
+const Star2D = ({ message, x, y, selected, fresh, animate, dense, reduceMotion, onSelect }) => {
   const wasSelected = useRef(false);
   const twinkle = useMemo(() => {
     const h = hashString(`twinkle-${message.id}`);
@@ -28,11 +28,13 @@ const Star2D = ({ message, x, y, selected, fresh, animate, reduceMotion, onSelec
         aria-hidden
         className="block rounded-full bg-white transition-[width,height,box-shadow] duration-300"
         style={{
-          width: selected ? 10 : 6,
-          height: selected ? 10 : 6,
+          width: selected ? 10 : dense ? 4 : 6,
+          height: selected ? 10 : dense ? 4 : 6,
           boxShadow: selected
             ? '0 0 14px 6px rgba(210,230,255,0.7), 0 0 34px 14px rgba(150,190,255,0.28)'
-            : '0 0 10px 3px rgba(190,215,255,0.55), 0 0 22px 8px rgba(140,180,255,0.18)',
+            : dense
+              ? '0 0 5px 1px rgba(190,215,255,0.45)'
+              : '0 0 10px 3px rgba(190,215,255,0.55), 0 0 22px 8px rgba(140,180,255,0.18)',
           animation:
             animate && !reduceMotion
               ? `splashStar ${twinkle.dur}s ease-in-out ${twinkle.delay}s infinite alternate`

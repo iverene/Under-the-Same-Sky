@@ -61,6 +61,46 @@ export const messageTo2D = (message) => {
   return starTo2D(message?.position, message?.id);
 };
 
+const spreadPoint = (point, index, count) => {
+  if (count < 2) return point;
+  const angle = index * 2.399963229728653;
+  const ring = Math.floor(index / 6);
+  const radius = Math.min(3.2, 0.9 + ring * 0.7);
+  return {
+    x: clamp(point.x + Math.cos(angle) * radius, 3, 97),
+    y: clamp(point.y + Math.sin(angle) * radius * 0.72, 5, 74),
+  };
+};
+
+export const layoutMessages2D = (messages) => {
+  const projected = messages.map((message) => ({
+    message,
+    point: messageTo2D(message),
+  }));
+  const buckets = new Map();
+
+  projected.forEach((entry) => {
+    const key = `${Math.floor(entry.point.x / 4)}:${Math.floor(entry.point.y / 4)}`;
+    const bucket = buckets.get(key) || [];
+    bucket.push(entry);
+    buckets.set(key, bucket);
+  });
+
+  const positions = new Map();
+  buckets.forEach((bucket) => {
+    const center = bucket.reduce(
+      (total, entry) => ({ x: total.x + entry.point.x, y: total.y + entry.point.y }),
+      { x: 0, y: 0 }
+    );
+    center.x /= bucket.length;
+    center.y /= bucket.length;
+    bucket.forEach((entry, index) => {
+      positions.set(entry.message.id, spreadPoint(center, index, bucket.length));
+    });
+  });
+  return positions;
+};
+
 export const makeStarfield = (seed = 20261019, count = 95) => {
   const rand = mulberry32(seed);
   return Array.from({ length: count }, () => ({
