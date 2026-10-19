@@ -97,6 +97,5 @@ html, body, #root {
 
 
 input::placeholder, textarea::placeholder {
-  opacity: 0.5;
   font-family: 'Quicksand', sans-serif;
 }

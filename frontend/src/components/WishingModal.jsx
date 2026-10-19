@@ -142,7 +142,7 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
                 value={name}
                 maxLength={NAME_LIMIT}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-amber-900/5 hover:bg-amber-900/10 focus:bg-amber-900/10 border border-amber-500/10 focus:border-amber-400/50 rounded-xl p-4 text-amber-50 placeholder-amber-500/30 focus:outline-none focus:ring-1 focus:ring-amber-400/30 transition-all duration-200"
+                className="w-full bg-amber-900/5 hover:bg-amber-900/10 focus:bg-amber-900/10 border border-amber-500/10 focus:border-amber-400/50 rounded-xl p-4 text-amber-50 placeholder-amber-200/60 focus:outline-none focus:ring-1 focus:ring-amber-400/30 transition-all duration-200"
                 placeholder="Yourself, a friend, or the world..."
               />
             </div>
@@ -158,7 +158,7 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
                 value={wish}
                 maxLength={WISH_LIMIT}
                 onChange={(e) => setWish(e.target.value)}
-                className="w-full bg-amber-900/5 hover:bg-amber-900/10 focus:bg-amber-900/10 border border-amber-500/10 focus:border-amber-400/50 rounded-xl p-4 text-amber-50 placeholder-amber-500/30 focus:outline-none focus:ring-1 focus:ring-amber-400/30 transition-all duration-200 resize-none leading-relaxed"
+                className="w-full bg-amber-900/5 hover:bg-amber-900/10 focus:bg-amber-900/10 border border-amber-500/10 focus:border-amber-400/50 rounded-xl p-4 text-amber-50 placeholder-amber-200/60 focus:outline-none focus:ring-1 focus:ring-amber-400/30 transition-all duration-200 resize-none leading-relaxed"
                 placeholder="What do you hope for?"
               />
             </div>
