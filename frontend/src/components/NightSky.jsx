@@ -18,6 +18,24 @@ import IntroScreen from './sky/IntroScreen';
 import SearchPanel from './sky/SearchPanel';
 import { useOutsideTapClose } from './sky/useOutsideTapClose';
 
+const INTRO_SEEN_KEY = 'utss.intro-seen:v1';
+
+const readIntroSeen = () => {
+  try {
+    return window.localStorage.getItem(INTRO_SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+const markIntroSeen = () => {
+  try {
+    window.localStorage.setItem(INTRO_SEEN_KEY, '1');
+  } catch {
+    // Private mode / storage disabled — show the intro again next session.
+  }
+};
+
 // Orchestrator: owns scene state (messages, selection, theme, modals),
 // wires state into Sky3D via props, and composes the Canvas + HTML overlays.
 // All 3D/presentational work lives in ./Sky3D and ./sky/*.
@@ -98,8 +116,11 @@ const NightSky = () => {
   const [homeSignal, setHomeSignal] = useState(0);
 
   const [splashVisible, setSplashVisible] = useState(true);
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => !readIntroSeen());
   const handleIntroStart = useCallback(() => setShowIntro(false), []);
+  useEffect(() => {
+    if (ready && !splashVisible && showIntro) markIntroSeen();
+  }, [ready, showIntro, splashVisible]);
 
   // Memoized starfield for splash so positions don't regenerate on re-render
   const splashStars = useMemo(() =>

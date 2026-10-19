@@ -18,7 +18,7 @@ Some users struggle to navigate the 3D sky: orbiting, pinching, and flying the c
 5. HUD copy adapts to the view: the instruction pill and the mobile help modal show "Tap stars & lanterns to discover a message" in 2D instead of the pinch/drag wording.
 6. Reset in 2D clears the current selection only (no camera to home); `homeSignal` stays a 3D concern.
 7. Switching crossfades (~300ms opacity) between views; the unmounted view releases its resources. Returning to 3D re-runs `SceneWarmup` and lands on `HOME_POS`.
-8. `IntroScreen` and splash behavior is untouched. If the remembered view is `2d`, `Sky2D` mounts behind the intro and the 3D warmup is simply not rendered.
+8. `IntroScreen` and splash behavior is shared across views, with the intro shown only on the first opening per device/browser. If the remembered view is `2d`, `Sky2D` mounts behind the intro and the 3D warmup is simply not rendered.
 
 ## Section 2 — 2D scene composition (approved)
 1. `Sky2D` is a full-screen, `overflow-hidden` container that reuses the intro's language: layered night bands from `SKY_THEMES[skyTheme]` (`bg`, then masked `mtnFar`/`mtn` haze so `transition-colors` can animate them), a deterministic CSS starfield (seeded `mulberry32` star table), a soft moon glow disc in the upper left (`left-[20%] top-[12%]`), and the `splashStar` twinkle plus a hand-rolled lantern-bob keyframe.

@@ -8,7 +8,7 @@ Lines (final copy):
 - Girl: "And sometimes, knowing we're not alone is enough to keep going."
 
 ## Decisions (from brainstorming)
-- Timing: after splash, auto-play every load (no localStorage gate).
+- Timing: after splash, auto-play on the first opening per device/browser.
 - Flow: sequential + auto-hide.
 - Rendering: projected HTML labels (not in-scene 3D sprites, not bottom visual-novel bar).
 - Visual companion: declined by user.
@@ -20,7 +20,8 @@ Lines (final copy):
 4. Girl bubble visible ~4–8s.
 5. Fade out ~1s, free explore resumes.
 6. Tap anywhere outside bubbles or X button skips/dismisses immediately.
-7. Plays once per page mount.
+7. Plays once on the first opening per device/browser; subsequent visits skip it.
+8. A versioned `localStorage` key (`utss.intro-seen:v1`) prevents replay on refreshes and future visits.
 
 ## Section 2 — Components & rendering (approved)
 - New component: `frontend/src/components/sky/IntroDialogue.jsx`.
@@ -50,5 +51,5 @@ Splash timers → `ready` → `IntroDialogue` mounts → timers drive `phase` �
 
 ## Out of scope
 - Voice audio, lip sync, head animation changes.
-- First-visit-only gating, i18n, backend storage of dialogue.
+- Hourly replay, i18n, backend storage of dialogue.
 - Changes to TeamModal trigger (couple click still opens team modal after intro).
