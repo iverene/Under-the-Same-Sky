@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || '/api/messages';
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? 'http://localhost:5000/api/messages' : '/api/messages');
 
 export const fetchMessages = async () => {
   try {
