@@ -22,11 +22,11 @@ Some users struggle to navigate the 3D sky: orbiting, pinching, and flying the c
 
 ## Section 2 — 2D scene composition (approved)
 1. `Sky2D` is a full-screen, `overflow-hidden` container that reuses the intro's language: layered night bands from `SKY_THEMES[skyTheme]` (`bg`, then masked `mtnFar`/`mtn` haze so `transition-colors` can animate them), a deterministic CSS starfield (seeded `mulberry32` star table), a soft moon glow disc in the upper left (`left-[20%] top-[12%]`), and the `splashStar` twinkle plus a hand-rolled lantern-bob keyframe.
-2. Terrain layer (`Terrain2D.jsx`): flat SVG silhouettes — near hill with the couple's platform, a ridge line behind it, and a few pine triangles. Colors derive from the theme (`mtn`, `mtnFar`, `ground`).
+2. Terrain layer (`Terrain2D.jsx`): flat SVG silhouettes — near hill with the couple's platform, a ridge line behind it, and a few pine triangles. Colors derive from the theme (`mtn`, `mtnFar`, `ground`). Every ground prop (couple, signpost, bench) plants its base inside the near-hill silhouette — the surface under the couple sits ~8% above the viewport bottom — so nothing appears to float on the far ridge.
 3. Landmarks, matching every 3D entry point:
    - Couple: reuse `Couple.jsx` `GirlFigure` / `BoyFigure`, standing on the hill. Tappable → `handleSelectTeam` (About/Team modal).
-   - Signpost: illustrated post+board, sized to read at a glance (`66x84` art in a `h-24 w-20` tap target). Tappable → `handleSelectSign`.
-   - Bench: decorative wood SVG beside the couple, `aria-hidden`, no interaction (matches 3D, where the bench has no content). Rendered at every breakpoint.
+   - Signpost: illustrated post+board in light wood, sized to read at a glance (`66x84` art in a `h-24 w-20` tap target), planted at `bottom-[7%]` so its base sits inside the near-hill silhouette. Tappable → `handleSelectSign`.
+   - Bench: wooden SVG beside the couple at `bottom-[6%] left-[70%]`, `aria-hidden`, no interaction (matches 3D, where the bench has no content). Explicit wood tones (not `theme.mtn`) so it stays visible against the night gradient, and rendered at every breakpoint.
    - Fireflies: eight deterministic glowing dots drifting around the couple (literal coordinate table, `fireflyGlow` keyframe), decorative and `aria-hidden`; suppressed under reduced motion.
 4. Bands: sky occupies roughly the top 62% (stars), the horizon/lantern band ~45–72%, terrain silhouette below ~58%, matching the intro's `bottom-[18%]` couple layout.
 
