@@ -50,8 +50,8 @@ const Sky2D = ({
         key: index,
         left: 12 + index * 29,
         top: 12 + (index % 2) * 15,
-        delay: index * 4.5,
-        duration: 1.8 + (index % 2) * 0.3,
+        delay: 1 + index * 7,
+        duration: 20 + index * 7,
       })),
     [graphics.shootingStarCount]
   );
@@ -94,10 +94,22 @@ const Sky2D = ({
           100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
         @keyframes shootingStar2D {
-          0%, 72% { opacity: 0; transform: translate3d(0, 0, 0) rotate(32deg) scaleX(0.35); }
-          76% { opacity: 1; }
-          88% { opacity: 0.9; transform: translate3d(18vw, 15vh, 0) rotate(32deg) scaleX(1); }
-          100% { opacity: 0; transform: translate3d(24vw, 20vh, 0) rotate(32deg) scaleX(1.1); }
+          0%, 79% {
+            opacity: 0;
+            transform: translate3d(0, 0, 0) rotate(32deg) scaleX(0.2);
+          }
+          82% {
+            opacity: 0.9;
+            transform: translate3d(5vw, 4vh, 0) rotate(32deg) scaleX(0.7);
+          }
+          87% {
+            opacity: 1;
+            transform: translate3d(14vw, 11vh, 0) rotate(32deg) scaleX(1);
+          }
+          92%, 100% {
+            opacity: 0;
+            transform: translate3d(24vw, 20vh, 0) rotate(32deg) scaleX(1.05);
+          }
         }
       `}</style>
 
@@ -129,7 +141,8 @@ const Sky2D = ({
               style={{
                 left: `${star.left}%`,
                 top: `${star.top}%`,
-                animation: `shootingStar2D ${star.duration}s ease-in-out ${star.delay}s infinite`,
+                animation: `shootingStar2D ${star.duration}s linear ${star.delay}s infinite`,
+                willChange: 'opacity, transform',
               }}
             />
           ))}
