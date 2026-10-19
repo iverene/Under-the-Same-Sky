@@ -19,7 +19,7 @@ const ReadingCard = ({ message, isLantern, cardRef, onClose }) => {
         </button>
         <div className="text-center px-8">
           <h3 className={`text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] ${isLantern ? 'text-amber-200' : 'text-blue-200'}`}>
-            {isLantern ? 'A Wish Floating By' : 'Addressed To'}
+            {isLantern ? 'A Wish For' : 'Addressed To'}
           </h3>
           <p className="text-white font-serif text-xl sm:text-2xl leading-tight mt-1 break-words">{message.recipient}</p>
         </div>

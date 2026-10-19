@@ -30,7 +30,7 @@ const LanternViewModal = ({ message, onClose }) => {
                 <span className="text-3xl filter drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]">🏮</span>
             </div>
             
-            <h3 className="text-xs font-bold text-amber-500 uppercase tracking-[0.2em] mb-2">A Wish Floating By</h3>
+            <h3 className="text-xs font-bold text-amber-500 uppercase tracking-[0.2em] mb-2">A Floating Wish</h3>
             
             <div className="my-6">
                 <p className="text-[10px] text-amber-200/50 uppercase tracking-widest mb-1">For</p>
