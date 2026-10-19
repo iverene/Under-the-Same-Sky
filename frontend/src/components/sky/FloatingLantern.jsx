@@ -91,8 +91,8 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, sel
     <group position={vecPosition} ref={groupRef} scale={1.15}>
       {/* Ribbed paper shell (ribs glow too via emissiveMap) */}
       <mesh
-        onClick={(e) => { e.stopPropagation(); onSelect(message, groupRef.current?.position.clone()); }}
-        onPointerOver={() => { document.body.style.cursor = 'pointer'; setHovered(true); }}
+        onClick={selected ? undefined : (e) => { e.stopPropagation(); onSelect(message, groupRef.current?.position.clone()); }}
+        onPointerOver={selected ? undefined : () => { document.body.style.cursor = 'pointer'; setHovered(true); }}
         onPointerOut={() => { document.body.style.cursor = 'default'; setHovered(false); }}
       >
         <latheGeometry args={[LANTERN_PROFILE, 16]} />
@@ -138,14 +138,15 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, sel
       </mesh>
 
       {/* Warm halo, centered low where the fire burns (bloom-like glow) —
-          part of the click target for far lanterns */}
+          part of the click target for far lanterns. While selected it becomes
+          visual-only so taps in the wide glow close the reading card. */}
       {glow && (
         <sprite
           ref={haloRef}
           position={[0, -0.25, 0]}
           scale={[3.4, 3.4, 1]}
-          onClick={(e) => { e.stopPropagation(); onSelect(message, groupRef.current?.position.clone()); }}
-          onPointerOver={() => { document.body.style.cursor = 'pointer'; setHovered(true); }}
+          onClick={selected ? undefined : (e) => { e.stopPropagation(); onSelect(message, groupRef.current?.position.clone()); }}
+          onPointerOver={selected ? undefined : () => { document.body.style.cursor = 'pointer'; setHovered(true); }}
           onPointerOut={() => { document.body.style.cursor = 'default'; setHovered(false); }}
         >
           <spriteMaterial

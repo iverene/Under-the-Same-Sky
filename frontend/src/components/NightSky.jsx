@@ -566,7 +566,7 @@ const NightSky = () => {
 
       {/* Selected star / lantern message — responsive bottom-center reading card */}
       {selectedStar && (
-        <ReadingCard message={selectedStar} isLantern={selectedIsLantern} cardRef={cardRef} />
+        <ReadingCard message={selectedStar} isLantern={selectedIsLantern} cardRef={cardRef} onClose={clearProps} />
       )}
 
       {/* Trail sign uses the centered wooden SignModal (see Global Modals) */}

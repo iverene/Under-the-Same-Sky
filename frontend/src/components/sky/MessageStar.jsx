@@ -57,12 +57,14 @@ const MessageStar = ({ position, message, baseSize, texture, corona, selected, o
 
   return (
     <group position={vecPosition}>
-      {/* Outer corona — shares the click target so far (tiny) stars stay tappable */}
+      {/* Outer corona — shares the click target so far (tiny) stars stay tappable.
+          While selected it stops intercepting taps so the wide glow counts as
+          empty sky and closes the reading card. */}
       <sprite
         ref={coronaRef}
         scale={[baseSize * 3.4, baseSize * 3.4, 1]}
-        onClick={(e) => { e.stopPropagation(); onSelect(message); }}
-        onPointerOver={() => { document.body.style.cursor = 'pointer'; setHovered(true); }}
+        onClick={selected ? undefined : (e) => { e.stopPropagation(); onSelect(message); }}
+        onPointerOver={selected ? undefined : () => { document.body.style.cursor = 'pointer'; setHovered(true); }}
         onPointerOut={() => { document.body.style.cursor = 'default'; setHovered(false); }}
       >
         <spriteMaterial
@@ -80,8 +82,8 @@ const MessageStar = ({ position, message, baseSize, texture, corona, selected, o
       <sprite
         ref={coreRef}
         scale={[baseSize, baseSize, 1]}
-        onClick={(e) => { e.stopPropagation(); onSelect(message); }}
-        onPointerOver={() => { document.body.style.cursor = 'pointer'; setHovered(true); }}
+        onClick={selected ? undefined : (e) => { e.stopPropagation(); onSelect(message); }}
+        onPointerOver={selected ? undefined : () => { document.body.style.cursor = 'pointer'; setHovered(true); }}
         onPointerOut={() => { document.body.style.cursor = 'default'; setHovered(false); }}
       >
         <spriteMaterial
