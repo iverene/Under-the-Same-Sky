@@ -167,8 +167,8 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, onReset, uiHidde
       </div>
 
       {/* Mobile: Sky panel — floats above the left buttons, fades fast during search */}
-      <div className={`sm:hidden fixed z-40 bottom-44 left-4 flex flex-col items-start ${panelCls}`}>
-      <div className={`flex flex-col items-start transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`sm:hidden fixed z-40 bottom-44 left-4 flex flex-col items-start pointer-events-none ${panelCls}`}>
+      <div className={`flex flex-col items-start pointer-events-none transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div
           className={`pointer-events-auto w-52 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom-left ${
             settingsOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
