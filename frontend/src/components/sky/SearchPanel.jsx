@@ -24,7 +24,7 @@ const SearchPanel = ({ messages, onSelect, onClose }) => {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name..."
           autoFocus
-          className="flex-1 bg-transparent text-white text-sm placeholder-slate-500 focus:outline-none"
+          className="flex-1 bg-transparent text-white text-base placeholder-slate-500 focus:outline-none"
         />
         {query && (
           <button onClick={() => setQuery('')} className="text-slate-400 hover:text-white text-xs transition-colors">
