@@ -62,6 +62,8 @@ const TeamModal = ({ open, onClose }) => {
           <p className="text-slate-400 text-xs leading-relaxed mb-7">
             4th Year BSIT Students
             <br />
+            Alliancics Balayan Innovation Hub
+            <br />
             BSU TNEU Balayan Campus
           </p>
 
