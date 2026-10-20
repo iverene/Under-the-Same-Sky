@@ -6,7 +6,7 @@ import { toVector3 } from '../../three/messages';
 
 // Interactive message star: glowing core + wide corona click target,
 // layered shimmer, birth-glow for fresh arrivals.
-const MessageStar = ({ position, message, baseSize, texture, corona, selected, onSelect, bornAt }) => {
+const MessageStar = ({ position, message, baseSize, texture, corona, selected, animate = true, onSelect, bornAt }) => {
   const [hovered, setHovered] = useState(false);
   const coreRef = useRef();
   const coronaRef = useRef();
@@ -30,6 +30,7 @@ const MessageStar = ({ position, message, baseSize, texture, corona, selected, o
   }, [vecPosition]);
 
   useFrame(({ clock }, delta) => {
+    if (!animate && !selected && !hovered && !bornAt) return;
     const time = clock.getElapsedTime();
     const offset = numericId * 0.7;
     // Layered shimmer feels organic, never fully dark

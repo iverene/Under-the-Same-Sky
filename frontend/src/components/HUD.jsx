@@ -167,7 +167,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality 
       {/* Mobile: sky toggle + Reset — bottom left (fades fast during search takeover) */}
       <div className={`sm:hidden fixed z-40 left-4 bottom-6 flex flex-col gap-3 items-center ${barCls}`}>
       <div className={`flex flex-col gap-3 items-center transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-        {/* Moon toggle */}
+        {/* Theme settings */}
         <button
           onClick={() => setSettingsOpen((v) => !v)}
           aria-label="Sky settings"
@@ -179,7 +179,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality 
           }`}
         >
           <svg aria-hidden="true" className="w-6 h-6 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.1M12 18.9V21M3 12h2.1M18.9 12H21M5.64 5.64l1.49 1.49M16.87 16.87l1.49 1.49M5.64 18.36l1.49-1.49M16.87 7.13l1.49-1.49M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
           </svg>
         </button>
 
@@ -292,10 +292,10 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality 
             }`}
           >
             <svg aria-hidden="true" className={`w-5 h-5 text-slate-200 transition-transform duration-500 ${settingsOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0012 21.75a9.753 9.753 0 009.752-6.748z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.1M12 18.9V21M3 12h2.1M18.9 12H21M5.64 5.64l1.49 1.49M16.87 16.87l1.49 1.49M5.64 18.36l1.49-1.49M16.87 7.13l1.49-1.49M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
             </svg>
           </button>
-          {/* Sky panel — anchored above its moon button */}
+          {/* Sky panel — anchored above its settings button */}
           <div className={`absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-40 pointer-events-none ${panelCls}`}>
             <div
               className={`pointer-events-auto w-56 overflow-hidden bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 origin-bottom ${

@@ -20,7 +20,7 @@ const LANTERN_PROFILE = [
 
 // Floating sky-lantern: ribbed paper shell, flickering flame, warm halo.
 // Rises forever (resets at the ceiling), sways, and glows after release.
-const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, selected, onLivePosition }) => {
+const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, selected, animate = true, onLivePosition }) => {
   const groupRef = useRef();
   const lightRef = useRef();
   const flameRef = useRef();
@@ -43,6 +43,7 @@ const FloatingLantern = ({ position, message, onSelect, glow, paper, bornAt, sel
   useFrame(({ clock }, delta) => {
     const g = groupRef.current;
     if (!g) return;
+    if (!animate && !selected && !bornAt) return;
     const time = clock.getElapsedTime();
 
     // Gentle rise

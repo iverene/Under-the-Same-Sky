@@ -87,6 +87,7 @@ const Sky3D = ({
   return (
     <Canvas
       camera={{ position: HOME_POS.toArray(), fov: 50 }}
+      dpr={graphics.dpr}
       frameloop={showIntro ? 'never' : 'always'}
       onPointerMissed={onPointerMissed}
     >
@@ -133,6 +134,7 @@ const Sky3D = ({
           texture={starTexture}
           corona={coronaTexture}
           selected={msg.id === selectedId}
+          animate={graphics.animateMessageStars}
           onSelect={onSelectStar}
           bornAt={freshMap[msg.id]}
         />
@@ -148,6 +150,7 @@ const Sky3D = ({
           paper={paperTexture}
           bornAt={freshMap[msg.id]}
           selected={msg.id === selectedId && selectedIsLantern}
+          animate={graphics.animateLanterns || (msg.id === selectedId && selectedIsLantern)}
           onLivePosition={
             msg.id === selectedId && selectedIsLantern
               ? (pos) => setFocusOverride({ id: msg.id, pos })
@@ -156,7 +159,9 @@ const Sky3D = ({
         />
       ))}
 
-      <FallingStarSystem headTexture={starTexture} trailTexture={trailTexture} />
+      {graphics.showFallingStars && (
+        <FallingStarSystem headTexture={starTexture} trailTexture={trailTexture} />
+      )}
 
       <CameraRig
         controlsRef={controlsRef}
@@ -165,6 +170,7 @@ const Sky3D = ({
         flightRef={flightRef}
         homeSignal={homeSignal}
         introHold={showIntro}
+        autoRotate={graphics.autoRotate}
       />
       <OrbitControls
         ref={controlsRef}
@@ -178,7 +184,7 @@ const Sky3D = ({
         touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
         minPolarAngle={0.6}
         maxPolarAngle={Math.PI - 0.05}
-        autoRotate={true}
+        autoRotate={graphics.autoRotate}
         autoRotateSpeed={0.15}
         enableDamping={true}
         dampingFactor={0.05}

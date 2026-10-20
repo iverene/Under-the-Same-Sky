@@ -11,7 +11,7 @@ import { SKY_THEMES } from '../../three/themes';
 // closing cards or picking other objects never resets your POV.
 // Only the reset button glides you home. An optional explicit focusCam
 // overrides the perch (used by the sign overlook shot).
-export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal, introHold }) => {
+export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSignal, introHold, autoRotate = true }) => {
   const wasFocused = useRef(false);
   // Rest gaze shared with the initial orbit pivot
   const homeTarget = useMemo(() => new THREE.Vector3(0, 1, 0), []);
@@ -86,12 +86,12 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
       // Free explore: nothing yanks the camera or target (no auto-reset).
       // Closing a card or picking another object never moves your POV —
       // only the reset button glides you home.
-      controls.autoRotate = true;
+      controls.autoRotate = autoRotate;
       // Intro screen: freeze the opening frame while the dialogue plays so
       // the pan only begins once the user starts exploring. Input is never
       // locked — the opaque intro simply covers the canvas until Start.
       controls.autoRotateSpeed = THREE.MathUtils.damp(
-        controls.autoRotateSpeed, introHold ? 0 : 0.15, 2.5, delta
+        controls.autoRotateSpeed, introHold || !autoRotate ? 0 : 0.15, 2.5, delta
       );
     }
     wasFocused.current = !!focusPoint;
