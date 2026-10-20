@@ -1,7 +1,33 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 const SearchPanel = ({ messages, onSelect, onClose }) => {
   const [query, setQuery] = useState('');
+  // Mobile: grow the results list into whatever the on-screen keyboard leaves
+  // visible, and re-expand as soon as the keyboard is dismissed.
+  const [resultsCap, setResultsCap] = useState(null);
+
+  useEffect(() => {
+    const desktop = window.matchMedia?.('(min-width: 640px)');
+    const viewport = window.visualViewport;
+    const update = () => {
+      if (desktop?.matches) {
+        setResultsCap(null);
+        return;
+      }
+      // top-16 (64px) + search input row (~49px) + 16px breathing room
+      const available = (viewport ? viewport.height : window.innerHeight) - 64 - 49 - 16;
+      setResultsCap(Math.max(120, Math.round(available)));
+    };
+    update();
+    viewport?.addEventListener('resize', update);
+    window.addEventListener('resize', update);
+    desktop?.addEventListener?.('change', update);
+    return () => {
+      viewport?.removeEventListener('resize', update);
+      window.removeEventListener('resize', update);
+      desktop?.removeEventListener?.('change', update);
+    };
+  }, []);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
@@ -41,7 +67,10 @@ const SearchPanel = ({ messages, onSelect, onClose }) => {
       </div>
 
       {/* Results */}
-      <div className="scroll-celestial max-h-48 sm:max-h-64 overflow-y-auto">
+      <div
+        className="scroll-celestial max-h-48 sm:max-h-64 overflow-y-auto"
+        style={resultsCap ? { maxHeight: resultsCap } : undefined}
+      >
         {query.trim() && results.length === 0 && (
           <p className="px-4 py-6 text-center text-slate-500 text-xs">No stars or lanterns found</p>
         )}
