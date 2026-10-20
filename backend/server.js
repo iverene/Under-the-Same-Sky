@@ -114,11 +114,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Server error' });
 });
 
-// Start Server (VERCEL guard: the runtime may import this file instead of running it)
-if (require.main === module || process.env.VERCEL) {
+// Start Server locally. On Vercel the runtime imports this module and uses the
+// exported Express app as the request handler, so it must be the default export.
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
 }
 
-module.exports = { app, isAllowedOrigin };
+module.exports = app;
