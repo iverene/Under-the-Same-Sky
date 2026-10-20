@@ -14,11 +14,28 @@ export const fetchMessages = async () => {
 };
 
 export const sendMessage = async (messageData) => {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(messageData),
-  });
-  if (!response.ok) throw new Error('Failed to send');
+  let response;
+  try {
+    response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(messageData),
+    });
+  } catch {
+    // fetch only rejects on network/CORS failure, never on 4xx/5xx
+    throw new Error('Network error — could not reach the server');
+  }
+  if (!response.ok) {
+    // Surface the backend's own reason (rate limit, validation, DB) so the
+    // banner tells the user what actually happened instead of "Failed to send".
+    let detail = null;
+    try {
+      const body = await response.json();
+      if (body && typeof body.error === 'string') detail = body.error;
+    } catch {
+      // Non-JSON error body — keep the status-only message.
+    }
+    throw new Error(detail ? `${detail} (${response.status})` : `Failed to send (${response.status})`);
+  }
   return await response.json();
 };
