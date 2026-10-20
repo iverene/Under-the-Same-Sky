@@ -22,13 +22,29 @@ const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http:/
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);
+
+// Browsers attach an Origin header to POSTs even when they are same-origin, so
+// a deployed frontend (e.g. https://app.vercel.app -> /api/messages) would be
+// rejected by an allowlist that only knows localhost. Treat requests whose
+// Origin host matches the host the request came in on as same-origin.
+const isAllowedOrigin = (req, origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  try {
+    const originHost = new URL(origin).host;
+    const requestHost = String(req.headers['x-forwarded-host'] || req.headers.host || '')
+      .split(',')[0]
+      .trim();
+    return Boolean(requestHost) && originHost === requestHost;
+  } catch {
+    return false;
+  }
+};
+
 app.use(
-  cors({
-    origin: (origin, cb) => {
-      // No Origin header (curl, same-origin, mobile apps) — allow
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-      return cb(new Error('Not allowed by CORS'));
-    },
+  cors((req, cb) => {
+    if (!isAllowedOrigin(req, req.headers.origin)) return cb(new Error('Not allowed by CORS'));
+    return cb(null, { origin: true });
   })
 );
 
@@ -98,7 +114,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Server error' });
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Start Server (VERCEL guard: the runtime may import this file instead of running it)
+if (require.main === module || process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = { app, isAllowedOrigin };
