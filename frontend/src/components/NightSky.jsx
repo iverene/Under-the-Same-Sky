@@ -584,6 +584,7 @@ const NightSky = () => {
       <HUD
         onOpenCompose={openCompose}
         onOpenWish={openWish}
+        onOverlayOpen={clearProps}
         skyTheme={skyTheme}
         onSkyTheme={setSkyTheme}
         graphicsQuality={graphicsQuality}

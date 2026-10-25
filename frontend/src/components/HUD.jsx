@@ -34,7 +34,7 @@ const ViewToggle = ({ view, onToggle }) => (
   </div>
 );
 
-const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality = 'medium', onGraphicsQuality, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch, modalOpen, view = '3d', onToggleView }) => {
+const HUD = ({ onOpenCompose, onOpenWish, onOverlayOpen, skyTheme, onSkyTheme, graphicsQuality = 'medium', onGraphicsQuality, onReset, uiHidden, onToggleUI, isSearching, onToggleSearch, modalOpen, view = '3d', onToggleView }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -50,6 +50,46 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality 
   }, []);
 
   const show = !uiHidden;
+
+  // One overlay at a time: opening any HUD panel (or search) dismisses the
+  // reading card via onOverlayOpen and closes the other HUD panels, so two
+  // overlays never share the screen.
+  const toggleSettings = () => {
+    if (!settingsOpen) {
+      setShareOpen(false);
+      setHelpOpen(false);
+      onOverlayOpen?.();
+    }
+    setSettingsOpen((v) => !v);
+  };
+
+  const toggleShare = () => {
+    if (!shareOpen) {
+      setSettingsOpen(false);
+      setHelpOpen(false);
+      onOverlayOpen?.();
+    }
+    setShareOpen((v) => !v);
+  };
+
+  const toggleHelp = () => {
+    if (!helpOpen) {
+      setSettingsOpen(false);
+      setShareOpen(false);
+      onOverlayOpen?.();
+    }
+    setHelpOpen((v) => !v);
+  };
+
+  const toggleSearch = () => {
+    if (!isSearching) {
+      setSettingsOpen(false);
+      setShareOpen(false);
+      setHelpOpen(false);
+      onOverlayOpen?.();
+    }
+    onToggleSearch?.();
+  };
 
   // Dismiss the sky picker on Escape
   useEffect(() => {
@@ -102,7 +142,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality 
       <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 transition-opacity duration-300 ${modalOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         {/* Help — mobile only, holds the instructions */}
         <button
-          onClick={() => setHelpOpen((v) => !v)}
+          onClick={toggleHelp}
           aria-label="How to explore"
           className={`sm:hidden pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-95 ${
             uiHidden
@@ -114,7 +154,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality 
         </button>
         {/* Search — fades with UI */}
         <button
-          onClick={() => onToggleSearch && onToggleSearch()}
+          onClick={toggleSearch}
           aria-label="Search by name"
           className={`pointer-events-auto flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105 active:scale-95 ${
             uiHidden
@@ -169,7 +209,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality 
       <div className={`flex flex-col gap-3 items-center transition-opacity duration-200 ${isSearching ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         {/* Theme settings */}
         <button
-          onClick={() => setSettingsOpen((v) => !v)}
+          onClick={toggleSettings}
           aria-label="Sky settings"
           aria-expanded={settingsOpen}
           className={`pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-xl border transition-all duration-300 active:scale-95 ${
@@ -283,7 +323,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality 
       <div className={`hidden sm:flex fixed bottom-8 left-0 right-0 z-40 justify-center items-center gap-3 pointer-events-none ${barCls}`}>
         <div className="relative">
           <button
-            onClick={() => setSettingsOpen((v) => !v)}
+            onClick={toggleSettings}
             aria-label="Sky settings"
             aria-expanded={settingsOpen}
             className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
@@ -356,7 +396,7 @@ const HUD = ({ onOpenCompose, onOpenWish, skyTheme, onSkyTheme, graphicsQuality 
         <ViewToggle view={view} onToggle={onToggleView} />
 
         <button
-          onClick={() => setShareOpen((v) => !v)}
+          onClick={toggleShare}
           aria-label="Share send page"
           className={`pointer-events-auto flex items-center justify-center w-12 h-12 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-105 active:scale-95 ${
             shareOpen
