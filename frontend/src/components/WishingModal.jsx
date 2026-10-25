@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { getMoonData, fetchMoonData } from '../moon';
 import ConfirmDialog from './ConfirmDialog';
 
@@ -14,9 +14,14 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
   const [name, setName] = useState('');
   const [wish, setWish] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [wishError, setWishError] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const hideTimer = useRef(null);
   const rootRef = useRef(null);
+  const wishRef = useRef(null);
+  const nameId = useId();
+  const wishId = useId();
+  const wishErrorId = useId();
 
   const NAME_LIMIT = 60;
   const WISH_LIMIT = 500;
@@ -28,6 +33,7 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
   const resetForm = useCallback(() => {
     setName('');
     setWish('');
+    setWishError('');
   }, []);
 
   const requestClose = useCallback(() => {
@@ -92,8 +98,14 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!wish) return; 
-    onSend({ name: name || 'Anonymous', wish, type: 'lantern' });
+    // Whitespace-only input counts as empty, mirroring the backend's trim().
+    const trimmedWish = wish.trim();
+    if (!trimmedWish) {
+      setWishError('Please write your wish.');
+      wishRef.current?.focus();
+      return;
+    }
+    onSend({ name: name.trim() || 'Anonymous', wish: trimmedWish, type: 'lantern' });
     
     resetForm();
     onClose();
@@ -157,10 +169,11 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
             {/* Name Input */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest ml-1">For Whom?</label>
+                <label htmlFor={nameId} className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest ml-1">For Whom? <span className="text-amber-500/40 normal-case font-medium tracking-normal">(optional)</span></label>
                 <span className="text-[10px] text-amber-500/50 tabular-nums mr-1">{name.length}/{NAME_LIMIT}</span>
               </div>
               <input 
+                id={nameId}
                 type="text" 
                 value={name}
                 maxLength={NAME_LIMIT}
@@ -173,17 +186,33 @@ const WishingModal = ({ isOpen, onClose, onSend }) => {
             {/* Wish Input */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest ml-1">Your Wish</label>
+                <label htmlFor={wishId} className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest ml-1">Your Wish</label>
                 <span className="text-[10px] text-amber-500/50 tabular-nums mr-1">{wish.length}/{WISH_LIMIT}</span>
               </div>
               <textarea 
+                id={wishId}
+                ref={wishRef}
                 rows={4}
                 value={wish}
                 maxLength={WISH_LIMIT}
-                onChange={(e) => setWish(e.target.value)}
-                className="w-full bg-amber-900/5 hover:bg-amber-900/10 focus:bg-amber-900/10 border border-amber-500/10 focus:border-amber-400/50 rounded-xl p-4 text-amber-50 placeholder-amber-200/60 focus:outline-none focus:ring-1 focus:ring-amber-400/30 transition-all duration-200 resize-none leading-relaxed"
+                onChange={(e) => {
+                  setWish(e.target.value);
+                  if (wishError) setWishError('');
+                }}
+                aria-invalid={wishError ? 'true' : 'false'}
+                aria-describedby={wishError ? wishErrorId : undefined}
+                className={`w-full bg-amber-900/5 hover:bg-amber-900/10 focus:bg-amber-900/10 border rounded-xl p-4 text-amber-50 placeholder-amber-200/60 focus:outline-none focus:ring-1 transition-all duration-200 resize-none leading-relaxed ${
+                  wishError
+                    ? 'border-red-400/60 focus:border-red-400 focus:ring-red-400/30'
+                    : 'border-amber-500/10 focus:border-amber-400/50 focus:ring-amber-400/30'
+                }`}
                 placeholder="What do you hope for?"
               />
+              {wishError && (
+                <p id={wishErrorId} role="alert" className="ml-1 pt-1 text-xs text-red-300">
+                  {wishError}
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}

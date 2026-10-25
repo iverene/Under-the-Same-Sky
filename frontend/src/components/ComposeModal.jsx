@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
 import ConfirmDialog from './ConfirmDialog';
 
 const ComposeModal = ({ isOpen, onClose, onSend }) => {
@@ -6,9 +6,16 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const [sender, setSender] = useState('');
   const [message, setMessage] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [errors, setErrors] = useState({ recipient: '', message: '' });
   const [isVisible, setIsVisible] = useState(false);
   const hideTimer = useRef(null);
   const rootRef = useRef(null);
+  const recipientRef = useRef(null);
+  const messageRef = useRef(null);
+  const recipientId = useId();
+  const messageId = useId();
+  const recipientErrorId = useId();
+  const messageErrorId = useId();
 
   const RECIPIENT_LIMIT = 60;
   const SENDER_LIMIT = 60;
@@ -20,6 +27,7 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
     setRecipient('');
     setSender('');
     setMessage('');
+    setErrors({ recipient: '', message: '' });
   }, []);
 
   const requestClose = useCallback(() => {
@@ -66,8 +74,22 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!recipient || !message) return;
-    onSend({ recipient, message, sender: sender.trim(), type: 'star' });
+    // Whitespace-only input counts as empty, mirroring the backend's trim().
+    const nextErrors = {
+      recipient: recipient.trim() ? '' : 'Please enter who this message is for.',
+      message: message.trim() ? '' : 'Please write a message.',
+    };
+    if (nextErrors.recipient || nextErrors.message) {
+      setErrors(nextErrors);
+      (nextErrors.recipient ? recipientRef : messageRef).current?.focus();
+      return;
+    }
+    onSend({
+      recipient: recipient.trim(),
+      message: message.trim(),
+      sender: sender.trim(),
+      type: 'star',
+    });
     resetForm();
     onClose();
   };
@@ -122,17 +144,33 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
             {/* Recipient Input */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</label>
+                <label htmlFor={recipientId} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</label>
                 <span className="text-[10px] text-slate-500 tabular-nums mr-1">{recipient.length}/{RECIPIENT_LIMIT}</span>
               </div>
               <input 
+                id={recipientId}
+                ref={recipientRef}
                 type="text" 
                 value={recipient}
                 maxLength={RECIPIENT_LIMIT}
-                onChange={(e) => setRecipient(e.target.value)}
-                className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border border-white/5 focus:border-blue-400/50 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-400/30 transition-all duration-200"
+                onChange={(e) => {
+                  setRecipient(e.target.value);
+                  if (errors.recipient) setErrors((prev) => ({ ...prev, recipient: '' }));
+                }}
+                aria-invalid={errors.recipient ? 'true' : 'false'}
+                aria-describedby={errors.recipient ? recipientErrorId : undefined}
+                className={`w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-all duration-200 ${
+                  errors.recipient
+                    ? 'border-red-400/60 focus:border-red-400 focus:ring-red-400/30'
+                    : 'border-white/5 focus:border-blue-400/50 focus:ring-blue-400/30'
+                }`}
                 placeholder="Someone..."
               />
+              {errors.recipient && (
+                <p id={recipientErrorId} role="alert" className="ml-1 pt-1 text-xs text-red-300">
+                  {errors.recipient}
+                </p>
+              )}
             </div>
             
             {/* Sender Input (optional) */}
@@ -154,17 +192,33 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
             {/* Message Input */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
+                <label htmlFor={messageId} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
                 <span className="text-[10px] text-slate-500 tabular-nums mr-1">{message.length}/{MESSAGE_LIMIT}</span>
               </div>
               <textarea 
+                id={messageId}
+                ref={messageRef}
                 rows={4}
                 value={message}
                 maxLength={MESSAGE_LIMIT}
-                onChange={(e) => setMessage(e.target.value)}
-                className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border border-white/5 focus:border-blue-400/50 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-400/30 transition-all duration-200 resize-none leading-relaxed"
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  if (errors.message) setErrors((prev) => ({ ...prev, message: '' }));
+                }}
+                aria-invalid={errors.message ? 'true' : 'false'}
+                aria-describedby={errors.message ? messageErrorId : undefined}
+                className={`w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-all duration-200 resize-none leading-relaxed ${
+                  errors.message
+                    ? 'border-red-400/60 focus:border-red-400 focus:ring-red-400/30'
+                    : 'border-white/5 focus:border-blue-400/50 focus:ring-blue-400/30'
+                }`}
                 placeholder="What's on your mind?"
               />
+              {errors.message && (
+                <p id={messageErrorId} role="alert" className="ml-1 pt-1 text-xs text-red-300">
+                  {errors.message}
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}
