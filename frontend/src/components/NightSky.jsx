@@ -288,6 +288,19 @@ const NightSky = () => {
     setSelectedTeam(true);
   };
 
+  // Opening the compose / wish modals dismisses any open message card so the
+  // two overlays never share the screen (and the card can never paint over
+  // the modal layer).
+  const openCompose = useCallback(() => {
+    clearProps();
+    setIsWriting(true);
+  }, [clearProps]);
+
+  const openWish = useCallback(() => {
+    clearProps();
+    setIsWishing(true);
+  }, [clearProps]);
+
   // Clicking empty space deselects (ignored when it was actually an orbit drag).
   // Note: background objects (stars field, nebulae, ground, mountains, moon)
   // opt out of raycasting via raycast={() => null} so taps there count as
@@ -569,8 +582,8 @@ const NightSky = () => {
 
       {!showIntro && (
       <HUD
-        onOpenCompose={() => setIsWriting(true)}
-        onOpenWish={() => setIsWishing(true)}
+        onOpenCompose={openCompose}
+        onOpenWish={openWish}
         skyTheme={skyTheme}
         onSkyTheme={setSkyTheme}
         graphicsQuality={graphicsQuality}

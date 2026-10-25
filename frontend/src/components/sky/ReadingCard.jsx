@@ -4,8 +4,10 @@
 const ReadingCard = ({ message, isLantern, cardRef, onClose }) => {
   if (!message) return null;
 
+  // Stacking: above the HUD bars (z-40) so the card is never buried, but
+  // below the modal layer (z-50) so an open overlay always wins.
   return (
-    <div data-reading-card className="fixed bottom-[19rem] sm:bottom-40 left-1/2 -translate-x-1/2 z-[55] w-[calc(100%-2rem)] sm:w-full max-w-md pointer-events-none">
+    <div data-reading-card className="fixed bottom-[19rem] sm:bottom-40 left-1/2 -translate-x-1/2 z-[45] w-[calc(100%-2rem)] sm:w-full max-w-md pointer-events-none">
       <div ref={cardRef} className={`pointer-events-auto relative max-h-[48vh] sm:max-h-[55vh] overflow-hidden bg-slate-950/80 backdrop-blur-xl border rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-300 ${isLantern ? 'border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 'border-white/10 shadow-[0_0_50px_rgba(150,180,255,0.15)]'}`}>
         <button
           type="button"
