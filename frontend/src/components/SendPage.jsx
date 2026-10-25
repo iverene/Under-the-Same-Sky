@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useId } from 'react';
 import { sendMessage } from '../api';
 
 const StarIcon = () => (
@@ -52,7 +52,14 @@ const SendPage = () => {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({ recipient: '', message: '' });
   const [ready, setReady] = useState(false);
+  const recipientRef = useRef(null);
+  const messageRef = useRef(null);
+  const recipientId = useId();
+  const messageId = useId();
+  const recipientErrorId = useId();
+  const messageErrorId = useId();
 
   const RECIPIENT_LIMIT = 60;
   const MESSAGE_LIMIT = 500;
@@ -64,11 +71,21 @@ const SendPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!recipient || !message || sending) return;
+    if (sending) return;
+    // Whitespace-only input counts as empty, mirroring the backend's trim().
+    const nextErrors = {
+      recipient: recipient.trim() ? '' : 'Please enter who this message is for.',
+      message: message.trim() ? '' : 'Please write a message.',
+    };
+    if (nextErrors.recipient || nextErrors.message) {
+      setErrors(nextErrors);
+      (nextErrors.recipient ? recipientRef : messageRef).current?.focus();
+      return;
+    }
     setSending(true);
     setError(null);
     try {
-      await sendMessage({ recipient, message, type });
+      await sendMessage({ recipient: recipient.trim(), message: message.trim(), type });
       setSent(true);
     } catch (err) {
       setError(err.message || 'Something went wrong');
@@ -86,7 +103,15 @@ const SendPage = () => {
           <h1 className="text-2xl sm:text-3xl font-serif text-white mb-3 tracking-wide">Released to the Sky</h1>
           <p className="text-blue-200/50 text-sm mb-8">Your star is now among the others</p>
           <button
-            onClick={() => { setSent(false); setRecipient(''); setMessage(''); setReady(false); setTimeout(() => setReady(true), 100); }}
+            onClick={() => {
+              setSent(false);
+              setRecipient('');
+              setMessage('');
+              setErrors({ recipient: '', message: '' });
+              setError(null);
+              setReady(false);
+              setTimeout(() => setReady(true), 100);
+            }}
             className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white text-sm font-medium transition-all duration-300"
           >
             Send Another
@@ -125,33 +150,65 @@ const SendPage = () => {
             {/* Recipient */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</label>
+                <label htmlFor={recipientId} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</label>
                 <span className="text-[10px] text-slate-500 tabular-nums mr-1">{recipient.length}/{RECIPIENT_LIMIT}</span>
               </div>
               <input
+                id={recipientId}
+                ref={recipientRef}
                 type="text"
                 value={recipient}
                 maxLength={RECIPIENT_LIMIT}
-                onChange={(e) => setRecipient(e.target.value)}
-                className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border border-white/5 focus:border-blue-400/50 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-400/30 transition-all duration-200"
+                onChange={(e) => {
+                  setRecipient(e.target.value);
+                  if (errors.recipient) setErrors((prev) => ({ ...prev, recipient: '' }));
+                }}
+                aria-invalid={errors.recipient ? 'true' : 'false'}
+                aria-describedby={errors.recipient ? recipientErrorId : undefined}
+                className={`w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-all duration-200 ${
+                  errors.recipient
+                    ? 'border-red-400/60 focus:border-red-400 focus:ring-red-400/30'
+                    : 'border-white/5 focus:border-blue-400/50 focus:ring-blue-400/30'
+                }`}
                 placeholder="Someone..."
               />
+              {errors.recipient && (
+                <p id={recipientErrorId} role="alert" className="ml-1 pt-1 text-xs text-red-300">
+                  {errors.recipient}
+                </p>
+              )}
             </div>
 
             {/* Message */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
+                <label htmlFor={messageId} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
                 <span className="text-[10px] text-slate-500 tabular-nums mr-1">{message.length}/{MESSAGE_LIMIT}</span>
               </div>
               <textarea
+                id={messageId}
+                ref={messageRef}
                 rows={4}
                 value={message}
                 maxLength={MESSAGE_LIMIT}
-                onChange={(e) => setMessage(e.target.value)}
-                className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border border-white/5 focus:border-blue-400/50 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-400/30 transition-all duration-200 resize-none leading-relaxed"
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  if (errors.message) setErrors((prev) => ({ ...prev, message: '' }));
+                }}
+                aria-invalid={errors.message ? 'true' : 'false'}
+                aria-describedby={errors.message ? messageErrorId : undefined}
+                className={`w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 border rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-all duration-200 resize-none leading-relaxed ${
+                  errors.message
+                    ? 'border-red-400/60 focus:border-red-400 focus:ring-red-400/30'
+                    : 'border-white/5 focus:border-blue-400/50 focus:ring-blue-400/30'
+                }`}
                 placeholder="What's on your mind?"
               />
+              {errors.message && (
+                <p id={messageErrorId} role="alert" className="ml-1 pt-1 text-xs text-red-300">
+                  {errors.message}
+                </p>
+              )}
             </div>
 
             {/* Type toggle */}
@@ -193,7 +250,7 @@ const SendPage = () => {
             {/* Submit */}
             <button
               type="submit"
-              disabled={!recipient || !message || sending}
+              disabled={sending}
               className={`w-full py-4 mt-2 font-bold rounded-xl shadow-lg border border-white/10 transition-all transform relative overflow-hidden group ${
                 type === 'star'
                   ? 'bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-900/30'
