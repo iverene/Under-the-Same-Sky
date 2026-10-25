@@ -21,14 +21,22 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
   // Failsafe bookkeeping: a flight that can't arrive must release the camera
   const flySince = useRef(0);
   const wasFlying = useRef(false);
+  // Base ambient-pan speed, damped in/out for the intro hold
+  const panSpeed = useRef(0.15);
 
   // Reset button arms a glide back to the bench POV
   useEffect(() => {
     if (homeSignal > 0) {
       flightRef.current.flying = false;
       flightRef.current.homingCam = true;
+      // The glide must not fight the ambient orbit: while both run, the
+      // rotation keeps pushing the camera away from home at the same rate the
+      // glide pulls it in, so the glide settles just outside the arrival
+      // threshold and never hands control back.
+      const controls = controlsRef.current;
+      if (controls) controls.autoRotate = false;
     }
-  }, [homeSignal, flightRef]);
+  }, [homeSignal, controlsRef, flightRef]);
 
   useFrame(({ camera, clock }, delta) => {
     const controls = controlsRef.current;
@@ -44,12 +52,30 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
     }
 
     if (flightRef.current.homingCam) {
-      // Glide home to the bench: position + target together, then release
+      // Glide home to the bench: position + target together, then release.
+      // Keep the ambient orbit off until the glide is done (see the reset
+      // effect above — otherwise the two motions reach an equilibrium short
+      // of home and the glide never completes).
+      controls.autoRotate = false;
       const t = 1 - Math.exp(-1.5 * delta);
       camera.position.lerp(HOME_POS, t);
       controls.target.lerp(homeTarget, t);
-      if (camera.position.distanceTo(HOME_POS) < 0.15) {
+      // "Home" means visually home: hand off as soon as both the camera and
+      // the gaze are within a visually identical sliver of home. Do NOT snap
+      // them the rest of the way — a one-frame teleport of up to 0.15 units
+      // (plus the same shift in the gaze) reads as a jolt. Starting the pan
+      // a hair off-center is invisible; the handoff must be velocity-clean.
+      if (
+        camera.position.distanceTo(HOME_POS) < 0.15 &&
+        controls.target.distanceTo(homeTarget) < 0.15
+      ) {
         flightRef.current.homingCam = false;
+        // Ease the ambient pan back in instead of reusing whatever speed was
+        // frozen when the reset was clicked (and never apply a stale speed on
+        // the first auto-rotate update after the glide).
+        panSpeed.current = 0;
+        controls.autoRotateSpeed = 0;
+        controls.autoRotate = autoRotate;
       }
       return;
     }
@@ -90,9 +116,13 @@ export const CameraRig = ({ controlsRef, focusPoint, focusCam, flightRef, homeSi
       // Intro screen: freeze the opening frame while the dialogue plays so
       // the pan only begins once the user starts exploring. Input is never
       // locked — the opaque intro simply covers the canvas until Start.
-      controls.autoRotateSpeed = THREE.MathUtils.damp(
-        controls.autoRotateSpeed, introHold || !autoRotate ? 0 : 0.15, 2.5, delta
-      );
+      const targetPanSpeed = introHold || !autoRotate ? 0 : 0.15;
+      panSpeed.current = THREE.MathUtils.damp(panSpeed.current, targetPanSpeed, 2.5, delta);
+      // OrbitControls advances auto-rotation by a fixed angle per update,
+      // tuned for 60 fps: at 30 fps the pan runs at half speed and can look
+      // stopped. Scale by real frame time so the sky drifts at the same pace
+      // on every device (and still stays put during the intro).
+      controls.autoRotateSpeed = panSpeed.current * Math.min(delta, 0.1) * 60;
     }
     wasFocused.current = !!focusPoint;
   });

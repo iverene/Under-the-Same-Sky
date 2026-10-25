@@ -17,7 +17,7 @@ export const GRAPHICS_PRESETS = {
     sparklesCount: 0,
     shootingStarCount: 0,
     showFallingStars: false,
-    autoRotate: false,
+    autoRotate: true,
     dpr: [0.7, 1],
     showSecondaryEffects: false,
   },
